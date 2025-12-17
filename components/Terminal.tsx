@@ -190,15 +190,9 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isEntering, isMinimized = 
           cursor: isDragging ? 'grabbing' : 'default',
         }}
       >
-        {/* === SPINNING GRADIENT BORDER (START) === */}
-        {/* 
-            Creates a moving border beam effect looping around the terminal.
-            Structure:
-            1. Outer absolute container with negative inset to create border thickness (-inset-[3px]).
-            2. Centering Wrapper: Holds the spinning element centered to prevent 'animate-spin' from breaking position.
-            3. Spinning Div: Contains the conic gradient and rotates.
-        */}
-        <div className="absolute -inset-[3px] rounded-[10px] overflow-hidden pointer-events-none">
+        {/* === LAYER 1: SPINNING GRADIENT BORDER === */}
+        {/* Sits at bottom. Negative inset creates the border width. */}
+        <div className="absolute -inset-[3px] rounded-[12px] overflow-hidden pointer-events-none">
             {/* Wrapper for centering to prevent transform conflict */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%]">
                 <div 
@@ -211,7 +205,7 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isEntering, isMinimized = 
                 </div>
             </div>
             
-            {/* Glow Layer (Blurry) - Adds the 'heavy glow' effect */}
+            {/* Glow Layer (Blurry) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%] opacity-60 blur-xl mix-blend-screen">
                 <div 
                      className="w-full h-full animate-spin-slow"
@@ -223,15 +217,23 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isEntering, isMinimized = 
                 </div>
             </div>
         </div>
-        {/* === SPINNING GRADIENT BORDER (END) === */}
 
 
-        {/* Main Terminal Content - Sits on TOP of the spinning border */}
-        {/* Added z-10 and bg-[#0c0c0c]/95 to obscure the center of the conic gradient, revealing only the border */}
-        {/* Removed overflow-hidden to allow tooltip to pop out. */}
-        <div className="relative z-10 flex flex-col w-full h-full bg-[#0c0c0c]/95 backdrop-blur-md rounded-lg border border-gray-700/50">
+        {/* === LAYER 2: BACKGROUND BLOCKER === */}
+        {/* 
+            Strictly opaque layer that matches the terminal size (inset-0).
+            This sits ON TOP of the gradient layer, effectively hiding the center 
+            of the gradient, leaving only the 3px outer rim visible. 
+        */}
+        <div className="absolute inset-0 bg-[#0c0c0c] rounded-lg z-0"></div>
+
+
+        {/* === LAYER 3: MAIN CONTENT === */}
+        {/* Sits ON TOP of the blocker. Background is transparent so the blocker color shows through. */}
+        <div className="relative z-10 flex flex-col w-full h-full bg-transparent rounded-lg border border-gray-700/50">
             
             {/* Terminal Header / Title Bar */}
+            {/* Has its own opaque background to cover the top area specifically */}
             <div 
             className="bg-[#181818] rounded-t-lg px-4 py-2 flex items-center justify-between select-none cursor-grab active:cursor-grabbing border-b border-gray-800"
             onMouseDown={handleMouseDown}
@@ -289,6 +291,7 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isEntering, isMinimized = 
             </div>
 
             {/* Terminal Content Body */}
+            {/* Background is transparent, relying on Layer 2 blocker behind it */}
             <div 
             className="p-4 md:p-6 text-gray-200 flex-1 min-h-[250px] text-left font-mono rounded-b-lg overflow-hidden"
             onClick={() => inputRef.current?.focus()}
