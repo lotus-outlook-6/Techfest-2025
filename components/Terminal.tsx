@@ -141,8 +141,9 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isEntering, isMinimized = 
   // -- Transformation Logic --
   
   // Coordinates relative to center where the logo roughly resides
+  // Since we are now fixed centered, these offsets are from the center of the screen
   const LOGO_OFFSET_X = -140;
-  const LOGO_OFFSET_Y = -280;
+  const LOGO_OFFSET_Y = -150; // Adjusted for new layout
 
   let currentTransform = '';
   let currentOpacity = 1;
@@ -172,17 +173,17 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isEntering, isMinimized = 
   }
 
   return (
-    // Container preserves layout flow but visual element is draggable
-    <div className={`relative w-full max-w-3xl h-[350px] flex items-center justify-center my-4 ${isEntering ? 'opacity-0 scale-125' : 'opacity-100'} transition-all duration-1000 ease-in-out z-20`}>
+    // Fixed container allows free dragging anywhere on screen without margin constraints
+    // pointer-events-none ensures clicks pass through to background when not interacting with terminal
+    <div className={`fixed inset-0 flex items-center justify-center z-30 pointer-events-none ${isEntering ? 'opacity-0 scale-125' : 'opacity-100'} transition-all duration-1000 ease-in-out`}>
       <div 
-        className={`absolute w-[90%] md:w-[650px] bg-[#0c0c0c]/90 backdrop-blur-md rounded-lg border border-gray-700/50 shadow-[0_0_40px_rgba(217,70,239,0.15)] flex flex-col font-mono text-sm md:text-base group hover:border-fuchsia-500/30`}
+        className={`pointer-events-auto absolute w-[90%] md:w-[650px] bg-[#0c0c0c]/90 backdrop-blur-md rounded-lg border border-gray-700/50 shadow-[0_0_40px_rgba(217,70,239,0.15)] flex flex-col font-mono text-sm md:text-base group hover:border-fuchsia-500/30`}
         style={{ 
           transform: currentTransform,
           opacity: currentOpacity,
           transition: transitionStyle,
           cursor: isDragging ? 'grabbing' : 'default',
           boxShadow: (isMinimized || animState === 'opening') ? 'none' : '0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 30px rgba(217, 70, 239, 0.1)',
-          pointerEvents: (isMinimized || animState === 'closing') ? 'none' : 'auto'
         }}
       >
         {/* Terminal Header / Title Bar - Added rounded-t-lg */}

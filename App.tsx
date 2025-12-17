@@ -11,9 +11,16 @@ import MusicPlayer from './components/MusicPlayer';
 function App() {
   const [isEntering, setIsEntering] = useState(false);
   const [showContent, setShowContent] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isClosed, setIsClosed] = useState(true);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  
+  // -- Animation States --
+  // Controls the positioning of Logo and Countdown (Expanded vs Centered)
+  const [isLayoutExpanded, setIsLayoutExpanded] = useState(false);
+  // Controls the rendering of the Terminal component
+  const [showTerminal, setShowTerminal] = useState(false);
+  
+  // Minimized state for the terminal window itself
+  const [isMinimized, setIsMinimized] = useState(false);
   
   // State to trigger background bursts
   const [bgBurst, setBgBurst] = useState(0);
@@ -27,19 +34,37 @@ function App() {
   };
 
   const handleLogoClick = () => {
-    if (!isClosed && !isMinimized) {
-        // If terminal is already open, trigger background burst
-        setBgBurst(prev => prev + 1);
+    if (isLayoutExpanded) {
+        // If layout is already expanded, clicking might just trigger effects or restore if minimized
+        if (isMinimized) {
+            setIsMinimized(false);
+        } else {
+            setBgBurst(prev => prev + 1);
+        }
     } else {
-        // Otherwise, restore terminal
-        setIsMinimized(false);
-        setIsClosed(false);
+        // -- OPEN SEQUENCE --
+        // 1. Expand Layout (Logo Up, Timer Down)
+        setIsLayoutExpanded(true);
+        
+        // 2. Wait for animation to create space (800ms matches the CSS transition duration)
+        setTimeout(() => {
+            setIsMinimized(false);
+            setShowTerminal(true);
+        }, 800);
     }
   };
 
+  const handleTerminalClose = () => {
+      // -- CLOSE SEQUENCE --
+      // 1. Terminal is already animating out internally. Unmount it.
+      setShowTerminal(false);
+      setIsMinimized(false);
+
+      // 2. Collapse Layout back to center
+      setIsLayoutExpanded(false);
+  };
+
   if (showContent) {
-    // This would be the actual content of the site after entering
-    // For this clone, we just show a placeholder or keep the effect loop
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center relative overflow-hidden">
         <WarpEffect active={true} />
@@ -52,7 +77,8 @@ function App() {
                setIsEntering(false); 
                setShowContent(false); 
                setIsMinimized(false); 
-               setIsClosed(true);
+               setShowTerminal(false);
+               setIsLayoutExpanded(false);
              }}
              className="mt-12 px-8 py-2 border border-fuchsia-500 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-black transition-colors font-mono"
            >
@@ -78,33 +104,46 @@ function App() {
       {/* Background Decorations */}
       <Decorations />
       
-      {/* Main Container */}
+      {/* Terminal Layer - Fixed Position */}
+      {showTerminal && (
+        <Terminal 
+          onEnter={handleEnter} 
+          isEntering={isEntering} 
+          isMinimized={isMinimized}
+          onMinimize={() => setIsMinimized(true)}
+          onClose={handleTerminalClose}
+        />
+      )}
+      
+      {/* Main Layout Container */}
       <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 transition-opacity duration-1000 ${isEntering ? 'opacity-0 scale-150' : 'opacity-100'}`}>
         
-        {/* Header / Logo */}
-        <div className="mb-8 md:mb-12 relative group cursor-default text-center">
-          {/* Logo Container similar to the image */}
+        {/* Header / Logo Wrapper - Animates UP */}
+        {/* Changed translate values to 28vh as requested (was 42vh) */}
+        <div 
+            className={`
+                relative mb-8 transition-transform duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)]
+                ${isLayoutExpanded ? '-translate-y-[28vh]' : 'translate-y-0'}
+            `}
+        >
           <div className="flex items-center justify-center">
-             {/* Interactive Text Component (Includes Logo) */}
              <InteractiveText onLogoClick={handleLogoClick} />
           </div>
-
           <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mt-4 opacity-70"></div>
         </div>
 
-        {/* Terminal Centerpiece */}
-        {!isClosed && (
-          <Terminal 
-            onEnter={handleEnter} 
-            isEntering={isEntering} 
-            isMinimized={isMinimized}
-            onMinimize={() => setIsMinimized(true)}
-            onClose={() => setIsClosed(true)}
-          />
-        )}
-
-        {/* Countdown Timer */}
-        <div className={`w-full mt-8 md:mt-12 transition-all duration-700 ${isMinimized || isClosed ? 'opacity-50 blur-sm' : 'opacity-100'}`}>
+        {/* Countdown Timer Wrapper - Animates DOWN */}
+        {/* Updates:
+            1. Scale reduced to 110% when expanded
+            2. Translation adjusted to 28vh (was 42vh)
+            3. Blur increased to 6px when closed
+        */}
+        <div className={`
+            transition-all duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)] origin-center
+            ${isLayoutExpanded 
+                ? 'translate-y-[28vh] scale-110 opacity-100 blur-0' 
+                : 'translate-y-0 scale-100 opacity-60 blur-[6px]'}
+        `}>
            <Countdown />
         </div>
 

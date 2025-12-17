@@ -38,20 +38,34 @@ const Countdown: React.FC = () => {
 
   const format = (num: number) => num.toString().padStart(2, '0');
 
+  // Reusable Separator Component
+  const Separator = () => (
+    <div className="text-3xl md:text-5xl font-bold tracking-widest opacity-60 text-white/80 pb-1">:</div>
+  );
+
   return (
-    <div className="flex gap-4 md:gap-8 items-end justify-center text-white select-none drop-shadow-[0_0_5px_rgba(217,70,239,0.5)]">
+    <div className="flex gap-3 md:gap-6 items-start justify-center text-white select-none drop-shadow-[0_0_5px_rgba(217,70,239,0.5)]">
       <div className="flex flex-col items-center">
         <span className="text-3xl md:text-5xl font-bold tracking-widest">{format(time.days)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Days</span>
       </div>
+      
+      <Separator />
+
       <div className="flex flex-col items-center">
         <span className="text-3xl md:text-5xl font-bold tracking-widest">{format(time.hours)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Hrs</span>
       </div>
+
+      <Separator />
+
       <div className="flex flex-col items-center">
         <span className="text-3xl md:text-5xl font-bold tracking-widest">{format(time.minutes)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Min</span>
       </div>
+
+      <Separator />
+
       <div className="flex flex-col items-center">
         <span className="text-3xl md:text-5xl font-bold tracking-widest w-16 text-center">{format(time.seconds)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Sec</span>
