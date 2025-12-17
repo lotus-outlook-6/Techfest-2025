@@ -15,6 +15,7 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
   // Glitch Effect State
   const [isGlitching, setIsGlitching] = useState(false);
   const glitchTimeoutRef = useRef<number | null>(null);
+  const blinkTimeoutsRef = useRef<number[]>([]); // Store IDs for individual blink sounds
 
   // Physics state for each letter (9 letters total: Y,A,N,T,R,A, K, S,H)
   const letterStates = useRef(Array(9).fill(null).map(() => ({ x: 0, y: 0, blur: 0 })));
@@ -147,32 +148,61 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
       // Mechanical Key Press Sound
       const audio = new Audio('https://cdn.pixabay.com/audio/2025/01/25/audio_33947eea08.mp3');
       audio.volume = 0.5;
-      audio.play().catch(() => {}); // Catch error if user hasn't interacted with document yet (though click implies they have)
+      audio.play().catch(() => {});
 
       setIsClicked(true);
       if (onLogoClick) onLogoClick();
       setTimeout(() => setIsClicked(false), 200);
   };
 
-  const handleMouseEnter = () => {
-    // Reset any existing timeout to ensure a fresh 1s blink sequence
-    if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current);
-    
-    // Glitch Sound Effect
+  const playSwooshSound = () => {
+    // Restored Swoosh Effect for main text hover
     const audio = new Audio('https://cdn.pixabay.com/audio/2025/08/02/audio_6f4893deae.mp3');
     audio.volume = 0.4;
     audio.play().catch(() => {});
+  };
 
-    setIsGlitching(true);
+  const playBlinkSound = () => {
+    // Specific Glitch Blip
+    const audio = new Audio('https://cdn.pixabay.com/audio/2025/04/30/audio_c81de40176.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  };
+
+  const handleKMouseEnter = (e: React.MouseEvent) => {
+    // Prevent this from triggering other handlers if nested (though structure is flat siblings inside h1 mostly)
+    // But conceptually correct to isolate logic.
     
-    // Stop glitching after 1 second (approx 3-4 blinks duration)
-    glitchTimeoutRef.current = window.setTimeout(() => {
-        setIsGlitching(false);
-    }, 1000);
+    // Stop any current sequence and reset state
+    if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current);
+    
+    // Clear any pending individual blink sounds
+    blinkTimeoutsRef.current.forEach(id => clearTimeout(id));
+    blinkTimeoutsRef.current = [];
+    
+    // Reset to restart animation
+    setIsGlitching(false);
+    
+    setTimeout(() => {
+        setIsGlitching(true);
+
+        // Schedule "Blink" sounds to match the CSS animation keyframes
+        // Times: 50ms, 150ms, 250ms, 350ms
+        const blinkTimings = [50, 150, 250, 350];
+        
+        blinkTimings.forEach(time => {
+            const id = window.setTimeout(playBlinkSound, time);
+            blinkTimeoutsRef.current.push(id);
+        });
+        
+        // Stop glitching after 1 second
+        glitchTimeoutRef.current = window.setTimeout(() => {
+            setIsGlitching(false);
+        }, 1000);
+    }, 10);
   };
 
   // Render Helpers
-  // Refactored to separate physics wrapper from visual styling to preserve drop-shadows during filter updates
   const renderChar = (char: string, index: number, className: string = "") => (
       <span 
         key={index} 
@@ -180,8 +210,7 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
         className="inline-block select-none transition-colors duration-300"
         style={{ willChange: 'transform, filter' }} 
       >
-        {/* Inner span holds the static visual effects (color, shadow). Glitch border animation applied here. */}
-        <span className={`${className} ${isGlitching ? 'glitch-mode' : ''}`}>
+        <span className={className}>
             {char}
         </span>
       </span>
@@ -221,21 +250,22 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
         </span>
       </button>
 
-      {/* The Text - Trigger glitch on mouse enter */}
+      {/* The Text Container - Plays Swoosh on Hover */}
       <h1 
         className="text-5xl md:text-7xl font-black tracking-wider uppercase flex items-center cursor-default"
-        onMouseEnter={handleMouseEnter}
+        onMouseEnter={playSwooshSound}
       >
          {/* YANTRA - Indices 0-5 */}
          {'YANTRA'.split('').map((c, i) => renderChar(c, i, "text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"))}
          
-         {/* K - Index 6 - Special Structure */}
+         {/* K - Index 6 - Special Structure with Glitch Trigger */}
          <span 
             ref={el => { lettersRef.current[6] = el; }}
             className="inline-block relative mx-1 select-none"
             style={{ willChange: 'transform, filter' }}
+            onMouseEnter={handleKMouseEnter}
          >
-            {/* Main K with inner glow simulation via gradient, plus glitch border effect */}
+            {/* Main K - Applies glitch class only when triggered */}
             <span className={`relative z-10 text-transparent bg-clip-text bg-[radial-gradient(circle_at_center,_#ffffff_60%,_#f0abfc_100%)] drop-shadow-[0_0_3px_rgba(217,70,239,0.5)] ${isGlitching ? 'glitch-mode' : ''}`}>K</span>
             <span className="absolute -top-1 right-0 text-fuchsia-500 opacity-50 blur-sm z-0">K</span>
          </span>

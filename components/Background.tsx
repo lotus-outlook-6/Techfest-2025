@@ -28,7 +28,7 @@ class Blob {
     this.color = colors[Math.floor(Math.random() * colors.length)];
     // Random initial phase
     this.t = Math.random() * Math.PI * 2;
-    this.alpha = 0.2; 
+    this.alpha = 0.3; 
   }
 
   update(width: number, height: number) {
@@ -43,14 +43,14 @@ class Blob {
 
     // Subtle alpha pulsing
     this.t += 0.005;
-    // Boosted slightly to ensure background stays lit (0.1 - 0.4 range)
-    this.alpha = 0.25 + Math.sin(this.t) * 0.15;
+    // Range 0.2 - 0.45
+    this.alpha = 0.325 + Math.sin(this.t) * 0.125;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
     const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
     gradient.addColorStop(0, `rgba(${this.color}, ${this.alpha})`);
-    gradient.addColorStop(0.5, `rgba(${this.color}, ${this.alpha * 0.5})`);
+    gradient.addColorStop(0.5, `rgba(${this.color}, ${this.alpha * 0.6})`);
     gradient.addColorStop(1, `rgba(${this.color}, 0)`);
     
     ctx.fillStyle = gradient;
@@ -76,7 +76,7 @@ class Particle {
     this.vx = (Math.random() - 0.5) * 0.8; 
     this.vy = (Math.random() - 0.5) * 0.8;
     this.color = Math.random() > 0.5 ? '255, 255, 255' : '236, 72, 153';
-    this.alpha = Math.random() * 0.5 + 0.2;
+    this.alpha = Math.random() * 0.5 + 0.3;
   }
 
   update(width: number, height: number) {
@@ -103,14 +103,10 @@ interface BackgroundProps {
 
 const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
-  // Use refs to store the active entities so they persist across re-renders
-  // but can still be mutated by the burstTrigger effect
   const blobsRef = useRef<Blob[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const dimsRef = useRef({ width: 0, height: 0 });
 
-  // Initialization and Loop Effect
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -119,18 +115,17 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
     if (!ctx) return;
 
     const init = () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        const width = window.innerWidth || document.documentElement.clientWidth || 1024;
+        const height = window.innerHeight || document.documentElement.clientHeight || 768;
         dimsRef.current = { width, height };
         canvas.width = width;
         canvas.height = height;
         
-        // Initial population (only if empty)
         if (blobsRef.current.length === 0) {
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 15; i++) {
                 blobsRef.current.push(new Blob(width, height));
             }
-            for (let i = 0; i < 70; i++) {
+            for (let i = 0; i < 80; i++) {
                 particlesRef.current.push(new Particle(width, height));
             }
         }
@@ -150,13 +145,17 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
       const { width, height } = dimsRef.current;
       if (!ctx || width === 0) return;
       
+      // Clear the canvas fully to transparent before drawing the frame
       ctx.clearRect(0, 0, width, height);
       
-      // Deep dark background
+      // Draw Base Background Color
+      // Explicitly using source-over to ensure base color is solid
+      ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = '#050205'; 
       ctx.fillRect(0, 0, width, height);
 
       // Draw Blobs (Background glow)
+      // Use 'screen' or 'lighter' to make them glow against the dark background
       ctx.globalCompositeOperation = 'screen';
       blobsRef.current.forEach(b => {
         b.update(width, height);
@@ -181,16 +180,12 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
     };
   }, []);
 
-  // Burst Effect Listener
   useEffect(() => {
     if (burstTrigger > 0) {
-        // When trigger fires, add new blobs
         const { width, height } = dimsRef.current;
         if (width > 0) {
-            for (let i = 0; i < 2; i++) {
+            for (let i = 0; i < 3; i++) {
                 const b = new Blob(width, height);
-                // Start phase at minimum (-1) so it fades in smoothly
-                // sin(1.5 * PI) = -1
                 b.t = Math.PI * 1.5; 
                 blobsRef.current.push(b);
             }

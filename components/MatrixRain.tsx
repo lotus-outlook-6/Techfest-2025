@@ -9,7 +9,6 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ active }) => {
   const activeRef = useRef(active);
 
   // Keep track of active state in a ref to use inside the animation loop
-  // without triggering a re-render/re-initialization of the loop
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
@@ -30,7 +29,6 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ active }) => {
     const columns = Math.ceil(width / fontSize);
     
     // Initialize drops below the screen so they are "ready" but invisible.
-    // This ensures that when the site loads (active=false), the screen is empty.
     const drops: number[] = [];
     for (let i = 0; i < columns; i++) {
         drops[i] = height + 100;
@@ -49,10 +47,15 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ active }) => {
         }
         lastTime = timeStamp;
 
-        // Create trail effect
+        // FADE OUT EFFECT
+        // Instead of painting semi-transparent black (which accumulates to opaque black),
+        // we use 'destination-out' to fade existing pixels towards transparency.
+        ctx.globalCompositeOperation = 'destination-out';
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; 
         ctx.fillRect(0, 0, width, height);
 
+        // Reset composition for drawing new text
+        ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = '#d946ef'; // Fuchsia-500
         ctx.font = `${fontSize}px monospace`;
 
@@ -77,8 +80,7 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ active }) => {
                         drops[i] = 0;
                     }
                 } else {
-                    // If inactive, DO NOT respawn. 
-                    // Just let it stay below screen (preventing overflow by clamping slightly below)
+                    // If inactive, keep it off screen
                     if (drops[i] > height + 200) {
                         drops[i] = height + 200;
                     }
@@ -115,7 +117,7 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ active }) => {
   return (
     <canvas 
         ref={canvasRef} 
-        className="fixed inset-0 z-0 pointer-events-none opacity-30"
+        className="fixed inset-0 z-0 pointer-events-none opacity-40 mix-blend-screen"
     />
   );
 };

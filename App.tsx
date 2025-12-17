@@ -90,7 +90,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center relative overflow-hidden font-sans">
+    <div className="min-h-screen text-white flex flex-col items-center justify-center relative overflow-hidden font-sans">
       
       {/* Audio Player Control */}
       <MusicPlayer onPlayChange={setIsMusicPlaying} />
@@ -119,7 +119,6 @@ function App() {
       <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 transition-opacity duration-1000 ${isEntering ? 'opacity-0 scale-150' : 'opacity-100'}`}>
         
         {/* Header / Logo Wrapper - Animates UP */}
-        {/* Changed translate values to 28vh as requested (was 42vh) */}
         <div 
             className={`
                 relative mb-8 transition-transform duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)]
@@ -133,11 +132,6 @@ function App() {
         </div>
 
         {/* Countdown Timer Wrapper - Animates DOWN */}
-        {/* Updates:
-            1. Scale reduced to 110% when expanded
-            2. Translation adjusted to 28vh (was 42vh)
-            3. Blur increased to 6px when closed
-        */}
         <div className={`
             transition-all duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)] origin-center
             ${isLayoutExpanded 
