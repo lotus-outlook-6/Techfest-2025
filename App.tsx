@@ -1,18 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
-import WarpEffect from './components/WarpEffect';
 import Decorations from './components/Decorations';
 import Background from './components/Background';
 import MatrixRain from './components/MatrixRain';
 import InteractiveText from './components/InteractiveText';
 import MusicPlayer from './components/MusicPlayer';
+import Home from './components/Home';
 
 function App() {
-  const [isEntering, setIsEntering] = useState(false);
-  const [showContent, setShowContent] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   
+  // -- Navigation State --
+  const [showHome, setShowHome] = useState(false);
+
   // -- Animation States --
   // Controls the positioning of Logo and Countdown (Expanded vs Centered)
   const [isLayoutExpanded, setIsLayoutExpanded] = useState(false);
@@ -26,11 +27,13 @@ function App() {
   const [bgBurst, setBgBurst] = useState(0);
 
   const handleEnter = () => {
-    setIsEntering(true);
-    // Simulate transition time
-    setTimeout(() => {
-      setShowContent(true);
-    }, 2000);
+    // Switch to Home view component immediately
+    setShowHome(true);
+  };
+
+  const handleHomeBack = () => {
+    // Return to landing page
+    setShowHome(false);
   };
 
   const handleLogoClick = () => {
@@ -64,29 +67,9 @@ function App() {
       setIsLayoutExpanded(false);
   };
 
-  if (showContent) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center relative overflow-hidden">
-        <WarpEffect active={true} />
-        <MusicPlayer onPlayChange={setIsMusicPlaying} />
-        <div className="z-10 text-center animate-pulse">
-           <h1 className="text-6xl md:text-8xl font-black mb-4 neon-text-filled tracking-widest">WELCOME</h1>
-           <p className="text-fuchsia-300 tracking-[1em]">SYSTEM ACCESS GRANTED</p>
-           <button 
-             onClick={() => { 
-               setIsEntering(false); 
-               setShowContent(false); 
-               setIsMinimized(false); 
-               setShowTerminal(false);
-               setIsLayoutExpanded(false);
-             }}
-             className="mt-12 px-8 py-2 border border-fuchsia-500 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-black transition-colors font-mono"
-           >
-             RESET SYSTEM
-           </button>
-        </div>
-      </div>
-    );
+  // Render Home component if navigation triggered
+  if (showHome) {
+      return <Home onBack={handleHomeBack} />;
   }
 
   return (
@@ -108,7 +91,7 @@ function App() {
       {showTerminal && (
         <Terminal 
           onEnter={handleEnter} 
-          isEntering={isEntering} 
+          isEntering={false} // Transition state removed
           isMinimized={isMinimized}
           onMinimize={() => setIsMinimized(true)}
           onClose={handleTerminalClose}
@@ -116,7 +99,7 @@ function App() {
       )}
       
       {/* Main Layout Container */}
-      <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 transition-opacity duration-1000 ${isEntering ? 'opacity-0 scale-150' : 'opacity-100'}`}>
+      <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 transition-opacity duration-1000`}>
         
         {/* Header / Logo Wrapper - Animates UP */}
         <div 
@@ -142,9 +125,6 @@ function App() {
         </div>
 
       </div>
-
-      {/* Warp Effect Overlay */}
-      <WarpEffect active={isEntering} />
       
       {/* Scan lines overlay */}
       <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[100] bg-[length:100%_2px,3px_100%] pointer-events-none mix-blend-overlay opacity-30"></div>
