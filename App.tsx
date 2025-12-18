@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
 import Decorations from './components/Decorations';
@@ -7,49 +7,62 @@ import MatrixRain from './components/MatrixRain';
 import InteractiveText from './components/InteractiveText';
 import MusicPlayer from './components/MusicPlayer';
 import Home from './components/Home';
+import LoadingScreen from './components/LoadingScreen';
 
 function App() {
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  
-  // -- Navigation State --
-  const [showHome, setShowHome] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showMain, setShowMain] = useState(false);
+  const [staggerState, setStaggerState] = useState({
+    background: false,
+    header: false,
+    timer: false
+  });
 
-  // -- Animation States --
-  // Controls the positioning of Logo and Countdown (Expanded vs Centered)
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [showHome, setShowHome] = useState(false);
   const [isLayoutExpanded, setIsLayoutExpanded] = useState(false);
-  // Controls the rendering of the Terminal component
   const [showTerminal, setShowTerminal] = useState(false);
-  
-  // Minimized state for the terminal window itself
   const [isMinimized, setIsMinimized] = useState(false);
-  
-  // State to trigger background bursts
   const [bgBurst, setBgBurst] = useState(0);
 
+  // Loading sequence orchestration
+  useEffect(() => {
+    // 1. Loading screen duration (3s)
+    const loadTimer = setTimeout(() => {
+      setIsLoading(false);
+      setShowMain(true);
+      
+      // 2. Background start
+      setTimeout(() => setStaggerState(prev => ({ ...prev, background: true })), 100);
+      
+      // 3. Header appears
+      setTimeout(() => setStaggerState(prev => ({ ...prev, header: true })), 1000);
+      
+      // 4. Timer fades in
+      setTimeout(() => setStaggerState(prev => ({ ...prev, timer: true })), 1800);
+
+    }, 3000);
+
+    return () => clearTimeout(loadTimer);
+  }, []);
+
   const handleEnter = () => {
-    // Switch to Home view component immediately
     setShowHome(true);
   };
 
   const handleHomeBack = () => {
-    // Return to landing page
     setShowHome(false);
   };
 
   const handleLogoClick = () => {
     if (isLayoutExpanded) {
-        // If layout is already expanded, clicking might just trigger effects or restore if minimized
         if (isMinimized) {
             setIsMinimized(false);
         } else {
             setBgBurst(prev => prev + 1);
         }
     } else {
-        // -- OPEN SEQUENCE --
-        // 1. Expand Layout (Logo Up, Timer Down)
         setIsLayoutExpanded(true);
-        
-        // 2. Wait for animation to create space (800ms matches the CSS transition duration)
         setTimeout(() => {
             setIsMinimized(false);
             setShowTerminal(true);
@@ -58,77 +71,86 @@ function App() {
   };
 
   const handleTerminalClose = () => {
-      // -- CLOSE SEQUENCE --
-      // 1. Terminal is already animating out internally. Unmount it.
       setShowTerminal(false);
       setIsMinimized(false);
-
-      // 2. Collapse Layout back to center
       setIsLayoutExpanded(false);
   };
 
-  // Render Home component if navigation triggered
   if (showHome) {
       return <Home onBack={handleHomeBack} />;
   }
 
   return (
-    <div className="min-h-screen text-white flex flex-col items-center justify-center relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full text-white flex flex-col items-center justify-center relative overflow-hidden font-sans bg-[#050505]">
       
-      {/* Audio Player Control */}
-      <MusicPlayer onPlayChange={setIsMusicPlaying} />
+      {isLoading && <LoadingScreen />}
 
-      {/* Dynamic Backgrounds with Burst Trigger */}
-      <Background burstTrigger={bgBurst} />
-      
-      {/* Matrix Overlay (Active when music is playing) */}
-      <MatrixRain active={isMusicPlaying} />
-      
-      {/* Background Decorations */}
-      <Decorations />
-      
-      {/* Terminal Layer - Fixed Position */}
-      {showTerminal && (
-        <Terminal 
-          onEnter={handleEnter} 
-          isEntering={false} // Transition state removed
-          isMinimized={isMinimized}
-          onMinimize={() => setIsMinimized(true)}
-          onClose={handleTerminalClose}
-        />
-      )}
-      
-      {/* Main Layout Container */}
-      <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 transition-opacity duration-1000`}>
+      {/* Main App Content */}
+      <div className={`fixed inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 ${showMain ? 'opacity-100' : 'opacity-0'} pointer-events-none`}>
         
-        {/* Header / Logo Wrapper - Animates UP */}
-        <div 
-            className={`
-                relative mb-8 transition-transform duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)]
-                ${isLayoutExpanded ? '-translate-y-[28vh]' : 'translate-y-0'}
-            `}
-        >
-          <div className="flex items-center justify-center">
-             <InteractiveText onLogoClick={handleLogoClick} />
+        {/* Audio Player Control */}
+        <div className="pointer-events-auto">
+          <MusicPlayer onPlayChange={setIsMusicPlaying} />
+        </div>
+
+        {/* Dynamic Backgrounds */}
+        {staggerState.background && (
+          <div className="absolute inset-0 animate-fade-in pointer-events-none">
+             <Background burstTrigger={bgBurst} />
+             <MatrixRain active={isMusicPlaying} />
+             <Decorations />
           </div>
-          <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mt-4 opacity-70"></div>
-        </div>
+        )}
+        
+        {/* Terminal Layer */}
+        {showTerminal && (
+          <div className="pointer-events-auto contents">
+            <Terminal 
+              onEnter={handleEnter} 
+              isEntering={false}
+              isMinimized={isMinimized}
+              onMinimize={() => setIsMinimized(true)}
+              onClose={handleTerminalClose}
+            />
+          </div>
+        )}
+        
+        {/* Main Layout Container */}
+        <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 pointer-events-none`}>
+          
+          {/* Header / Logo Wrapper */}
+          {staggerState.header && (
+            <div 
+                className={`
+                    relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center
+                    ${isLayoutExpanded ? '-translate-y-[35vh]' : 'translate-y-0'}
+                `}
+            >
+              <div className="flex items-center justify-center pointer-events-auto">
+                 <InteractiveText onLogoClick={handleLogoClick} />
+              </div>
+              
+              <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mt-4 opacity-70 animate-line"></div>
+              
+              {/* Countdown Timer Wrapper - Positioned relative to the line */}
+              <div className={`
+                  absolute top-full left-1/2 -translate-x-1/2 pt-12
+                  transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-top
+                  ${staggerState.timer ? 'opacity-100' : 'opacity-0'}
+                  ${isLayoutExpanded 
+                      ? 'translate-y-[49vh] scale-110 blur-0' 
+                      : 'translate-y-0 heavy-blur'}
+              `}>
+                 <Countdown />
+              </div>
+            </div>
+          )}
 
-        {/* Countdown Timer Wrapper - Animates DOWN */}
-        <div className={`
-            transition-all duration-1000 ease-[cubic-bezier(0.25,0.8,0.25,1)] origin-center
-            ${isLayoutExpanded 
-                ? 'translate-y-[28vh] scale-110 opacity-100 blur-0' 
-                : 'translate-y-0 scale-100 opacity-60 blur-[6px]'}
-        `}>
-           <Countdown />
         </div>
-
+        
+        {/* Scan lines overlay */}
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[100] bg-[length:100%_2px,3px_100%] pointer-events-none mix-blend-overlay opacity-30"></div>
       </div>
-      
-      {/* Scan lines overlay */}
-      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[100] bg-[length:100%_2px,3px_100%] pointer-events-none mix-blend-overlay opacity-30"></div>
-
     </div>
   );
 }
