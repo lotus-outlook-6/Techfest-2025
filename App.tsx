@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
@@ -84,8 +85,11 @@ function App() {
           GLOBAL COMPONENTS 
           These stay mounted across page transitions to ensure 
           uninterrupted audio and ambient effects.
+          Passing showHome as hideButton prop to remove UI on Home page.
       */}
-      <MusicPlayer onPlayChange={setIsMusicPlaying} />
+      <MusicPlayer onPlayChange={setIsMusicPlaying} hideButton={showHome} />
+      
+      {/* Matrix Rain placed very low in stacking order (z-1) */}
       <MatrixRain active={isMusicPlaying} />
 
       {showHome ? (
@@ -97,14 +101,16 @@ function App() {
           {/* Main Landing App Content */}
           <div className={`fixed inset-0 flex flex-col items-center justify-center transition-opacity duration-1000 ${showMain ? 'opacity-100' : 'opacity-0'} pointer-events-none`}>
             
-            {/* Dynamic Backgrounds */}
+            {/* Background Decorations Layer */}
             {staggerState.background && (
-              <div className="absolute inset-0 animate-fade-in pointer-events-none">
+              <div className="absolute inset-0 animate-fade-in pointer-events-none z-0">
                  <Background burstTrigger={bgBurst} />
                  <Decorations />
-                 <SocialButtons />
               </div>
             )}
+            
+            {/* Social Buttons Layer */}
+            {staggerState.background && <SocialButtons />}
             
             {/* Terminal Layer */}
             {showTerminal && (
@@ -119,8 +125,8 @@ function App() {
               </div>
             )}
             
-            {/* Main Layout Container */}
-            <div className={`relative z-10 flex flex-col items-center justify-center w-full max-w-5xl px-4 pointer-events-none`}>
+            {/* Main Layout Container - Explicitly z-20 to be above MatrixRain (z-1) */}
+            <div className={`relative z-20 flex flex-col items-center justify-center w-full max-w-5xl px-4 pointer-events-none`}>
               
               {/* Header / Logo Wrapper */}
               {staggerState.header && (
@@ -152,7 +158,7 @@ function App() {
 
             </div>
             
-            {/* Scan lines overlay */}
+            {/* Scan lines overlay - Highest layer */}
             <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[100] bg-[length:100%_2px,3px_100%] pointer-events-none mix-blend-overlay opacity-30"></div>
           </div>
         </>
