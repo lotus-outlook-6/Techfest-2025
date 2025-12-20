@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,16 +8,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Unbounded:wght@200..900&family=Space+Grotesk:wght@300..700&family=Anton&display=swap" rel="stylesheet">
     <style>
       body {
         margin: 0;
         background-color: #050505;
-        font-family: 'Orbitron', sans-serif;
+        font-family: 'Space Grotesk', sans-serif;
         overflow: hidden;
         width: 100vw;
         height: 100vh;
       }
+      
+      .font-unbounded { font-family: 'Unbounded', sans-serif; }
+      .font-orbitron { font-family: 'Orbitron', sans-serif; }
+      .font-space { font-family: 'Space Grotesk', sans-serif; }
+      .font-anton { font-family: 'Anton', sans-serif; }
+
       .neon-text {
         color: transparent;
         -webkit-text-stroke: 1px #ff00ff;
@@ -36,18 +43,6 @@
         from { transform: rotate(360deg); }
         to { transform: rotate(0deg); }
       }
-      @keyframes spin-fast {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      
-      /* Blob Animations for Background */
-      @keyframes blob {
-        0% { transform: translate(0px, 0px) scale(1); }
-        33% { transform: translate(30px, -50px) scale(1.1); }
-        66% { transform: translate(-20px, 20px) scale(0.9); }
-        100% { transform: translate(0px, 0px) scale(1); }
-      }
       
       .animate-spin-slow {
         animation: spin-slow 20s linear infinite;
@@ -55,33 +50,7 @@
       .animate-spin-reverse-slow {
         animation: spin-reverse-slow 15s linear infinite;
       }
-      .animate-spin-medium {
-        animation: spin-slow 8s linear infinite;
-      }
-      .animate-spin-fast {
-        animation: spin-fast 1s linear infinite;
-      }
       
-      .animate-blob {
-        animation: blob 10s infinite;
-      }
-      
-      .animation-delay-2000 {
-        animation-delay: 2s;
-      }
-      .animation-delay-4000 {
-        animation-delay: 4s;
-      }
-
-      .perspective-container {
-        perspective: 1000px;
-      }
-      .tilted-plane {
-        transform: rotateX(60deg) scale(1.5);
-        transform-origin: center bottom;
-      }
-
-      /* Tooltip Lifecycle Animation: 0.4s In, 3s Wait, 0.4s Out. Total 3.8s */
       @keyframes tooltip-sequence {
         0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
         10.5% { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -93,12 +62,7 @@
         animation: tooltip-sequence 3.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
 
-      /* Shimmer Effect for Music Button */
-      @keyframes shimmer {
-        100% { transform: translateX(100%); }
-      }
-
-      /* Entry Animations - Opacity only to allow Tailwind transforms to work */
+      /* Entry Animations */
       @keyframes simple-fade-in {
         from { opacity: 0; }
         to { opacity: 1; }

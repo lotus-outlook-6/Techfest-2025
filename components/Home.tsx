@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import NavbarSlider from './NavbarSlider';
+import RegisterButton from './RegisterButton';
 
 interface HomeProps {
   onBack?: () => void;
@@ -7,54 +9,101 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ onBack }) => {
   const [showCursor, setShowCursor] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Burst blink effect for the terminal logo cursor
+  // Very fast blink effect when hovered (approx 60ms interval for high-frequency feel)
   useEffect(() => {
-    const runBurst = () => {
-      [0, 80, 160, 240, 320, 400].forEach((delay, i) => {
-        setTimeout(() => {
-          setShowCursor(i % 2 !== 0);
-        }, delay);
-      });
-      setTimeout(() => setShowCursor(true), 500);
-    };
+    if (!isHovered) {
+      setShowCursor(true);
+      return;
+    }
 
-    const initialDelay = setTimeout(runBurst, 5000);
-    const interval = setInterval(runBurst, 5000);
+    const interval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 60);
 
-    return () => {
-      clearTimeout(initialDelay);
-      clearInterval(interval);
-    };
-  }, []);
+    return () => clearInterval(interval);
+  }, [isHovered]);
 
   return (
-    <div className="min-h-screen w-full bg-[#050A1F] text-white font-mono flex flex-col relative overflow-hidden z-[100]">
+    <div className="min-h-screen w-full bg-[#050205] text-white font-mono flex flex-col relative overflow-hidden z-[100]">
       
-      {/* Top Left Container */}
-      <button 
-        onClick={onBack}
-        className="absolute top-8 left-8 z-20 flex flex-row items-center gap-5 group cursor-pointer outline-none focus:ring-0 select-none text-left"
-        aria-label="Return to Landing Page"
-      >
-        <div className="relative w-12 h-12 md:w-14 md:h-14 bg-[#1e1e1e] rounded-lg border border-gray-700 shadow-[0_0_15px_rgba(217,70,239,0.3)] flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:border-fuchsia-500 group-hover:shadow-[0_0_30px_rgba(217,70,239,0.6)] active:scale-95">
-          <span className="text-fuchsia-500 font-bold text-xl md:text-2xl font-mono flex items-baseline">
-            <span>&gt;</span>
-            <span className={`${showCursor ? 'opacity-100' : 'opacity-0'}`}>_</span>
+      {/* BACKGROUND FLARE - Soft Fuchsia Ambient Light */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[60vh] bg-fuchsia-950/20 blur-[180px] pointer-events-none rounded-full"></div>
+
+      {/* HEADER SECTION - items-center ensures horizontal alignment */}
+      <header className="w-full h-24 flex items-center justify-between px-4 md:px-8 z-50 relative">
+        
+        {/* Top Left: Terminal Logo Unit - Decreased Size and moved more left */}
+        <button 
+          onClick={onBack}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="flex items-center gap-4 group cursor-pointer outline-none select-none transition-all duration-300 z-50"
+        >
+          {/* Decreased icon size to w-10/12 */}
+          <div className="relative w-10 h-10 md:w-12 md:h-12 bg-[#0c0c0c] rounded-lg border border-fuchsia-500/40 shadow-[0_0_10px_rgba(217,70,239,0.2)] flex items-center justify-center transition-all duration-300 group-hover:border-fuchsia-400 group-hover:shadow-[0_0_15px_rgba(217,70,239,0.5)]">
+            <span className="text-fuchsia-500 font-bold text-lg md:text-xl font-mono flex items-baseline">
+              <span>&gt;</span>
+              <span className={`${showCursor ? 'opacity-100' : 'opacity-0'}`}>_</span>
+            </span>
+          </div>
+          {/* Decreased text size to text-lg/xl */}
+          <span className="hidden md:block text-lg md:text-xl font-black tracking-[0.2em] font-sans text-white/60 group-hover:text-white transition-colors">
+            YANTRAKSH
           </span>
+        </button>
+
+        {/* Top Center: The Nav Slider 
+            Positioned absolutely at the center of the screen to ensure the 3rd point is perfectly aligned with the screen center.
+        */}
+        <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-40">
+            <NavbarSlider />
         </div>
 
-        <span className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-white uppercase font-sans drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] transition-all duration-300 group-hover:text-fuchsia-400 group-hover:drop-shadow-[0_0_15px_rgba(217,70,239,0.8)]">
-          YANTRAKSH
-        </span>
-      </button>
+        {/* Top Right: Small Header Register */}
+        <div className="hidden md:flex items-center z-50">
+            <RegisterButton size="sm" />
+        </div>
+      </header>
 
-      {/* Center Content: HOME title */}
-      <div className="w-full min-h-screen flex flex-col items-center justify-center z-10">
-        <h1 className="text-7xl md:text-9xl tracking-[0.25em] font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] font-sans select-none">
-          HOME
-        </h1>
-      </div>
+      {/* Main Content: Focal Central Register Action */}
+      <main className="flex-1 flex flex-col items-center justify-center z-10 relative">
+        {/* Ambient Grid Floor Perspective */}
+        <div className="absolute bottom-0 w-full h-[40vh] opacity-10 pointer-events-none" style={{ background: 'linear-gradient(0deg, #d946ef 1px, transparent 1px), linear-gradient(90deg, #d946ef 1px, transparent 1px)', backgroundSize: '40px 40px', transform: 'perspective(500px) rotateX(60deg)' }}></div>
+        
+        <div className="flex flex-col items-center text-center animate-fade-in-up">
+            {/* Status Indicator */}
+            <div className="mb-10 opacity-40">
+                <span className="text-[10px] md:text-xs tracking-[1.2em] text-fuchsia-300 font-bold uppercase">
+                    Initialize Phase 01
+                </span>
+            </div>
+            
+            {/* LARGE HERO REGISTER BUTTON */}
+            <RegisterButton size="lg" />
+            
+            {/* Footnote / Decorative line */}
+            <div className="mt-16 flex items-center gap-6 opacity-20">
+                <div className="w-16 h-px bg-fuchsia-500"></div>
+                <span className="text-[9px] tracking-[0.6em] font-black">SYSTEM_STABLE</span>
+                <div className="w-16 h-px bg-fuchsia-500"></div>
+            </div>
+        </div>
+      </main>
+
+      {/* Decorative Scanline Overlay */}
+      <div className="fixed inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-[1000] bg-[length:100%_4px,4px_100%] opacity-20"></div>
+
+      <style>{`
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+      `}</style>
       
     </div>
   );
