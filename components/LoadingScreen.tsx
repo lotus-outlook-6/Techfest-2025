@@ -66,7 +66,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
     }, intervalTime);
 
     return () => clearInterval(timer);
-    // Removed logs from dependencies to prevent the interval from resetting every time a log is added
   }, [isTransition, transitionMessages]);
 
   // TRANSITION-SPECIFIC UI (MID-PAGE SWAP)
@@ -76,7 +75,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
         <div className="w-full max-w-xl px-10">
           <div className="flex justify-between items-end mb-6">
             <div className="text-left">
-              <h2 className="text-white text-3xl font-anton tracking-widest uppercase mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+              <h2 className="text-white text-3xl font-anton tracking-widest uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
                 {progress < 100 ? "Syncing_Data" : "Link_Established"}
               </h2>
               <div className="flex items-center gap-2">
@@ -85,21 +84,21 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
               </div>
             </div>
             <div className="text-right">
-              <span className="text-5xl font-anton text-white tabular-nums">{Math.floor(progress)}%</span>
+              <span className="text-5xl font-anton text-white tabular-nums drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{Math.floor(progress)}%</span>
             </div>
           </div>
 
-          <div className="w-full h-40 bg-black/60 border border-white/10 p-5 mb-8 overflow-hidden flex flex-col justify-end rounded-lg shadow-inner">
-            <div className="space-y-1.5">
+          <div className="w-full h-40 bg-black/80 border border-fuchsia-900/20 p-5 mb-10 overflow-hidden flex flex-col justify-end rounded-xl shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+            <div className="space-y-2">
               {logs.map((log, i) => (
-                <div key={i} className="text-[11px] md:text-xs flex gap-4 animate-fade-in font-medium">
-                  <span className="text-fuchsia-500/60 shrink-0 font-bold">
+                <div key={i} className="text-[11px] md:text-xs flex gap-4 animate-fade-in font-medium tracking-wider">
+                  <span className="text-fuchsia-500/80 shrink-0 font-bold">
                     [{new Date().toLocaleTimeString([], {hour12: false})}]
                   </span>
                   <span className={`
-                    ${log.includes('[OK]') ? 'text-green-400' : 'text-gray-200'}
-                    ${log.includes('[INFO]') ? 'text-blue-300/90' : ''}
-                    drop-shadow-[0_0_2px_rgba(255,255,255,0.2)]
+                    ${log.includes('[OK]') ? 'text-green-400' : 'text-fuchsia-100'}
+                    ${log.includes('[INFO]') ? 'text-blue-300' : ''}
+                    drop-shadow-[0_0_8px_rgba(217,70,239,0.3)]
                   `}>
                     {log}
                   </span>
@@ -108,23 +107,29 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
             </div>
           </div>
           
-          <div className="relative w-full h-3 bg-gray-900 border border-white/5 rounded-full overflow-hidden shadow-2xl">
+          {/* THE PROGRESS TRACK - Removed white border, added deep glow */}
+          <div className="relative w-full h-3.5 bg-[#0a0a0a] rounded-full overflow-hidden shadow-[0_0_30px_rgba(217,70,239,0.1)] border border-fuchsia-950/20">
+            {/* THE PROGRESS BAR - Circular ends, Intense Glow */}
             <div 
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-fuchsia-700 to-fuchsia-500 transition-all duration-300 ease-out shadow-[0_0_20px_#d946ef]"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-fuchsia-700 via-fuchsia-500 to-fuchsia-400 transition-all duration-300 ease-out rounded-full shadow-[0_0_25px_#d946ef,0_0_50px_rgba(217,70,239,0.6)]"
               style={{ width: `${progress}%` }}
             >
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent)] animate-[shimmer_2s_infinite]"></div>
+              {/* Internal Shimmer - Softened to remove "Windows 7" sharp line look */}
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)] animate-[shimmer_3s_infinite] rounded-full"></div>
+              
+              {/* Moving Glow Tip */}
+              <div className="absolute top-0 right-0 h-full w-8 bg-white/20 blur-md rounded-full"></div>
             </div>
           </div>
         </div>
         
-        {/* Subtle background glow to keep it from feeling completely flat */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-fuchsia-950/10 blur-[180px] rounded-full pointer-events-none"></div>
+        {/* Ambient background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-fuchsia-950/10 blur-[200px] rounded-full pointer-events-none"></div>
 
         <style>{`
           @keyframes shimmer {
             0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            100% { transform: translateX(200%); }
           }
         `}</style>
       </div>
@@ -139,10 +144,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
           {bootMessage}
         </div>
         
-        <div className="relative w-full h-1 bg-gray-900 overflow-hidden rounded-full">
+        <div className="relative w-full h-1.5 bg-gray-950 overflow-hidden rounded-full shadow-[0_0_15px_rgba(217,70,239,0.1)]">
           <div 
-            className="absolute top-0 left-0 h-full bg-fuchsia-600 transition-all duration-300 ease-out"
-            style={{ width: `${progress}%`, boxShadow: '0 0 10px #d946ef' }}
+            className="absolute top-0 left-0 h-full bg-fuchsia-600 transition-all duration-300 ease-out rounded-full shadow-[0_0_15px_#d946ef]"
+            style={{ width: `${progress}%` }}
           ></div>
         </div>
         
