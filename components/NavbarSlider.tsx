@@ -7,11 +7,15 @@ const NavbarSlider: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
+  // Default to true so it starts as a pill on entry
+  const [isSticky, setIsSticky] = useState(true);
   const trackRef = useRef<HTMLDivElement>(null);
   const stickyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Start the 5-minute countdown immediately on mount
+    startStickyTimer();
+    
     return () => {
       if (stickyTimerRef.current) window.clearTimeout(stickyTimerRef.current);
     };
@@ -19,6 +23,15 @@ const NavbarSlider: React.FC = () => {
 
   const getPillPosition = () => {
     return (activeIndex * 20);
+  };
+
+  const startStickyTimer = () => {
+    if (stickyTimerRef.current) window.clearTimeout(stickyTimerRef.current);
+    // 5 minutes (300,000ms)
+    stickyTimerRef.current = window.setTimeout(() => {
+      setIsSticky(false);
+      stickyTimerRef.current = null;
+    }, 300000); 
   };
 
   const handleClick = (index: number) => {
@@ -31,10 +44,7 @@ const NavbarSlider: React.FC = () => {
 
   const refreshExpansion = () => {
     setIsSticky(true);
-    if (stickyTimerRef.current) {
-      window.clearTimeout(stickyTimerRef.current);
-      stickyTimerRef.current = null;
-    }
+    startStickyTimer();
   };
 
   const handleMouseEnter = () => {
@@ -45,12 +55,7 @@ const NavbarSlider: React.FC = () => {
   const handleMouseLeave = () => {
     setHovering(false);
     setIsDragging(false);
-    
-    if (stickyTimerRef.current) window.clearTimeout(stickyTimerRef.current);
-    stickyTimerRef.current = window.setTimeout(() => {
-      setIsSticky(false);
-      stickyTimerRef.current = null;
-    }, 30000);
+    startStickyTimer();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -115,7 +120,6 @@ const NavbarSlider: React.FC = () => {
                 `}>
                     <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite] transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}></div>
                     
-                    {/* SECTION TEXT: Now using Anton for the extreme bold condensed impact requested */}
                     <span className={`
                         text-sm md:text-lg font-anton tracking-[0.05em] text-white uppercase 
                         transition-all duration-500 drop-shadow-[0_0_3px_rgba(0,0,0,0.3)] leading-none

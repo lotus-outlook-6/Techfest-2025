@@ -1,64 +1,17 @@
+
 import React, { useEffect, useRef } from 'react';
 
-// Classes defined outside to be reusable across effects
-class Blob {
-  x: number;
-  y: number;
-  radius: number;
-  vx: number;
-  vy: number;
-  color: string;
-  alpha: number;
-  t: number;
-
-  constructor(width: number, height: number) {
-    this.x = Math.random() * width;
-    this.y = Math.random() * height;
-    this.radius = Math.random() * 250 + 150; // Large soft blobs
-    this.vx = (Math.random() - 0.5) * 0.5; // Slow drift
-    this.vy = (Math.random() - 0.5) * 0.5;
-    // Pink/Purple palette
-    const colors = [
-      '217, 70, 239', // fuchsia-500
-      '168, 85, 247', // purple-500
-      '236, 72, 153', // pink-500
-      '192, 38, 211', // fuchsia-700
-      '255, 0, 255'   // magenta
-    ];
-    this.color = colors[Math.floor(Math.random() * colors.length)];
-    // Random initial phase
-    this.t = Math.random() * Math.PI * 2;
-    this.alpha = 0.3; 
-  }
-
-  update(width: number, height: number) {
-    this.x += this.vx;
-    this.y += this.vy;
-    
-    // Wrap around screen
-    if (this.x < -this.radius * 2) this.x = width + this.radius;
-    if (this.x > width + this.radius * 2) this.x = -this.radius;
-    if (this.y < -this.radius * 2) this.y = height + this.radius;
-    if (this.y > height + this.radius * 2) this.y = -this.radius;
-
-    // Subtle alpha pulsing
-    this.t += 0.005;
-    // Range 0.2 - 0.45
-    this.alpha = 0.325 + Math.sin(this.t) * 0.125;
-  }
-
-  draw(ctx: CanvasRenderingContext2D) {
-    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-    gradient.addColorStop(0, `rgba(${this.color}, ${this.alpha})`);
-    gradient.addColorStop(0.5, `rgba(${this.color}, ${this.alpha * 0.6})`);
-    gradient.addColorStop(1, `rgba(${this.color}, 0)`);
-    
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
+// Softened neon palette with slightly higher base opacities for "fat" colors
+const NEON_COLORS = [
+  'rgba(217, 70, 239, 0.15)', // Soft Fuchsia
+  'rgba(162, 28, 175, 0.12)', // Deep Purple
+  'rgba(124, 58, 237, 0.12)', // Violet
+  'rgba(37, 99, 235, 0.10)',  // Electric Blue
+  'rgba(6, 182, 212, 0.10)',  // Cyan
+  'rgba(236, 72, 153, 0.15)', // Hot Pink
+  'rgba(139, 92, 246, 0.12)', // Lavender
+  'rgba(255, 0, 255, 0.10)',  // Neon Magenta
+];
 
 class Particle {
   x: number;
@@ -70,23 +23,23 @@ class Particle {
   alpha: number;
 
   constructor(width: number, height: number) {
-    this.x = Math.random() * width;
-    this.y = Math.random() * height;
+    this.x = Math.random() * (width || 1920);
+    this.y = Math.random() * (height || 1080);
     this.size = Math.random() * 2 + 0.5;
-    this.vx = (Math.random() - 0.5) * 0.8; 
-    this.vy = (Math.random() - 0.5) * 0.8;
-    this.color = Math.random() > 0.5 ? '255, 255, 255' : '236, 72, 153';
-    this.alpha = Math.random() * 0.5 + 0.3;
+    this.vx = (Math.random() - 0.5) * 0.5; 
+    this.vy = (Math.random() - 0.5) * 0.5;
+    this.color = Math.random() > 0.6 ? '255, 255, 255' : '236, 72, 153';
+    this.alpha = Math.random() * 0.5 + 0.2;
   }
 
   update(width: number, height: number) {
     this.x += this.vx;
     this.y += this.vy;
 
-    if (this.x < 0) this.x = width;
-    if (this.x > width) this.x = 0;
-    if (this.y < 0) this.y = height;
-    if (this.y > height) this.y = 0;
+    if (this.x < -20) this.x = width + 20;
+    if (this.x > width + 20) this.x = -20;
+    if (this.y < -20) this.y = height + 20;
+    if (this.y > height + 20) this.y = -20;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -97,36 +50,149 @@ class Particle {
   }
 }
 
+type BlobState = 'appearing' | 'stable' | 'disappearing' | 'dead';
+
+class Blob {
+  x: number;
+  y: number;
+  radius: number;
+  vx: number;
+  vy: number;
+  color: string;
+  
+  state: BlobState;
+  alpha: number;
+  targetAlpha: number = 1.0;
+  lifeTimer: number; 
+  fadeSpeed: number = 0.005; // Slightly faster fades
+
+  constructor(width: number, height: number, startInstant = false) {
+    this.radius = Math.random() * 450 + 350;
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    
+    this.vx = (Math.random() - 0.5) * 0.25;
+    this.vy = (Math.random() - 0.5) * 0.25;
+    
+    this.color = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
+    
+    // If startInstant is true, we skip 'appearing' and go straight to 'stable'
+    if (startInstant) {
+      this.state = 'stable';
+      this.alpha = this.targetAlpha;
+    } else {
+      this.state = 'appearing';
+      this.alpha = 0;
+    }
+    
+    // 20-30 seconds
+    this.lifeTimer = (20 + Math.random() * 10) * 60; 
+  }
+
+  update(width: number, height: number) {
+    this.x += this.vx;
+    this.y += this.vy;
+
+    const margin = this.radius;
+    if (this.x < -margin) this.x = width + margin;
+    if (this.x > width + margin) this.x = -margin;
+    if (this.y < -margin) this.y = height + margin;
+    if (this.y > height + margin) this.y = -margin;
+
+    switch(this.state) {
+      case 'appearing':
+        this.alpha += this.fadeSpeed;
+        if (this.alpha >= this.targetAlpha) {
+          this.alpha = this.targetAlpha;
+          this.state = 'stable';
+        }
+        break;
+      case 'stable':
+        this.lifeTimer--;
+        if (this.lifeTimer <= 0) {
+          this.state = 'disappearing';
+        }
+        break;
+      case 'disappearing':
+        this.alpha -= this.fadeSpeed;
+        if (this.alpha <= 0) {
+          this.alpha = 0;
+          this.state = 'dead';
+        }
+        break;
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    if (this.state === 'dead') return;
+
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+    gradient.addColorStop(0, this.color);
+    gradient.addColorStop(1, 'transparent');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+}
+
 interface BackgroundProps {
   burstTrigger?: number;
 }
 
 const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const blobsRef = useRef<Blob[]>([]);
   const particlesRef = useRef<Particle[]>([]);
+  const blobsRef = useRef<Blob[]>([]);
   const dimsRef = useRef({ width: 0, height: 0 });
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const { width, height } = dimsRef.current;
+    if (width > 0) {
+      for (let i = 0; i < 4; i++) {
+        blobsRef.current.push(new Blob(width, height));
+      }
+    }
+  }, [burstTrigger]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     const init = () => {
-        const width = window.innerWidth || document.documentElement.clientWidth || 1024;
-        const height = window.innerHeight || document.documentElement.clientHeight || 768;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
         dimsRef.current = { width, height };
         canvas.width = width;
         canvas.height = height;
         
-        if (blobsRef.current.length === 0) {
-            for (let i = 0; i < 15; i++) {
-                blobsRef.current.push(new Blob(width, height));
-            }
-            for (let i = 0; i < 80; i++) {
+        if (particlesRef.current.length === 0) {
+            for (let i = 0; i < 150; i++) {
                 particlesRef.current.push(new Particle(width, height));
+            }
+        }
+
+        if (blobsRef.current.length === 0) {
+            // Spawn initial blobs with 'startInstant' so the screen isn't black
+            for (let i = 0; i < 15; i++) {
+                const b = new Blob(width, height, true);
+                b.lifeTimer = Math.random() * b.lifeTimer;
+                blobsRef.current.push(b);
             }
         }
     };
@@ -141,28 +207,31 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
     };
     window.addEventListener('resize', handleResize);
 
+    const spawnInterval = setInterval(() => {
+      const { width, height } = dimsRef.current;
+      // Maintain at least 12 active/stable blobs for that "fat" color look
+      if (width > 0 && blobsRef.current.filter(b => b.state !== 'disappearing').length < 12) {
+          blobsRef.current.push(new Blob(width, height));
+      }
+    }, 3000); 
+
     const animate = () => {
       const { width, height } = dimsRef.current;
-      if (!ctx || width === 0) return;
+      if (!ctx || width === 0) {
+          requestAnimationFrame(animate);
+          return;
+      }
       
-      // Clear the canvas fully to transparent before drawing the frame
-      ctx.clearRect(0, 0, width, height);
-      
-      // Draw Base Background Color
-      // Explicitly using source-over to ensure base color is solid
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = '#050205'; 
+      ctx.fillStyle = '#050505';
       ctx.fillRect(0, 0, width, height);
-
-      // Draw Blobs (Background glow)
-      // Use 'screen' or 'lighter' to make them glow against the dark background
+      
       ctx.globalCompositeOperation = 'screen';
+      blobsRef.current = blobsRef.current.filter(b => b.state !== 'dead');
       blobsRef.current.forEach(b => {
         b.update(width, height);
         b.draw(ctx);
       });
 
-      // Draw Particles (Foreground dust)
       ctx.globalCompositeOperation = 'source-over';
       particlesRef.current.forEach(p => {
         p.update(width, height);
@@ -176,22 +245,10 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      clearInterval(spawnInterval);
       cancelAnimationFrame(animationId);
     };
   }, []);
-
-  useEffect(() => {
-    if (burstTrigger > 0) {
-        const { width, height } = dimsRef.current;
-        if (width > 0) {
-            for (let i = 0; i < 3; i++) {
-                const b = new Blob(width, height);
-                b.t = Math.PI * 1.5; 
-                blobsRef.current.push(b);
-            }
-        }
-    }
-  }, [burstTrigger]);
 
   return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />;
 };

@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
-import Decorations from './components/Decorations';
 import Background from './components/Background';
 import MatrixRain from './components/MatrixRain';
 import InteractiveText from './components/InteractiveText';
@@ -73,6 +72,7 @@ function App() {
         if (isMinimized) {
             setIsMinimized(false);
         } else {
+            // Adds more persistent gradient blobs to the background
             setBgBurst(prev => prev + 1);
         }
     } else {
@@ -94,19 +94,20 @@ function App() {
     <div className="min-h-screen w-full text-white flex flex-col items-center justify-center relative overflow-hidden font-sans bg-[#050505]">
       
       {/* PERSISTENT STABLE BACKGROUND LAYER (Z-0) */}
-      <div className={`fixed inset-0 z-0 transition-opacity duration-1000 ${showHome ? 'opacity-40' : 'opacity-100'}`}>
+      <div 
+        className={`fixed inset-0 z-0 transition-opacity duration-1000 ${showHome ? 'opacity-40' : 'opacity-100'}`}
+        style={{
+          // Deeper base to allow dynamic blobs to pop
+          background: 'radial-gradient(circle at 50% 100%, rgba(20, 5, 25, 1) 0%, rgba(5, 5, 5, 1) 100%)'
+        }}
+      >
         {staggerState.background && (
-          <>
-            <Background burstTrigger={bgBurst} />
-            <Decorations />
-          </>
+          <Background burstTrigger={bgBurst} />
         )}
         <MatrixRain active={isMusicPlaying} />
       </div>
 
-      {/* PERSISTENT AUDIO PLAYER (Z-300) 
-          Mounted here so it never unmounts. 
-          UI is hidden during boot (!showMain), home (showHome), and transition (isTransitioning). */}
+      {/* PERSISTENT AUDIO PLAYER (Z-300) */}
       <MusicPlayer 
         onPlayChange={setIsMusicPlaying} 
         hideButton={showHome || !showMain || isTransitioning} 
@@ -169,6 +170,7 @@ function App() {
 
       {/* GLOBAL SCANLINES / POST-PROCESS LAYER */}
       <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[600] bg-[length:100%_2px,3px_100%] opacity-20"></div>
+
     </div>
   );
 }
