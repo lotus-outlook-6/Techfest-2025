@@ -214,7 +214,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               </filter>
             </defs>
             <g transform="translate(120, 60)">
-              {/* SHACKLE (The "Handle") */}
               <path 
                 className="shackle-steady-animation"
                 d="M -18 -10 V -26 A 18 18 0 0 1 18 -26 V -10" 
@@ -223,24 +222,15 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 strokeWidth="6.5" 
                 strokeLinecap="round"
               />
-              
-              {/* PADLOCK BODY */}
               <rect x="-28" y="-12" width="56" height="48" rx="10" fill="#050505" stroke="currentColor" strokeWidth="2.5" />
               <rect x="-22" y="-6" width="44" height="36" rx="6" fill="#0c0c0c" opacity="0.9" />
-              
-              {/* STATUS INDICATOR / KEYHOLE */}
               <g filter="url(#cyber-steady-glow)">
                 <circle cx="0" cy="12" r="5" fill="currentColor" className="animate-pulse" />
                 <rect x="-1.5" y="15" width="3" height="8" rx="1.5" fill="currentColor" opacity="0.6" />
               </g>
-
-              {/* TECH ACCENTS */}
               <line x1="-15" y1="-6" x2="-10" y2="-6" stroke="currentColor" strokeWidth="1" opacity="0.4" />
               <line x1="10" y1="-6" x2="15" y2="-6" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-
-              {/* ENERGY SHIELD - Enhanced Visibility and Border on Hover */}
               <g className="shield-vibrate-layer opacity-0 group-hover:opacity-100 transition-all duration-300" filter="url(#cyber-steady-glow)">
-                {/* Outer Glow Border */}
                 <path 
                    d="M -40 -35 L 40 -35 L 40 10 Q 40 45 0 60 Q -40 45 -40 10 Z" 
                    fill="none" 
@@ -248,13 +238,11 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                    strokeWidth="4" 
                    className="opacity-60"
                 />
-                {/* Main Shield Fill - More Visible */}
                 <path 
                    d="M -40 -35 L 40 -35 L 40 10 Q 40 45 0 60 Q -40 45 -40 10 Z" 
                    fill="currentColor" 
                    opacity="0.25" 
                 />
-                {/* Tech Inner Detail Line */}
                 <path 
                    d="M -34 -29 L 34 -29 L 34 8 Q 34 38 0 52 Q -34 38 -34 8 Z" 
                    fill="none" 
@@ -262,7 +250,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                    strokeWidth="1.2" 
                    opacity="0.5" 
                 />
-                {/* Hexagon Pattern Detail */}
                 <g opacity="0.5" strokeWidth="0.5">
                    <path d="M -12 2 L -4 -4 L 4 -4 L 12 2 L 4 8 L -4 8 Z" fill="none" stroke="currentColor" />
                 </g>
@@ -271,60 +258,61 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </svg>
         );
       case "BIO-TECH":
+        // Refined DNA helix based on sketch: Open top, closed mid, open bottom.
+        const rungPositions = [-45, -35, -25, -15, -5, 5, 15, 25, 35, 45];
+        const maxWidth = 24;
+        
+        // Helper to get x offset at height y for a single twist helix
+        // We use a cosine function to ensure it's open at top/bottom (y=-50, 50) 
+        // and crossing at middle (y=0).
+        const getDNAX = (y: number) => {
+          // Normalizing y from -50...50 to -PI/2...PI/2
+          const phase = (y / 50) * (Math.PI / 2);
+          const xOffset = Math.sin(phase) * maxWidth;
+          return xOffset;
+        };
+
         return (
-          <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 120" style={{ perspective: '500px' }}>
-            <defs>
-              <filter id="bio-glow-v5" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-            <g transform="translate(120, 60)">
-              {/* TRUE 3D AXIS SPIN CONTAINER */}
-              <g className="dna-3d-axis-spin">
-                <g className="dna-inner-content">
-                  {/* Left Helix path */}
-                  <path 
-                    d="M 0 -45 Q 15 -22 0 0 Q -15 22 0 45" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="3.5" 
-                    strokeLinecap="round" 
-                    className="dna-axis-strand-l"
-                  />
-                  {/* Right Helix path (Phase offset) */}
-                  <path 
-                    d="M 0 -45 Q -15 -22 0 0 Q 15 22 0 45" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="3.5" 
-                    strokeLinecap="round" 
-                    className="dna-axis-strand-r"
-                  />
-                  {/* Base Pair Rungs */}
-                  {[...Array(7)].map((_, i) => (
-                    <line 
-                      key={i}
-                      className={`dna-axis-rung-${i}`}
-                      x1="-6" y1={-36 + (i * 12)} x2="6" y2={-36 + (i * 12)}
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      opacity="0.3"
-                    />
-                  ))}
+          <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 140">
+            <g transform="translate(120, 70)">
+              <g className="dna-subtle-breathing">
+                
+                {/* RUNGS */}
+                <g className="dna-strands-layer">
+                  {rungPositions.map((y, i) => {
+                    const x = getDNAX(y);
+                    return (
+                      <line 
+                        key={i} 
+                        x1={-x} y1={y} x2={x} y2={y} 
+                        stroke="currentColor" 
+                        strokeWidth="3.5" 
+                        strokeLinecap="round"
+                        className="dna-rung-pulse"
+                        style={{ 
+                          animationDelay: `${i * 0.1}s`,
+                          opacity: 0.8
+                        } as React.CSSProperties}
+                      />
+                    );
+                  })}
                 </g>
-              </g>
 
-              {/* UNZIP TRANSITION LAYER - Perfect Overlay Alignment */}
-              <g className="dna-unzip-sequence opacity-0 group-hover:opacity-100 pointer-events-none">
-                <path d="M 0 -45 C -10 -20 -20 5 -40 45" fill="none" stroke="currentColor" strokeWidth="4" className="dna-peel-anim-l" />
-                <path d="M 0 -45 C 10 -20 20 5 45 45" fill="none" stroke="currentColor" strokeWidth="4" className="dna-peel-anim-r" />
-              </g>
-
-              {/* ZIPPER HANDLE - Slides Down On Hover */}
-              <g className="dna-zipper-handle-node opacity-0 group-hover:opacity-100" filter="url(#bio-glow-v5)">
-                <path d="M -7 -9 L 7 -9 L 7 1 L 0 11 L -7 1 Z" fill="#0c0c0c" stroke="currentColor" strokeWidth="2" />
-                <circle cx="0" cy="0" r="2" fill="currentColor" />
+                {/* BACKBONES - Cubic Beziers for smooth "twist" crossing at center */}
+                <g className="dna-backbones-sketch">
+                  {/* Strand 1: Starts Left-Bottom (-24, 50), curves through (0,0) to Left-Top (-24, -50) */}
+                  {/* Wait, the sketch is: Top Open (\ /), Mid Crossing (X), Bottom Open (/ \) */}
+                  {/* Top (-24, -50) to Bottom (24, 50) */}
+                  <path 
+                    d="M -24 -50 C -24 -25, 0 -20, 0 0 C 0 20, 24 25, 24 50" 
+                    fill="none" stroke="currentColor" strokeWidth="6.5" strokeLinecap="round" 
+                  />
+                  {/* Strand 2: Top (24, -50) to Bottom (-24, 50) */}
+                  <path 
+                    d="M 24 -50 C 24 -25, 0 -20, 0 0 C 0 20, -24 25, -24 50" 
+                    fill="none" stroke="currentColor" strokeWidth="6.5" strokeLinecap="round" opacity="0.9"
+                  />
+                </g>
               </g>
             </g>
           </svg>
@@ -500,8 +488,8 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
             </div>
             <div className="group relative cursor-pointer">
               <div className="absolute inset-0 bg-fuchsia-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="px-12 py-4 bg-[#0c0c0c] border border-white/10 rounded-full flex items-center gap-4 transition-all duration-300 group-hover:border-fuchsia-500/50 group-hover:translate-y-[-2px]">
-                <span className="text-white font-anton text-xl tracking-[0.1em] uppercase">VIEW MODULES</span>
+              <div className="px-10 py-3 md:px-14 md:py-4 bg-[#0c0c0c] border border-white/10 rounded-md flex items-center gap-4 transition-all duration-300 group-hover:border-fuchsia-500/50 group-hover:translate-y-[-2px]">
+                <span className="text-white font-anton text-lg md:text-2xl tracking-[0.1em] uppercase">VIEW MODULES</span>
                 <svg className="w-6 h-6 text-fuchsia-500 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
@@ -551,49 +539,26 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
            animation: shield-vibrate 0.08s linear infinite;
         }
 
-        /* BIO-TECH DNA - STILL CENTERED 3D SPIN */
-        @keyframes dna-rotate-axis-center {
-           from { transform: rotateY(0deg); }
-           to { transform: rotateY(360deg); }
+        /* BIO-TECH - SUBTLE IDLE & SEQUENTIAL RUNGS */
+        @keyframes dna-breathe {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-3px) scale(1.03); }
         }
-        .dna-3d-axis-spin {
-           animation: dna-rotate-axis-center 3.5s linear infinite;
-           transform-origin: center;
-           transform-style: preserve-3d;
+        .dna-subtle-breathing {
+          animation: dna-breathe 5s ease-in-out infinite;
+          transform-origin: center;
         }
-        .group:hover .dna-3d-axis-spin {
-           animation-play-state: paused;
-           opacity: 0;
-           transition: opacity 0.3s ease;
+        .group:hover .dna-subtle-breathing {
+          animation-play-state: paused;
         }
 
-        /* UNZIP OVERLAY - TOP TO BOTTOM PEEL */
-        @keyframes peel-anim-l {
-           0% { d: path("M 0 -45 C 0 -22 0 0 0 45"); opacity: 0; }
-           15% { opacity: 1; }
-           100% { d: path("M 0 -45 C -10 -20 -20 5 -40 45"); opacity: 1; }
+        /* DNA RUNG SEQUENTIAL "OFF" PULSE */
+        @keyframes rung-blink-sequence {
+          0%, 5% { opacity: 0; filter: blur(2px); }
+          8%, 100% { opacity: 0.8; filter: blur(0); }
         }
-        @keyframes peel-anim-r {
-           0% { d: path("M 0 -45 C 0 -22 0 0 0 45"); opacity: 0; }
-           15% { opacity: 1; }
-           100% { d: path("M 0 -45 C 10 -20 20 5 45 45"); opacity: 1; }
-        }
-        .group:hover .dna-peel-anim-l {
-           animation: peel-anim-l 1.2s cubic-bezier(0.2, 0, 0, 1) forwards;
-        }
-        .group:hover .dna-peel-anim-r {
-           animation: peel-anim-r 1.2s cubic-bezier(0.2, 0, 0, 1) forwards;
-        }
-
-        /* ZIPPER HANDLE - TOP TO BOTTOM SLIDE & VANISH */
-        @keyframes handle-slide-exit {
-           0% { transform: translateY(-50px); opacity: 0; }
-           15% { transform: translateY(-50px); opacity: 1; }
-           85% { transform: translateY(50px); opacity: 1; }
-           100% { transform: translateY(50px); opacity: 0; }
-        }
-        .group:hover .dna-zipper-handle-node {
-           animation: handle-slide-exit 1.4s ease-in-out forwards;
+        .group:hover .dna-rung-pulse {
+          animation: rung-blink-sequence 1.5s linear infinite;
         }
 
         /* FIN-TECH - DATA FLOW */
