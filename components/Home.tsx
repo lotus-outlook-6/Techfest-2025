@@ -16,6 +16,15 @@ interface NoteParticle {
   type: number;
 }
 
+interface Laser {
+  id: number;
+  top: number;
+  width: number;
+  duration: number;
+  delay: number;
+  thickness: number;
+}
+
 const Home: React.FC<HomeProps> = ({ onBack }) => {
   const [showCursor, setShowCursor] = useState(true);
   const [rotation, setRotation] = useState(0); 
@@ -32,6 +41,18 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
   const startX = useRef(0);
   const startRotation = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Laser Rain Logic
+  const lasers = useMemo(() => {
+    return Array.from({ length: 25 }).map((_, i) => ({
+      id: i,
+      top: Math.random() * 100,
+      width: Math.random() * 300 + 50,
+      duration: Math.random() * 2 + 1.5,
+      delay: Math.random() * 5,
+      thickness: Math.random() * 2 + 1
+    }));
+  }, []);
 
   const galleryItems = useMemo(() => [
     { 
@@ -685,11 +706,37 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         </section>
 
         <section id="register" className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-gradient-to-b from-transparent to-fuchsia-950/10">
-          <div className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center p-12 md:p-24 bg-[#0c0c0c]/50 backdrop-blur-[120px] rounded-[3rem] border border-white/10 shadow-[0_0_120px_rgba(0,0,0,0.9)] z-20">
-              <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4 text-center leading-tight">
-                READY TO ASCEND INTO THE <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">DIGITAL_REALM?</span>
-              </h4>
-              <RegisterButton size="lg" />
+          <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center p-12 md:p-24 overflow-hidden rounded-[3rem] z-20">
+              
+              {/* LASER RAIN LAYER - Placed behind the blur and text */}
+              <div className="absolute inset-0 pointer-events-none z-0">
+                {lasers.map(laser => (
+                  <div 
+                    key={laser.id}
+                    className="absolute bg-fuchsia-500 opacity-60 shadow-[0_0_15px_#d946ef] animate-laser-move"
+                    style={{
+                      top: `${laser.top}%`,
+                      height: `${laser.thickness}px`,
+                      width: `${laser.width}px`,
+                      left: '-50%',
+                      animationDuration: `${laser.duration}s`,
+                      animationDelay: `${laser.delay}s`,
+                      filter: `blur(${Math.random() * 2}px)`
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* HEAVY BLUR GLASS BOX */}
+              <div className="absolute inset-0 bg-[#0c0c0c]/50 backdrop-blur-[180px] rounded-[3rem] border border-white/10 shadow-[0_0_150px_rgba(0,0,0,0.95)] z-10 pointer-events-none"></div>
+
+              {/* REGISTRATION CONTENT */}
+              <div className="relative z-20 flex flex-col items-center justify-center">
+                  <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4 text-center leading-tight">
+                    READY TO ASCEND INTO THE <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">DIGITAL_REALM?</span>
+                  </h4>
+                  <RegisterButton size="lg" />
+              </div>
           </div>
         </section>
       </div>
@@ -759,6 +806,17 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         }
         .animate-float-note {
           animation: float-note 2s ease-out forwards;
+        }
+
+        /* LASER RAIN ANIMATION */
+        @keyframes laser-move {
+          0% { left: -50%; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { left: 150%; opacity: 0; }
+        }
+        .animate-laser-move {
+          animation: laser-move linear infinite;
         }
 
         /* SWAP LEAF TO COIN VISUALS ON HOVER - SMOOTH & SUBTLE */
