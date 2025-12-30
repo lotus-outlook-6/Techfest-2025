@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import NavbarSlider from './NavbarSlider';
 import RegisterButton from './RegisterButton';
@@ -22,43 +23,43 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
       id: '01', 
       title: 'ROBOTICS_UPLINK', 
       description: 'Synchronized biomechanical limbs operating through a decentralized neural network for high-precision tasks.',
-      img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1589254065878-42c9da997008?q=80&w=1200&auto=format&fit=crop' 
     },
     { 
       id: '02', 
       title: 'NEURAL_INTERFACE', 
       description: 'Advanced brain-computer mapping enabling direct data transfer between human cognition and digital storage.',
-      img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1555664424-778a1e5e1b48?q=80&w=1200&auto=format&fit=crop' 
     },
     { 
       id: '03', 
       title: 'CYBER_CITY_V1', 
       description: 'A modular urban landscape designed for efficiency, powered entirely by sustainable quantum fusion reactors.',
-      img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=1200&auto=format&fit=crop' 
     },
     { 
       id: '04', 
       title: 'BEYOND_SPACE', 
       description: 'Next-generation orbital propulsion systems designed for deep-space exploration and interstellar logistics.',
-      img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop' 
     },
     { 
       id: '05', 
       title: 'DRONE_SWARM', 
       description: 'Autonomous aerial units utilizing collective intelligence for rapid environmental mapping and defense monitoring.',
-      img: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1473960104312-bf2e12017180?q=80&w=1200&auto=format&fit=crop' 
     },
     { 
       id: '06', 
       title: 'CORE_REACTOR', 
       description: 'The heartbeat of the station, managing trillions of calculations per second to maintain planetary stability.',
-      img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop' 
     },
     { 
       id: '07', 
       title: 'VOID_NAVIGATOR', 
       description: 'Quantum positioning hardware capable of threading through sub-atomic dimensions for instantaneous travel.',
-      img: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=800' 
+      img: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1200&auto=format&fit=crop' 
     },
   ], []);
 
@@ -71,7 +72,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
       glowColor: "rgba(217, 70, 239, 0.8)",
       accentColor: "border-fuchsia-500/40",
       bgGlow: "bg-fuchsia-900/5",
-      glowClass: "drop-shadow-[0_0_20px_rgba(217,70,239,0.8)]"
+      glowClass: "animate-fuchsia-glow"
     },
     {
       title: "ASSAM UNIVERSITY SILCHAR",
@@ -81,7 +82,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
       glowColor: "rgba(163, 230, 53, 0.8)",
       accentColor: "border-lime-400/40",
       bgGlow: "bg-lime-900/5",
-      glowClass: "drop-shadow-[0_0_20px_rgba(163,230,53,0.8)]"
+      glowClass: "animate-lime-glow"
     }
   ], []);
 
@@ -115,6 +116,14 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
       color: "orange"
     }
   ], []);
+
+  const musiciaEvent = {
+    id: "E_01",
+    name: "MUSICIA",
+    desc: "The cosmic symphony where waves of sound fuse with digital rhythms. Experience the absolute fusion of cultural excellence and musical energy.",
+    time: "20:00 IST | SOT FIELD",
+    img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1920&auto=format&fit=crop"
+  };
 
   const activeIndex = useMemo(() => {
     const count = galleryItems.length;
@@ -169,6 +178,11 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
   };
 
   const currentAbout = aboutContent[aboutSlide];
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop"; 
+  };
 
   const renderModuleInfographic = (moduleName: string, color: string) => {
     const colorClass = color === 'fuchsia' ? 'text-fuchsia-500' : color === 'cyan' ? 'text-cyan-400' : color === 'lime' ? 'text-lime-400' : 'text-orange-400';
@@ -297,30 +311,27 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </svg>
         );
       case "FIN-TECH":
-        // Refined Botanical Digital Tree - Pro Interaction Model
-        const ProBotanicalLeaf = ({ index, rotate, scale = 1, x = 0, y = 0 }: { index: number, rotate: number, scale?: number, x?: number, y?: number }) => (
-          <g transform={`translate(${x}, ${y}) rotate(${rotate}) scale(${scale})`}>
-            {/* 
-              This leaf uses staggered transition delays.
-              On HOVER, it FALLS with gravity.
-              On EXIT, it POPS back in with a bouncy elastic transition.
-            */}
-            <path 
-              d="M 0 0 C -4 -8, -4 -13, 0 -18 C 4 -13, 4 -8, 0 0" 
-              fill="currentColor" 
-              className="
-                leaf-dynamic-state
-                transition-all duration-[700ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]
-                group-hover:translate-y-[180px] group-hover:rotate-[280deg] group-hover:opacity-0 group-hover:scale-0 group-hover:duration-[900ms] group-hover:ease-[cubic-bezier(0.5,0,1,1)]
-              "
-              style={{ 
-                transformOrigin: 'bottom center',
-                // Delay for sequential falling/popping
-                transitionDelay: `${index * 0.08}s`
-              } as React.CSSProperties} 
-            />
-          </g>
-        );
+        const StaticLeaf = ({ rotate, x = 0, y = 0 }: { rotate: number, x?: number, y?: number }) => {
+          return (
+            <g transform={`translate(${x}, ${y})`}>
+              <g className="leaf-container">
+                {/* ORIGINAL LEAF - Hidden on hover */}
+                <path 
+                  d="M 0 0 C -4 -8, -4 -13, 0 -18 C 4 -13, 4 -8, 0 0" 
+                  fill="currentColor" 
+                  className="leaf-visual"
+                  transform={`rotate(${rotate})`}
+                />
+                
+                {/* GOLDEN COIN - Appears on hover */}
+                <g className="coin-visual" opacity="0">
+                  <circle r="5.5" fill="#fbbf24" stroke="#b45309" strokeWidth="0.8" />
+                  <text y="2" fontSize="5.5" textAnchor="middle" fill="#b45309" fontWeight="bold" style={{fontFamily: 'Arial, sans-serif'}}>$</text>
+                </g>
+              </g>
+            </g>
+          );
+        };
 
         return (
           <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 130">
@@ -331,54 +342,63 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               </filter>
             </defs>
             <g transform="translate(120, 120) scale(0.85)">
-              <g className="animate-tree-sway">
-                {/* Unified idle breathing - whole tree sways together */}
+              {/* COMPLETELY STILL TREE UNIT */}
+              <g>
                 <path d="M -8 0 Q -6 -35 0 -55 L 8 0 Z" fill="#050505" stroke="currentColor" strokeWidth="2" />
                 <line x1="0" y1="-6" x2="0" y2="-50" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
-
-                {/* Branches with Staggered Pro Leaves */}
+                
                 <g>
                   <path d="M -4 -20 Q -22 -28 -40 -45" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <ProBotanicalLeaf index={0} x={-20} y={-26} rotate={-100} scale={0.8} />
-                  <ProBotanicalLeaf index={1} x={-40} y={-45} rotate={-55} scale={1.1} />
-                </g>
-
-                <g>
                   <path d="M 4 -24 Q 28 -32 48 -48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <ProBotanicalLeaf index={2} x={24} y={-30} rotate={100} scale={0.8} />
-                  <ProBotanicalLeaf index={3} x={48} y={-48} rotate={55} scale={1.1} />
-                </g>
-
-                <g>
                   <path d="M -2 -40 Q -28 -52 -36 -85" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <ProBotanicalLeaf index={4} x={-36} y={-85} rotate={-12} scale={1.3} />
-                  <ProBotanicalLeaf index={5} x={-31} y={-65} rotate={-40} scale={0.9} />
-                  <ProBotanicalLeaf index={6} x={-18} y={-46} rotate={-85} scale={0.7} />
-                </g>
-
-                <g>
                   <path d="M 2 -44 Q 32 -56 36 -95" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <ProBotanicalLeaf index={7} x={36} y={-95} rotate={12} scale={1.3} />
-                  <ProBotanicalLeaf index={8} x={31} y={-68} rotate={40} scale={0.9} />
-                  <ProBotanicalLeaf index={9} x={18} y={-50} rotate={85} scale={0.7} />
-                </g>
-
-                <g>
                   <path d="M 0 -55 Q 0 -80 10 -110" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <ProBotanicalLeaf index={10} x={10} y={-110} rotate={0} scale={1.2} />
-                  <ProBotanicalLeaf index={11} x={0} y={-80} rotate={0} scale={1.0} />
                 </g>
 
+                <StaticLeaf x={-20} y={-26} rotate={-100} />
+                <StaticLeaf x={-40} y={-45} rotate={-55} />
+                <StaticLeaf x={24} y={-30} rotate={100} />
+                <StaticLeaf x={48} y={-48} rotate={55} />
+                <StaticLeaf x={-36} y={-85} rotate={-12} />
+                <StaticLeaf x={-31} y={-65} rotate={-40} />
+                <StaticLeaf x={-18} y={-46} rotate={-85} />
+                <StaticLeaf x={36} y={-95} rotate={12} />
+                <StaticLeaf x={31} y={-68} rotate={40} />
+                <StaticLeaf x={18} y={-50} rotate={85} />
+                <StaticLeaf x={10} y={-110} rotate={0} />
+                <StaticLeaf x={0} y={-80} rotate={0} />
+                
                 <g filter="url(#pro-tree-glow-clean)">
-                  <ProBotanicalLeaf index={12} x={-6} y={-45} rotate={-155} scale={0.6} />
-                  <ProBotanicalLeaf index={13} x={6} y={-50} rotate={155} scale={0.6} />
+                  <StaticLeaf x={-6} y={-45} rotate={-155} />
+                  <StaticLeaf x={6} y={-50} rotate={155} />
                 </g>
               </g>
+              {/* Dotted base line removed as per request */}
             </g>
           </svg>
         );
       default:
         return null;
+    }
+  };
+
+  const getModuleHoverClasses = (color: string) => {
+    switch(color) {
+      case 'cyan': return 'hover:border-cyan-400 hover:shadow-[0_0_80px_rgba(34,211,238,0.3)]';
+      case 'fuchsia': return 'hover:border-fuchsia-500 hover:shadow-[0_0_80px_rgba(217,70,239,0.3)]';
+      case 'lime': return 'hover:border-lime-400 hover:shadow-[0_0_80px_rgba(163,230,53,0.3)]';
+      case 'orange': return 'hover:border-orange-400 hover:shadow-[0_0_80px_rgba(251,146,60,0.3)]';
+      default: return 'hover:border-fuchsia-500/50';
+    }
+  };
+
+  const getModuleTextClasses = (color: string) => {
+    switch(color) {
+      case 'cyan': return 'group-hover:text-cyan-400 group-hover:drop-shadow-[0_0_30px_rgba(34,211,238,1)]';
+      case 'fuchsia': return 'group-hover:text-fuchsia-400 group-hover:drop-shadow-[0_0_30px_rgba(217,70,239,1)]';
+      case 'lime': return 'group-hover:text-lime-400 group-hover:drop-shadow-[0_0_30px_rgba(163,230,53,1)]';
+      case 'orange': return 'group-hover:text-orange-400 group-hover:drop-shadow-[0_0_30px_rgba(251,146,60,1)]';
+      default: return 'group-hover:text-fuchsia-400';
     }
   };
 
@@ -416,8 +436,8 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
       <div className="relative z-10">
         <section id="home" className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center px-4 relative">
           <div className="text-center animate-home-entry mb-8">
-            <h2 className="text-6xl md:text-9xl font-anton tracking-tighter text-white mb-6 leading-none drop-shadow-[0_0_40px_rgba(255,255,255,0.1)]">
-              THE NEXT GEN <br/> <span className="text-fuchsia-500 drop-shadow-[0_0_30px_rgba(217,70,239,0.8)]">TECH_FEST</span>
+            <h2 className="text-6xl md:text-9xl font-anton tracking-tighter text-white mb-6 leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+              THE NEXT GEN <br/> <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">TECH_FEST</span>
             </h2>
             <p className="text-gray-400 text-sm md:text-lg tracking-[0.5em] font-medium uppercase max-w-2xl mx-auto opacity-70">
               Assam University | Triguna Sen School of Technology
@@ -445,7 +465,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 <div className={`bg-[#0c0c0c]/90 backdrop-blur-3xl border p-8 md:p-16 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.9)] flex flex-col items-center relative overflow-hidden w-full md:w-[90%] transition-all duration-1000 min-h-[400px] ${aboutSlide === 0 ? 'border-white/5' : 'border-lime-400/10'}`}>
                     <h3 key={`title-${aboutSlide}`} className="text-3xl md:text-6xl font-anton tracking-tight text-white mb-10 text-center uppercase flex flex-wrap justify-center items-center gap-x-4 animate-char-reveal">
                         <span className="text-gray-400">ABOUT</span>
-                        <span className={`${currentAbout.themeColor} transition-all duration-1000 ${currentAbout.glowClass} px-3 py-1`}>{currentAbout.title}</span>
+                        <span className={`${currentAbout.themeColor} transition-all duration-1000 ${currentAbout.glowClass} px-4 py-2 rounded-xl`}>{currentAbout.title}</span>
                     </h3>
                     <p key={`desc-${aboutSlide}`} className="text-gray-300 text-base md:text-xl font-space leading-relaxed text-center max-w-4xl opacity-90 drop-shadow-lg font-light tracking-wide animate-char-reveal">{currentAbout.description}</p>
                 </div>
@@ -463,7 +483,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               <div className="relative inline-block px-12 py-2 bg-transparent">
                 <h3 className="text-3xl md:text-6xl font-anton tracking-tight text-white uppercase flex items-center gap-6">
                   <span className="w-16 h-px bg-fuchsia-600/30"></span>
-                  TECHNICAL <span className="text-fuchsia-500 drop-shadow-[0_0_20px_#d946ef]">GALLERY</span>
+                  TECHNICAL <span className="text-fuchsia-500 drop-shadow-[0_0_10px_#d946ef]">GALLERY</span>
                   <span className="w-16 h-px bg-fuchsia-600/30"></span>
                 </h3>
               </div>
@@ -483,14 +503,20 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 const zIndex = Math.round((z + radius * 2) * 10);
                 return (
                   <div key={item.id} className={`absolute rounded-[2.5rem] overflow-hidden border transition-all duration-700 ease-out ${index === activeIndex ? 'border-fuchsia-500/50 shadow-[0_0_50px_rgba(217,70,239,0.3)]' : 'border-white/10 shadow-2xl'} w-[180px] md:w-[500px] aspect-[16/10] bg-[#0c0c0c]`} style={{ transform: `translate3d(${x}px, 0, ${z}px) scale(${scale})`, opacity: opacity, zIndex: zIndex, pointerEvents: index === activeIndex ? 'auto' : 'none', transition: isDragging ? 'none' : 'all 0.8s cubic-bezier(0.19, 1, 0.22, 1)', }}>
-                    <img src={item.img} alt={item.title} className={`w-full h-full object-cover transition-all duration-1000 ${index === activeIndex ? 'grayscale-0 brightness-110' : 'grayscale brightness-[0.3] blur-[1px]'}`} draggable="false" />
+                    <img 
+                      src={item.img} 
+                      alt={item.title} 
+                      className={`w-full h-full object-cover transition-all duration-1000 ${index === activeIndex ? 'grayscale-0 brightness-110' : 'grayscale brightness-[0.3] blur-[1px]'}`} 
+                      draggable="false" 
+                      onError={handleImageError}
+                    />
                     <div className={`absolute inset-0 bg-black/40 transition-opacity duration-1000 ${index === activeIndex ? 'opacity-0' : 'opacity-100'}`}></div>
                   </div>
                 );
               })}
             </div>
             <div className="w-full flex flex-col items-center text-center px-6 mb-8">
-               <h4 className="text-2xl md:text-4xl font-anton text-white tracking-wide uppercase drop-shadow-[0_0_15px_rgba(217,70,239,0.4)] mb-2 transition-all duration-500">{galleryItems[activeIndex].title}</h4>
+               <h4 className="text-2xl md:text-4xl font-anton text-white tracking-wide uppercase drop-shadow-[0_0_10px_rgba(217,70,239,0.3)] mb-2 transition-all duration-500">{galleryItems[activeIndex].title}</h4>
                <p className="text-gray-400 text-xs md:text-lg font-space leading-relaxed max-w-2xl opacity-80 italic mb-10 transition-all duration-500">{galleryItems[activeIndex].description}</p>
                <div className="group relative cursor-pointer">
                   <div className="absolute inset-0 bg-fuchsia-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -509,11 +535,11 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[linear-gradient(rgba(217,70,239,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(217,70,239,0.2)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
           <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
             <h3 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-20 text-center uppercase">
-              TECHNICAL <span className="text-fuchsia-500 drop-shadow-[0_0_20px_#d946ef]">MODULES</span>
+              TECHNICAL <span className="text-fuchsia-500 drop-shadow-[0_0_10px_#d946ef]">MODULES</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full mb-20">
               {modules.map((module) => (
-                <div key={module.id} className="group relative bg-[#0c0c0c]/80 border border-white/5 rounded-[2.5rem] p-0 transition-all duration-700 hover:border-fuchsia-500/50 hover:shadow-[0_0_60px_rgba(217,70,239,0.1)] flex flex-col items-center overflow-hidden">
+                <div key={module.id} className={`group relative bg-[#0c0c0c]/80 border border-white/5 rounded-[2.5rem] p-0 transition-all duration-700 flex flex-col items-center overflow-hidden ${getModuleHoverClasses(module.color)}`}>
                   <div className="relative w-full h-48 flex items-center justify-center bg-black/40">
                     <div className="absolute inset-0 bg-fuchsia-500/5 blur-2xl rounded-full animate-pulse"></div>
                     <div className="w-full h-full">
@@ -528,13 +554,13 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                         <span className="text-[9px] text-gray-400 font-bold tracking-widest uppercase">{module.status}</span>
                       </div>
                     </div>
-                    <h4 className="text-2xl font-anton text-white mb-3 tracking-wide group-hover:text-fuchsia-400 transition-colors duration-500">{module.name}</h4>
+                    <h4 className={`text-2xl font-anton text-white mb-3 tracking-wide transition-all duration-500 ${getModuleTextClasses(module.color)}`}>{module.name}</h4>
                     <p className="text-gray-400 text-xs font-space leading-relaxed h-10 overflow-hidden opacity-70 group-hover:opacity-100 transition-opacity">{module.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="group relative cursor-pointer">
+            <div className="group relative cursor-pointer" onClick={() => document.getElementById('musicia-strip')?.scrollIntoView()}>
               <div className="absolute inset-0 bg-fuchsia-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="px-10 py-3 md:px-14 md:py-4 bg-[#0c0c0c] border border-white/10 rounded-md flex items-center gap-4 transition-all duration-300 group-hover:border-fuchsia-500/50 group-hover:translate-y-[-2px]">
                 <span className="text-white font-anton text-lg md:text-2xl tracking-[0.1em] uppercase">VIEW MODULES</span>
@@ -546,86 +572,113 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
         </section>
 
+        {/* MUSICIA BANNER STRIP - Balanced medium strip with holographic crowd silhouette */}
+        <section id="musicia-strip" className="h-[220px] md:h-[280px] w-full relative overflow-hidden bg-black group/musicia flex items-center border-y-2 border-fuchsia-500/30 shadow-[0_0_50px_rgba(0,0,0,0.8)] px-10 md:px-24">
+          <div className="absolute inset-0 z-0">
+             <img src={musiciaEvent.img} alt="Musicia Banner" className="w-full h-full object-cover opacity-80 transition-transform duration-[2s] group-hover/musicia:scale-110 grayscale-[10%]" />
+             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80"></div>
+             <div className="absolute inset-0 bg-fuchsia-950/20 mix-blend-overlay"></div>
+          </div>
+          <div className="absolute inset-0 z-[1] pointer-events-none">
+            <div className="fusion-orb orb-1 scale-50"></div>
+            <div className="fusion-orb orb-2 scale-50"></div>
+          </div>
+          <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between h-full py-8 gap-8">
+            <div className="flex flex-col items-center md:items-start group-hover/musicia:translate-x-2 transition-transform duration-700 text-center md:text-left">
+               <span className="inline-block text-[10px] md:text-xs text-fuchsia-400 font-bold tracking-[0.4em] bg-black/60 px-4 py-1.5 rounded-full border border-fuchsia-500/30 backdrop-blur-md mb-4 animate-fade-in">{musiciaEvent.time}</span>
+               <h3 className="text-5xl md:text-9xl font-anton tracking-tight text-white uppercase drop-shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all duration-1000 group-hover/musicia:scale-[1.02] leading-none mb-4">{musiciaEvent.name}</h3>
+               <p className="text-gray-200 text-[10px] md:text-xs font-space tracking-[0.15em] opacity-70 uppercase max-w-xl leading-relaxed">
+                  {musiciaEvent.desc}
+               </p>
+            </div>
+            
+            <div className="group/enter relative flex items-center justify-center shrink-0">
+              {/* SLOWLY RISING CROWD SILHOUETTE - Triggered on button hover */}
+              <div className="absolute inset-x-[-200%] top-[-150px] bottom-[-50px] pointer-events-none z-0 overflow-visible flex items-end justify-center">
+                 <img 
+                   src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop" 
+                   className="w-[300%] max-w-none opacity-0 translate-y-32 group-hover/enter:opacity-50 group-hover/enter:translate-y-[-10px] transition-all duration-[2500ms] ease-[cubic-bezier(0.2,0,0.3,1)] mix-blend-screen grayscale invert brightness-200" 
+                   style={{ maskImage: 'linear-gradient(to top, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 50%, transparent 100%)' }}
+                 />
+              </div>
+
+              <div className="absolute inset-0 bg-fuchsia-500/20 blur-2xl opacity-0 group-hover/enter:opacity-100 transition-opacity duration-500"></div>
+              <button className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-black/40 backdrop-blur-3xl border border-fuchsia-500/40 hover:border-fuchsia-500 text-white font-anton text-lg md:text-2xl tracking-widest rounded-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 shadow-[0_0_20px_rgba(217,70,239,0.1)] hover:shadow-[0_0_40px_rgba(217,70,239,0.3)]">
+                <div className="flex items-center gap-4">
+                  <span className="whitespace-nowrap">ENTER MUSICIA</span>
+                  <svg className="w-6 h-6 md:w-8 md:h-8 text-fuchsia-500 group-hover/enter:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </div>
+              </button>
+            </div>
+          </div>
+          <div className="absolute inset-0 z-[2] pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] opacity-30"></div>
+        </section>
+
         <section id="register" className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-gradient-to-b from-transparent to-fuchsia-950/10">
           <div className="flex flex-col items-center text-center z-20">
-              <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4">
-                READY TO ASCEND INTO THE <span className="text-fuchsia-500">DIGITAL_REALM?</span>
-              </h4>
+              <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4 text-center">READY TO ASCEND INTO THE <span className="text-fuchsia-500">DIGITAL_REALM?</span></h4>
               <RegisterButton size="lg" />
           </div>
         </section>
       </div>
 
       <style>{`
-        /* ROBOTICS - EMO STYLE ANIMATIONS */
+        /* PURPLE NIGHT FUSION BACKGROUND EFFECTS */
+        @keyframes fusion-drift {
+          0% { transform: translate(-20%, -20%) rotate(0deg) scale(1); }
+          50% { transform: translate(20%, 20%) rotate(180deg) scale(1.3); }
+          100% { transform: translate(-20%, -20%) rotate(360deg) scale(1); }
+        }
+        .fusion-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(140px);
+          animation: fusion-drift 28s infinite ease-in-out;
+          opacity: 0.45;
+          mix-blend-mode: screen;
+        }
+        .orb-1 { width: 850px; height: 850px; background: radial-gradient(circle, #7e22ce 0%, transparent 70%); top: -15%; left: -10%; animation-duration: 32s; }
+        .orb-2 { width: 1000px; height: 1000px; background: radial-gradient(circle, #db2777 0%, transparent 70%); bottom: -25%; right: -15%; animation-delay: -6s; animation-duration: 38s; }
+        .orb-3 { width: 750px; height: 750px; background: radial-gradient(circle, #3b82f6 0%, transparent 70%); top: 45%; left: 35%; animation-delay: -14s; animation-duration: 44s; }
+
         @keyframes robot-floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .animate-robot-floating { animation: robot-floating 4s ease-in-out infinite; }
         @keyframes eye-blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
         .animate-eye-blink { animation: eye-blink 5s ease-in-out infinite; transform-origin: center; }
         .eye-movement-layer { animation: eye-movement 9s ease-in-out infinite; transform-origin: center; transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1); }
         .group:hover .eye-movement-layer { animation: none; transform: translate(0, 0); }
-        @keyframes eye-movement { 0%, 100% { transform: translate(0, 0); } 15% { transform: translate(8px, -4px); } 30% { transform: translate(-8px, 3px); } 55% { transform: translate(5px, 5px); } 80% { transform: translate(-4px, -6px); } }
+        @keyframes shackle-steady { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .shackle-steady-animation { animation: shackle-steady 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+        @keyframes shield-vibrate { 0% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, 1.5px); } 50% { transform: translate(1.5px, -1.5px); } 75% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, 2px); } }
+        .group:hover .shield-vibrate-layer { animation: shield-vibrate 0.08s linear infinite; }
+        @keyframes dna-breathe { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(-4px) scale(1.05, 0.98); } }
+        .dna-subtle-breathing { animation: dna-breathe 4s ease-in-out infinite; transform-origin: center; }
+        @keyframes rung-blink-sequence { 0%, 5% { opacity: 0; filter: blur(2px); } 8%, 100% { opacity: 0.8; filter: blur(0); } }
+        .group:hover .dna-rung-pulse { animation: rung-blink-sequence 1.5s linear infinite; }
 
-        /* CYBERSEC STEADY LOCK ANIMATION */
-        @keyframes shackle-steady {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-12px); }
-        }
-        .shackle-steady-animation { 
-          animation: shackle-steady 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; 
-        }
-
-        /* CYBERSEC SHIELD VIBRATION */
-        @keyframes shield-vibrate {
-          0% { transform: translate(0, 0); }
-          25% { transform: translate(-1.5px, 1.5px); }
-          50% { transform: translate(1.5px, -1.5px); }
-          75% { transform: translate(-1px, -2px); }
-          100% { transform: translate(1px, 2px); }
-        }
-        .group:hover .shield-vibrate-layer {
-           animation: shield-vibrate 0.08s linear infinite;
+        /* ALL TREE ANIMATIONS DISABLED FOR PERFECT STABILITY */
+        .animate-tree-sway-unit {
+          animation: none !important;
         }
 
-        /* BIO-TECH - ORGANIC PERSISTENT BREATHING */
-        @keyframes dna-breathe {
-          0%, 100% { transform: translateY(0) scale(1, 1); }
-          50% { transform: translateY(-4px) scale(1.05, 0.98); }
+        /* SWAP LEAF TO COIN VISUALS ON HOVER - SMOOTH & SUBTLE */
+        .leaf-visual { 
+          transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+          opacity: 1; 
         }
-        .dna-subtle-breathing {
-          animation: dna-breathe 4s ease-in-out infinite;
-          transform-origin: center;
-        }
-
-        /* DNA RUNG SEQUENTIAL "OFF" PULSE */
-        @keyframes rung-blink-sequence {
-          0%, 5% { opacity: 0; filter: blur(2px); }
-          8%, 100% { opacity: 0.8; filter: blur(0); }
-        }
-        .group:hover .dna-rung-pulse {
-          animation: rung-blink-sequence 1.5s linear infinite;
-        }
-
-        /* FIN-TECH - REFINED ORGANIC TREE ANIMATIONS */
-        @keyframes tree-sway {
-          0%, 100% { transform: rotate(-1.5deg); }
-          50% { transform: rotate(1.5deg); }
-        }
-        .animate-tree-sway {
-          /* Restore organic breathing sway - leaves are transitionally static within this group unless hovered */
-          animation: tree-sway 7s ease-in-out infinite;
-          transform-origin: bottom center;
+        .coin-visual { 
+          transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+          opacity: 0; 
+          transform: scale(0.4); 
         }
         
-        /* 
-          Leaf state is strictly managed via transitions on the ProBotanicalLeaf.
-          The staggered delays handle the "one-by-one" requirement perfectly.
-          The elastic cubic-bezier handles the "pop" on exit.
-        */
-        .leaf-dynamic-state {
-            /* Ensures no jitter - leaf is perfectly static until card is hovered */
-            transform: translate(0,0) rotate(0deg) scale(1);
-            opacity: 1;
+        .group:hover .leaf-visual { 
+          opacity: 0; 
+          transform: scale(0.85);
+        }
+        .group:hover .coin-visual { 
+          opacity: 1; 
+          transform: scale(1.1); 
         }
 
         @keyframes home-entry { from { opacity: 0; transform: scale(1.05) translateY(40px); filter: blur(15px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
@@ -634,6 +687,26 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         .animate-rapid-arrow-blink { animation: rapid-arrow-blink 5s infinite ease-in-out; }
         @keyframes char-reveal { from { opacity: 0; filter: blur(8px); transform: translateY(10px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
         .animate-char-reveal { animation: char-reveal 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+
+        /* SUBTLE NEON GLOW ANIMATIONS FOR ABOUT TITLES */
+        @keyframes fuchsia-glow-pulse {
+          0%, 100% { text-shadow: 0 0 4px #d946ef, 0 0 10px rgba(217, 70, 239, 0.2); }
+          50% { text-shadow: 0 0 8px #d946ef, 0 0 15px rgba(217, 70, 239, 0.4); }
+        }
+        .animate-fuchsia-glow {
+          animation: fuchsia-glow-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes lime-glow-pulse {
+          0%, 100% { text-shadow: 0 0 4px #a3e635, 0 0 10px rgba(163, 230, 53, 0.2); }
+          50% { text-shadow: 0 0 8px #a3e635, 0 0 15px rgba(163, 230, 53, 0.4); }
+        }
+        .animate-lime-glow {
+          animation: lime-glow-pulse 3s ease-in-out infinite;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: #d946ef; border-radius: 10px; box-shadow: 0 0 10px rgba(217,70,239,0.5); }
