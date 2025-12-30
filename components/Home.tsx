@@ -394,15 +394,12 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           return (
             <g transform={`translate(${x}, ${y})`}>
               <g className="leaf-container">
-                {/* LEAF VISUAL - Hidden on hover */}
                 <path 
                   d="M 0 0 C -4 -8, -4 -13, 0 -18 C 4 -13, 4 -8, 0 0" 
                   fill="currentColor" 
                   className="leaf-visual"
                   transform={`rotate(${rotate})`}
                 />
-                
-                {/* COIN VISUAL - Revealed on hover */}
                 <g className="coin-visual" opacity="0">
                   <circle r="6" fill="#fbbf24" stroke="#b45309" strokeWidth="0.8" />
                   <text y="2" fontSize="6" textAnchor="middle" fill="#b45309" fontWeight="bold" style={{fontFamily: 'Arial, sans-serif'}}>$</text>
@@ -424,7 +421,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               <g>
                 <path d="M -8 0 Q -6 -35 0 -55 L 8 0 Z" fill="#050505" stroke="currentColor" strokeWidth="2" />
                 <line x1="0" y1="-6" x2="0" y2="-50" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
-                
                 <g>
                   <path d="M -4 -20 Q -22 -28 -40 -45" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   <path d="M 4 -24 Q 28 -32 48 -48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -432,7 +428,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                   <path d="M 2 -44 Q 32 -56 36 -95" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   <path d="M 0 -55 Q 0 -80 10 -110" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </g>
-
                 <StaticLeaf x={-20} y={-26} rotate={-100} />
                 <StaticLeaf x={-40} y={-45} rotate={-55} />
                 <StaticLeaf x={24} y={-30} rotate={100} />
@@ -445,7 +440,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 <StaticLeaf x={18} y={-50} rotate={85} />
                 <StaticLeaf x={10} y={-110} rotate={0} />
                 <StaticLeaf x={0} y={-80} rotate={0} />
-                
                 <g filter="url(#fin-glow)">
                   <StaticLeaf x={-6} y={-45} rotate={-155} />
                   <StaticLeaf x={6} y={-50} rotate={155} />
@@ -637,7 +631,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 </div>
               ))}
             </div>
-            {/* VIEW MODULES BUTTON - RESTORED */}
             <div className="group relative cursor-pointer" onClick={() => document.getElementById('musicia-strip')?.scrollIntoView()}>
               <div className="absolute inset-0 bg-fuchsia-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="px-10 py-3 md:px-14 md:py-4 bg-[#0c0c0c] border border-white/10 rounded-md flex items-center gap-4 transition-all duration-300 group-hover:border-fuchsia-500/50 group-hover:translate-y-[-2px]">
@@ -752,13 +745,13 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
 
           <div className="relative z-10 flex flex-col items-center text-center max-w-7xl w-full group/footer">
-            {/* 2026 Background Layer - Dynamic Interaction State - REDUCED SIZE */}
+            {/* 2026 Background Layer - Dynamic Interaction State - INCREASED DEFAULT OPACITY */}
             <div className={`
               absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] pointer-events-none select-none
               transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]
               ${isYearForward 
                 ? 'z-20 scale-[1.1] opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_50px_rgba(217,70,239,1)]' 
-                : 'z-0 scale-100 opacity-20 blur-[2px] text-fuchsia-500/20 drop-shadow-[0_0_40px_rgba(217,70,239,0.3)]'}
+                : 'z-0 scale-100 opacity-80 blur-[2px] text-fuchsia-500/80 drop-shadow-[0_0_40px_rgba(217,70,239,0.3)]'}
             `}>
                <span className="text-[18vw] md:text-[12rem] font-anton tracking-tighter">2026</span>
             </div>
@@ -788,14 +781,19 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                   <a href="#" className="text-white hover:text-blue-600 transition-all duration-300 hover:scale-125">
                     <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                   </a>
-                  {/* CLEANER REDDIT LOGO */}
+                  {/* REDDIT LOGO - HIGH FIDELITY SNOO-IN-SPEECH-BUBBLE */}
                   <a href="#" className="text-white hover:text-orange-600 transition-all duration-300 hover:scale-125">
                     <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.05l-2.454-.547-.748 3.41c2.061.116 3.963.622 5.304 1.365.192-.184.45-.295.734-.295.586 0 1.059.475 1.059 1.059 0 .266-.102.511-.265.696.03.189.045.381.045.573 0 2.39-3.1 4.335-6.941 4.335s-6.941-1.945-6.941-4.335c0-.19.015-.381.045-.568A1.057 1.057 0 0 1 5.352 11c0-.584.473-1.059 1.059-1.059.283 0 .541.112.733.296 1.341-.748 3.245-1.255 5.307-1.366l.773-3.522 2.726.605c.058-.451.445-.799.91-.799zM9.182 12.442c-.654 0-1.186.532-1.186 1.186 0 .654.532 1.186 1.186 1.186.654 0 1.186-.532 1.186-1.186 0-.654-.532-1.186-1.186-1.186zm5.634 0c-.654 0-1.186.532-1.186 1.186 0 .654.532 1.186 1.186 1.186.654 0 1.186-.532 1.186-1.186 0-.654-.532-1.186-1.186-1.186zm-5.634 3.41c-.116 0-.209.093-.209.209 0 .115.093.209.209.209h5.634c.116 0 .209-.094.209-.209 0-.116-.093-.209-.209-.209H9.182z"/>
+                      <path d="M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.313 3.515 8.485l-1.42 2.366c-.244.407.13.882.593.743l3.35-.972A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm5.111 6.222c.614 0 1.111.497 1.111 1.111s-.497 1.111-1.111 1.111-1.111-.497-1.111-1.111.497-1.111 1.111-1.111zM6.889 6.222c.614 0 1.111.497 1.111 1.111s-.497 1.111-1.111 1.111-1.111-.497-1.111-1.111.497-1.111 1.111-1.111zM12 18.222c-3.14 0-5.748-1.851-6.865-4.444h13.73c-1.117 2.593-3.725 4.444-6.865 4.444zm4.444-6.222l1.111-4.889c.148-.652.889-.889 1.333-.444.444.444.207 1.185-.444 1.333l-1.333.334.667-2.89c.133-.578.8-.733 1.133-.333.333.4.156 1.044-.333 1.156l-.334.089.444-1.956c.074-.326.518-.444.74-.222.222.222.119.63-.148.667l-2.444.556c-.614.133-1.111-.334-1-.889l.333-1.444c.074-.326.518-.444.74-.222.222.222.119.63-.148.667l-.667.148-.333 1.444c-.074.326-.518.444-.74.222s-.119-.63.148-.667l1.111-.259.333-1.444c.074-.326.518-.444.74-.222s.119.63-.148.667l-3.333.741c-.267.059-.444.333-.444.611l.889-4.444z"/>
                     </svg>
                   </a>
                   <a href="#" className="text-white hover:text-red-600 transition-all duration-300 hover:scale-125">
                     <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.612 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  </a>
+                  <a href="mailto:contact@yantraksh.org" className="text-white hover:text-fuchsia-500 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
                   </a>
                </div>
             </div>
@@ -823,7 +821,6 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         @keyframes rung-blink-sequence { 0%, 5% { opacity: 0; filter: blur(2px); } 8%, 100% { opacity: 0.8; filter: blur(0); } }
         .group:hover .dna-rung-pulse { animation: rung-blink-sequence 1.5s linear infinite; }
         
-        /* FIN-TECH TREE ANIMATIONS */
         .leaf-visual { 
           transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
           opacity: 1; 
