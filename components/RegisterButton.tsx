@@ -15,12 +15,9 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({ className = "", size = 
   const handleMouseEnter = () => {
     setIsHovered(true);
     
-    // Trigger glitch effect
+    // Trigger glitch effect - now persists as long as hovered
     setIsGlitching(true);
     if (glitchTimeoutRef.current) window.clearTimeout(glitchTimeoutRef.current);
-    glitchTimeoutRef.current = window.setTimeout(() => {
-      setIsGlitching(false);
-    }, 2500); // Glitch only for 2.5 seconds
 
     // Play a short UI sound
     const audio = new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c36203a95c.mp3');

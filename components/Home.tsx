@@ -7,6 +7,15 @@ interface HomeProps {
   onBack?: () => void;
 }
 
+interface NoteParticle {
+  id: number;
+  x: number;
+  y: number;
+  rotation: number;
+  scale: number;
+  type: number;
+}
+
 const Home: React.FC<HomeProps> = ({ onBack }) => {
   const [showCursor, setShowCursor] = useState(true);
   const [rotation, setRotation] = useState(0); 
@@ -14,6 +23,12 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
   const [aboutSlide, setAboutSlide] = useState(0); // 0: Yantraksh, 1: AU Silchar
   const [arrowsHovered, setArrowsHovered] = useState(false);
   
+  // Musicia Hover Effect States
+  const [isMusiciaHovered, setIsMusiciaHovered] = useState(false);
+  const [notes, setNotes] = useState<NoteParticle[]>([]);
+  const noteIdCounter = useRef(0);
+  const spawnTimer = useRef<number | null>(null);
+
   const startX = useRef(0);
   const startRotation = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -140,6 +155,33 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Music Note Spawning Logic
+  useEffect(() => {
+    if (isMusiciaHovered) {
+      spawnTimer.current = window.setInterval(() => {
+        const newNote: NoteParticle = {
+          id: ++noteIdCounter.current,
+          x: Math.random() * 100 - 50, // Percentage offset
+          y: Math.random() * 40 - 20,
+          rotation: Math.random() * 60 - 30,
+          scale: Math.random() * 0.5 + 0.5,
+          type: Math.floor(Math.random() * 3) // 3 different note icons
+        };
+        setNotes(prev => [...prev, newNote]);
+        
+        // Cleanup note after animation
+        setTimeout(() => {
+          setNotes(prev => prev.filter(n => n.id !== newNote.id));
+        }, 2000);
+      }, 150);
+    } else {
+      if (spawnTimer.current) clearInterval(spawnTimer.current);
+    }
+    return () => {
+      if (spawnTimer.current) clearInterval(spawnTimer.current);
+    };
+  }, [isMusiciaHovered]);
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
@@ -572,7 +614,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
         </section>
 
-        {/* MUSICIA BANNER STRIP - Balanced medium strip with holographic crowd silhouette */}
+        {/* MUSICIA BANNER STRIP - Balanced medium strip with rhythmic 'alive' text effect */}
         <section id="musicia-strip" className="h-[220px] md:h-[280px] w-full relative overflow-hidden bg-black group/musicia flex items-center border-y-2 border-fuchsia-500/30 shadow-[0_0_50px_rgba(0,0,0,0.8)] px-10 md:px-24">
           <div className="absolute inset-0 z-0">
              <img src={musiciaEvent.img} alt="Musicia Banner" className="w-full h-full object-cover opacity-80 transition-transform duration-[2s] group-hover/musicia:scale-110 grayscale-[10%]" />
@@ -584,24 +626,52 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
             <div className="fusion-orb orb-2 scale-50"></div>
           </div>
           <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between h-full py-8 gap-8">
-            <div className="flex flex-col items-center md:items-start group-hover/musicia:translate-x-2 transition-transform duration-700 text-center md:text-left">
+            <div className="flex flex-col items-center md:items-start transition-transform duration-700 text-center md:text-left">
                <span className="inline-block text-[10px] md:text-xs text-fuchsia-400 font-bold tracking-[0.4em] bg-black/60 px-4 py-1.5 rounded-full border border-fuchsia-500/30 backdrop-blur-md mb-4 animate-fade-in">{musiciaEvent.time}</span>
-               <h3 className="text-5xl md:text-9xl font-anton tracking-tight text-white uppercase drop-shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all duration-1000 group-hover/musicia:scale-[1.02] leading-none mb-4">{musiciaEvent.name}</h3>
+               
+               {/* MUSICIA TEXT WITH PULSE AND NOTES */}
+               <div 
+                 className="relative mb-4 cursor-default"
+                 onMouseEnter={() => setIsMusiciaHovered(true)}
+                 onMouseLeave={() => setIsMusiciaHovered(false)}
+               >
+                  {/* Notes Spawner */}
+                  <div className="absolute inset-0 pointer-events-none overflow-visible">
+                    {notes.map(note => (
+                      <div 
+                        key={note.id}
+                        className="absolute animate-float-note opacity-0"
+                        style={{ 
+                          left: `calc(50% + ${note.x}%)`, 
+                          top: `calc(50% + ${note.y}%)`,
+                          transform: `rotate(${note.rotation}deg) scale(${note.scale})`,
+                          color: '#d946ef'
+                        }}
+                      >
+                        {note.type === 0 && (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        )}
+                        {note.type === 1 && (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l.01 10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6zm4.5 3h-3v-1h3v1z"/></svg>
+                        )}
+                        {note.type === 2 && (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3l-6 1.45V17.03c-.73-.44-1.61-.7-2.58-.7-2.48 0-4.5 1.75-4.5 3.91s2.02 3.91 4.5 3.91 4.5-1.75 4.5-3.91c0-.1-.01-.2-.02-.3V6.91l4-1v2.12c-.73-.44-1.61-.7-2.58-.7-2.48 0-4.5 1.75-4.5 3.91s2.02 3.91 4.5 3.91 4.5-1.75 4.5-3.91c0-.1-.01-.2-.02-.3V3z"/></svg>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <h3 className={`text-5xl md:text-9xl font-anton tracking-tight text-white uppercase drop-shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all duration-300 leading-none ${isMusiciaHovered ? 'animate-musicia-vibrate text-fuchsia-400' : ''}`}>
+                    {musiciaEvent.name}
+                  </h3>
+               </div>
+
                <p className="text-gray-200 text-[10px] md:text-xs font-space tracking-[0.15em] opacity-70 uppercase max-w-xl leading-relaxed">
                   {musiciaEvent.desc}
                </p>
             </div>
             
             <div className="group/enter relative flex items-center justify-center shrink-0">
-              {/* SLOWLY RISING CROWD SILHOUETTE - Triggered on button hover */}
-              <div className="absolute inset-x-[-200%] top-[-150px] bottom-[-50px] pointer-events-none z-0 overflow-visible flex items-end justify-center">
-                 <img 
-                   src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop" 
-                   className="w-[300%] max-w-none opacity-0 translate-y-32 group-hover/enter:opacity-50 group-hover/enter:translate-y-[-10px] transition-all duration-[2500ms] ease-[cubic-bezier(0.2,0,0.3,1)] mix-blend-screen grayscale invert brightness-200" 
-                   style={{ maskImage: 'linear-gradient(to top, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 50%, transparent 100%)' }}
-                 />
-              </div>
-
               <div className="absolute inset-0 bg-fuchsia-500/20 blur-2xl opacity-0 group-hover/enter:opacity-100 transition-opacity duration-500"></div>
               <button className="relative z-10 px-8 py-4 md:px-12 md:py-6 bg-black/40 backdrop-blur-3xl border border-fuchsia-500/40 hover:border-fuchsia-500 text-white font-anton text-lg md:text-2xl tracking-widest rounded-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1 shadow-[0_0_20px_rgba(217,70,239,0.1)] hover:shadow-[0_0_40px_rgba(217,70,239,0.3)]">
                 <div className="flex items-center gap-4">
@@ -615,8 +685,10 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         </section>
 
         <section id="register" className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-gradient-to-b from-transparent to-fuchsia-950/10">
-          <div className="flex flex-col items-center text-center z-20">
-              <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4 text-center">READY TO ASCEND INTO THE <span className="text-fuchsia-500">DIGITAL_REALM?</span></h4>
+          <div className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center p-12 md:p-24 bg-[#0c0c0c]/50 backdrop-blur-[120px] rounded-[3rem] border border-white/10 shadow-[0_0_120px_rgba(0,0,0,0.9)] z-20">
+              <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4 text-center leading-tight">
+                READY TO ASCEND INTO THE <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">DIGITAL_REALM?</span>
+              </h4>
               <RegisterButton size="lg" />
           </div>
         </section>
@@ -659,6 +731,34 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         /* ALL TREE ANIMATIONS DISABLED FOR PERFECT STABILITY */
         .animate-tree-sway-unit {
           animation: none !important;
+        }
+
+        /* MUSICIA 'ALIVE' EFFECT ANIMATIONS */
+        @keyframes musicia-vibrate {
+          0% { transform: translate(0,0) scale(1); }
+          10% { transform: translate(-2px, 1px) scale(1.01); }
+          20% { transform: translate(2px, -1px) scale(0.99); }
+          30% { transform: translate(-2px, -2px) scale(1.02); }
+          40% { transform: translate(2px, 2px) scale(1); }
+          50% { transform: translate(-1px, 1px) scale(1.01); }
+          60% { transform: translate(1px, -1px) scale(0.99); }
+          70% { transform: translate(-2px, 1px) scale(1.02); }
+          80% { transform: translate(2px, -2px) scale(1); }
+          90% { transform: translate(-1px, 2px) scale(1.01); }
+          100% { transform: translate(0,0) scale(1); }
+        }
+        .animate-musicia-vibrate {
+          animation: musicia-vibrate 0.3s linear infinite;
+        }
+
+        @keyframes float-note {
+          0% { transform: translateY(0) scale(0.5); opacity: 0; filter: blur(5px); }
+          20% { opacity: 0.8; filter: blur(0); }
+          80% { opacity: 0.6; }
+          100% { transform: translateY(-150px) translateX(var(--tw-translate-x, 40px)) rotate(45deg) scale(1.2); opacity: 0; filter: blur(2px); }
+        }
+        .animate-float-note {
+          animation: float-note 2s ease-out forwards;
         }
 
         /* SWAP LEAF TO COIN VISUALS ON HOVER - SMOOTH & SUBTLE */
