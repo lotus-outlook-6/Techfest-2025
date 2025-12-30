@@ -38,6 +38,10 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
   const noteIdCounter = useRef(0);
   const spawnTimer = useRef<number | null>(null);
 
+  // Footer Year Animation State
+  const [isYearForward, setIsYearForward] = useState(false);
+  const yearResetTimer = useRef<number | null>(null);
+
   const startX = useRef(0);
   const startRotation = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -247,6 +251,18 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
     target.src = "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop"; 
   };
 
+  const handleYearTrigger = () => {
+    if (isYearForward) return;
+    
+    setIsYearForward(true);
+    if (yearResetTimer.current) window.clearTimeout(yearResetTimer.current);
+    
+    // Auto-reset after 3 seconds
+    yearResetTimer.current = window.setTimeout(() => {
+      setIsYearForward(false);
+    }, 3000);
+  };
+
   const renderModuleInfographic = (moduleName: string, color: string) => {
     const colorClass = color === 'fuchsia' ? 'text-fuchsia-500' : color === 'cyan' ? 'text-cyan-400' : color === 'lime' ? 'text-lime-400' : 'text-orange-400';
     
@@ -378,7 +394,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           return (
             <g transform={`translate(${x}, ${y})`}>
               <g className="leaf-container">
-                {/* ORIGINAL LEAF - Hidden on hover */}
+                {/* LEAF VISUAL - Hidden on hover */}
                 <path 
                   d="M 0 0 C -4 -8, -4 -13, 0 -18 C 4 -13, 4 -8, 0 0" 
                   fill="currentColor" 
@@ -386,10 +402,10 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                   transform={`rotate(${rotate})`}
                 />
                 
-                {/* GOLDEN COIN - Appears on hover */}
+                {/* COIN VISUAL - Revealed on hover */}
                 <g className="coin-visual" opacity="0">
-                  <circle r="5.5" fill="#fbbf24" stroke="#b45309" strokeWidth="0.8" />
-                  <text y="2" fontSize="5.5" textAnchor="middle" fill="#b45309" fontWeight="bold" style={{fontFamily: 'Arial, sans-serif'}}>$</text>
+                  <circle r="6" fill="#fbbf24" stroke="#b45309" strokeWidth="0.8" />
+                  <text y="2" fontSize="6" textAnchor="middle" fill="#b45309" fontWeight="bold" style={{fontFamily: 'Arial, sans-serif'}}>$</text>
                 </g>
               </g>
             </g>
@@ -399,13 +415,12 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         return (
           <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 130">
             <defs>
-              <filter id="pro-tree-glow-clean" x="-50%" y="-50%" width="200%" height="200%">
+              <filter id="fin-glow" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="5" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
             </defs>
             <g transform="translate(120, 120) scale(0.85)">
-              {/* COMPLETELY STILL TREE UNIT */}
               <g>
                 <path d="M -8 0 Q -6 -35 0 -55 L 8 0 Z" fill="#050505" stroke="currentColor" strokeWidth="2" />
                 <line x1="0" y1="-6" x2="0" y2="-50" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
@@ -431,12 +446,11 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 <StaticLeaf x={10} y={-110} rotate={0} />
                 <StaticLeaf x={0} y={-80} rotate={0} />
                 
-                <g filter="url(#pro-tree-glow-clean)">
+                <g filter="url(#fin-glow)">
                   <StaticLeaf x={-6} y={-45} rotate={-155} />
                   <StaticLeaf x={6} y={-50} rotate={155} />
                 </g>
               </g>
-              {/* Dotted base line removed as per request */}
             </g>
           </svg>
         );
@@ -623,6 +637,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 </div>
               ))}
             </div>
+            {/* VIEW MODULES BUTTON - RESTORED */}
             <div className="group relative cursor-pointer" onClick={() => document.getElementById('musicia-strip')?.scrollIntoView()}>
               <div className="absolute inset-0 bg-fuchsia-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="px-10 py-3 md:px-14 md:py-4 bg-[#0c0c0c] border border-white/10 rounded-md flex items-center gap-4 transition-all duration-300 group-hover:border-fuchsia-500/50 group-hover:translate-y-[-2px]">
@@ -635,28 +650,22 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
         </section>
 
-        {/* MUSICIA BANNER STRIP - Balanced medium strip with rhythmic 'alive' text effect */}
+        {/* MUSICIA BANNER STRIP */}
         <section id="musicia-strip" className="h-[220px] md:h-[280px] w-full relative overflow-hidden bg-black group/musicia flex items-center border-y-2 border-fuchsia-500/30 shadow-[0_0_50px_rgba(0,0,0,0.8)] px-10 md:px-24">
           <div className="absolute inset-0 z-0">
              <img src={musiciaEvent.img} alt="Musicia Banner" className="w-full h-full object-cover opacity-80 transition-transform duration-[2s] group-hover/musicia:scale-110 grayscale-[10%]" />
              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80"></div>
              <div className="absolute inset-0 bg-fuchsia-950/20 mix-blend-overlay"></div>
           </div>
-          <div className="absolute inset-0 z-[1] pointer-events-none">
-            <div className="fusion-orb orb-1 scale-50"></div>
-            <div className="fusion-orb orb-2 scale-50"></div>
-          </div>
           <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between h-full py-8 gap-8">
             <div className="flex flex-col items-center md:items-start transition-transform duration-700 text-center md:text-left">
                <span className="inline-block text-[10px] md:text-xs text-fuchsia-400 font-bold tracking-[0.4em] bg-black/60 px-4 py-1.5 rounded-full border border-fuchsia-500/30 backdrop-blur-md mb-4 animate-fade-in">{musiciaEvent.time}</span>
                
-               {/* MUSICIA TEXT WITH PULSE AND NOTES */}
                <div 
                  className="relative mb-4 cursor-default"
                  onMouseEnter={() => setIsMusiciaHovered(true)}
                  onMouseLeave={() => setIsMusiciaHovered(false)}
                >
-                  {/* Notes Spawner */}
                   <div className="absolute inset-0 pointer-events-none overflow-visible">
                     {notes.map(note => (
                       <div 
@@ -702,13 +711,10 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               </button>
             </div>
           </div>
-          <div className="absolute inset-0 z-[2] pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] opacity-30"></div>
         </section>
 
         <section id="register" className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-gradient-to-b from-transparent to-fuchsia-950/10">
           <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center p-12 md:p-24 overflow-hidden rounded-[3rem] z-20">
-              
-              {/* LASER RAIN LAYER - Placed behind the blur and text */}
               <div className="absolute inset-0 pointer-events-none z-0">
                 {lasers.map(laser => (
                   <div 
@@ -726,11 +732,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                   />
                 ))}
               </div>
-
-              {/* HEAVY BLUR GLASS BOX */}
               <div className="absolute inset-0 bg-[#0c0c0c]/50 backdrop-blur-[180px] rounded-[3rem] border border-white/10 shadow-[0_0_150px_rgba(0,0,0,0.95)] z-10 pointer-events-none"></div>
-
-              {/* REGISTRATION CONTENT */}
               <div className="relative z-20 flex flex-col items-center justify-center">
                   <h4 className="text-4xl md:text-7xl font-anton tracking-tighter text-white mb-16 max-w-4xl px-4 text-center leading-tight">
                     READY TO ASCEND INTO THE <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">DIGITAL_REALM?</span>
@@ -739,33 +741,79 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               </div>
           </div>
         </section>
+
+        {/* FOOTER SECTION - EXTENDED & REDESIGNED */}
+        <section id="footer-banner" className="min-h-[550px] w-full relative overflow-hidden flex flex-col items-center justify-center py-16 px-4">
+          <div className="absolute inset-0 bg-[#3b0000] z-0 overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_30%,#8b0000_0%,transparent_50%),radial-gradient(circle_at_80%_70%,#660000_0%,transparent_50%),radial-gradient(circle_at_50%_50%,#b91c1c_0%,transparent_70%)] opacity-80"></div>
+             <div className="absolute inset-0 opacity-40 mix-blend-multiply" 
+                  style={{ backgroundImage: 'radial-gradient(circle, #000 20%, transparent 20%)', backgroundSize: '6px 6px' }}></div>
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)]"></div>
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center text-center max-w-7xl w-full group/footer">
+            {/* 2026 Background Layer - Dynamic Interaction State - REDUCED SIZE */}
+            <div className={`
+              absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] pointer-events-none select-none
+              transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]
+              ${isYearForward 
+                ? 'z-20 scale-[1.1] opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_50px_rgba(217,70,239,1)]' 
+                : 'z-0 scale-100 opacity-20 blur-[2px] text-fuchsia-500/20 drop-shadow-[0_0_40px_rgba(217,70,239,0.3)]'}
+            `}>
+               <span className="text-[18vw] md:text-[12rem] font-anton tracking-tighter">2026</span>
+            </div>
+
+            {/* MAIN YANTRAKSH TEXT */}
+            <h2 
+              onMouseEnter={handleYearTrigger}
+              className="relative z-10 text-[16vw] md:text-[14rem] font-anton text-white leading-none tracking-[-0.03em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.05] cursor-default"
+            >
+              YANTRAKSH
+            </h2>
+
+            {/* CONTACT US */}
+            <div className="mt-24 md:mt-32 flex flex-col items-center gap-10">
+               <span className="text-white text-base md:text-2xl font-anton tracking-[0.4em] uppercase opacity-90 drop-shadow-lg">CONTACT US</span>
+               
+               <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
+                  <a href="#" className="text-white hover:text-fuchsia-500 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849s-.011 3.585-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.849-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849s.012-3.584.07-4.849c.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.28.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                  </a>
+                  <a href="#" className="text-white hover:text-blue-500 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04c-5.5 0-10 4.5-10 10.04 0 5 3.66 9.14 8.44 9.88v-6.99h-2.54v-2.89h2.54v-2.2c0-2.5 1.52-3.89 3.77-3.89 1.08 0 2.2.19 2.2.19v2.43h-1.24c-1.24 0-1.63.77-1.63 1.56v1.91h2.74l-.44 2.89h-2.3v6.99c4.78-.74 8.44-4.88 8.44-9.88 0-5.54-4.5-10.04-10-10.04z"/></svg>
+                  </a>
+                  <a href="#" className="text-white hover:text-gray-400 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                  <a href="#" className="text-white hover:text-blue-600 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </a>
+                  {/* CLEANER REDDIT LOGO */}
+                  <a href="#" className="text-white hover:text-orange-600 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.05l-2.454-.547-.748 3.41c2.061.116 3.963.622 5.304 1.365.192-.184.45-.295.734-.295.586 0 1.059.475 1.059 1.059 0 .266-.102.511-.265.696.03.189.045.381.045.573 0 2.39-3.1 4.335-6.941 4.335s-6.941-1.945-6.941-4.335c0-.19.015-.381.045-.568A1.057 1.057 0 0 1 5.352 11c0-.584.473-1.059 1.059-1.059.283 0 .541.112.733.296 1.341-.748 3.245-1.255 5.307-1.366l.773-3.522 2.726.605c.058-.451.445-.799.91-.799zM9.182 12.442c-.654 0-1.186.532-1.186 1.186 0 .654.532 1.186 1.186 1.186.654 0 1.186-.532 1.186-1.186 0-.654-.532-1.186-1.186-1.186zm5.634 0c-.654 0-1.186.532-1.186 1.186 0 .654.532 1.186 1.186 1.186.654 0 1.186-.532 1.186-1.186 0-.654-.532-1.186-1.186-1.186zm-5.634 3.41c-.116 0-.209.093-.209.209 0 .115.093.209.209.209h5.634c.116 0 .209-.094.209-.209 0-.116-.093-.209-.209-.209H9.182z"/>
+                    </svg>
+                  </a>
+                  <a href="#" className="text-white hover:text-red-600 transition-all duration-300 hover:scale-125">
+                    <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.612 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  </a>
+               </div>
+            </div>
+            <div className="h-16"></div>
+          </div>
+        </section>
       </div>
 
       <style>{`
-        /* PURPLE NIGHT FUSION BACKGROUND EFFECTS */
         @keyframes fusion-drift {
           0% { transform: translate(-20%, -20%) rotate(0deg) scale(1); }
           50% { transform: translate(20%, 20%) rotate(180deg) scale(1.3); }
           100% { transform: translate(-20%, -20%) rotate(360deg) scale(1); }
         }
-        .fusion-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(140px);
-          animation: fusion-drift 28s infinite ease-in-out;
-          opacity: 0.45;
-          mix-blend-mode: screen;
-        }
-        .orb-1 { width: 850px; height: 850px; background: radial-gradient(circle, #7e22ce 0%, transparent 70%); top: -15%; left: -10%; animation-duration: 32s; }
-        .orb-2 { width: 1000px; height: 1000px; background: radial-gradient(circle, #db2777 0%, transparent 70%); bottom: -25%; right: -15%; animation-delay: -6s; animation-duration: 38s; }
-        .orb-3 { width: 750px; height: 750px; background: radial-gradient(circle, #3b82f6 0%, transparent 70%); top: 45%; left: 35%; animation-delay: -14s; animation-duration: 44s; }
-
         @keyframes robot-floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .animate-robot-floating { animation: robot-floating 4s ease-in-out infinite; }
         @keyframes eye-blink { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
         .animate-eye-blink { animation: eye-blink 5s ease-in-out infinite; transform-origin: center; }
-        .eye-movement-layer { animation: eye-movement 9s ease-in-out infinite; transform-origin: center; transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1); }
-        .group:hover .eye-movement-layer { animation: none; transform: translate(0, 0); }
         @keyframes shackle-steady { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
         .shackle-steady-animation { animation: shackle-steady 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
         @keyframes shield-vibrate { 0% { transform: translate(0, 0); } 25% { transform: translate(-1.5px, 1.5px); } 50% { transform: translate(1.5px, -1.5px); } 75% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, 2px); } }
@@ -774,13 +822,20 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         .dna-subtle-breathing { animation: dna-breathe 4s ease-in-out infinite; transform-origin: center; }
         @keyframes rung-blink-sequence { 0%, 5% { opacity: 0; filter: blur(2px); } 8%, 100% { opacity: 0.8; filter: blur(0); } }
         .group:hover .dna-rung-pulse { animation: rung-blink-sequence 1.5s linear infinite; }
-
-        /* ALL TREE ANIMATIONS DISABLED FOR PERFECT STABILITY */
-        .animate-tree-sway-unit {
-          animation: none !important;
+        
+        /* FIN-TECH TREE ANIMATIONS */
+        .leaf-visual { 
+          transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+          opacity: 1; 
         }
+        .coin-visual { 
+          transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+          opacity: 0; 
+          transform: scale(0.4); 
+        }
+        .group:hover .leaf-visual { opacity: 0; transform: scale(0.85); }
+        .group:hover .coin-visual { opacity: 1; transform: scale(1.1); }
 
-        /* MUSICIA 'ALIVE' EFFECT ANIMATIONS */
         @keyframes musicia-vibrate {
           0% { transform: translate(0,0) scale(1); }
           10% { transform: translate(-2px, 1px) scale(1.01); }
@@ -794,77 +849,37 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           90% { transform: translate(-1px, 2px) scale(1.01); }
           100% { transform: translate(0,0) scale(1); }
         }
-        .animate-musicia-vibrate {
-          animation: musicia-vibrate 0.3s linear infinite;
-        }
-
+        .animate-musicia-vibrate { animation: musicia-vibrate 0.3s linear infinite; }
         @keyframes float-note {
           0% { transform: translateY(0) scale(0.5); opacity: 0; filter: blur(5px); }
           20% { opacity: 0.8; filter: blur(0); }
           80% { opacity: 0.6; }
           100% { transform: translateY(-150px) translateX(var(--tw-translate-x, 40px)) rotate(45deg) scale(1.2); opacity: 0; filter: blur(2px); }
         }
-        .animate-float-note {
-          animation: float-note 2s ease-out forwards;
-        }
-
-        /* LASER RAIN ANIMATION */
+        .animate-float-note { animation: float-note 2s ease-out forwards; }
         @keyframes laser-move {
           0% { left: -50%; opacity: 0; }
           10% { opacity: 1; }
           90% { opacity: 1; }
           100% { left: 150%; opacity: 0; }
         }
-        .animate-laser-move {
-          animation: laser-move linear infinite;
-        }
-
-        /* SWAP LEAF TO COIN VISUALS ON HOVER - SMOOTH & SUBTLE */
-        .leaf-visual { 
-          transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-          opacity: 1; 
-        }
-        .coin-visual { 
-          transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
-          opacity: 0; 
-          transform: scale(0.4); 
-        }
-        
-        .group:hover .leaf-visual { 
-          opacity: 0; 
-          transform: scale(0.85);
-        }
-        .group:hover .coin-visual { 
-          opacity: 1; 
-          transform: scale(1.1); 
-        }
-
+        .animate-laser-move { animation: laser-move linear infinite; }
         @keyframes home-entry { from { opacity: 0; transform: scale(1.05) translateY(40px); filter: blur(15px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
         .animate-home-entry { animation: home-entry 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
         @keyframes rapid-arrow-blink { 0%, 80% { opacity: 0.2; } 83%, 89%, 95% { opacity: 1; } 86%, 92%, 98% { opacity: 0.2; } 100% { opacity: 0.2; } }
         .animate-rapid-arrow-blink { animation: rapid-arrow-blink 5s infinite ease-in-out; }
         @keyframes char-reveal { from { opacity: 0; filter: blur(8px); transform: translateY(10px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
         .animate-char-reveal { animation: char-reveal 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-
-        /* SUBTLE NEON GLOW ANIMATIONS FOR ABOUT TITLES */
         @keyframes fuchsia-glow-pulse {
           0%, 100% { text-shadow: 0 0 4px #d946ef, 0 0 10px rgba(217, 70, 239, 0.2); }
           50% { text-shadow: 0 0 8px #d946ef, 0 0 15px rgba(217, 70, 239, 0.4); }
         }
-        .animate-fuchsia-glow {
-          animation: fuchsia-glow-pulse 3s ease-in-out infinite;
-        }
-
+        .animate-fuchsia-glow { animation: fuchsia-glow-pulse 3s ease-in-out infinite; }
         @keyframes lime-glow-pulse {
           0%, 100% { text-shadow: 0 0 4px #a3e635, 0 0 10px rgba(163, 230, 53, 0.2); }
           50% { text-shadow: 0 0 8px #a3e635, 0 0 15px rgba(163, 230, 53, 0.4); }
         }
-        .animate-lime-glow {
-          animation: lime-glow-pulse 3s ease-in-out infinite;
-        }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-lime-glow { animation: lime-glow-pulse 3s ease-in-out infinite; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: #d946ef; border-radius: 10px; box-shadow: 0 0 10px rgba(217,70,239,0.5); }
