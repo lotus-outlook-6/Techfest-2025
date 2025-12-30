@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import NavbarSlider from './NavbarSlider';
 import RegisterButton from './RegisterButton';
@@ -258,74 +257,123 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </svg>
         );
       case "BIO-TECH":
-        // Refined DNA helix based on sketch: Open top, closed mid, open bottom.
-        const rungPositions = [-45, -35, -25, -15, -5, 5, 15, 25, 35, 45];
-        const maxWidth = 24;
-        
-        // Helper to get x offset at height y for a single twist helix
-        // We use a cosine function to ensure it's open at top/bottom (y=-50, 50) 
-        // and crossing at middle (y=0).
         const getDNAX = (y: number) => {
-          // Normalizing y from -50...50 to -PI/2...PI/2
-          const phase = (y / 50) * (Math.PI / 2);
-          const xOffset = Math.sin(phase) * maxWidth;
-          return xOffset;
+          return 18 * Math.sin(((y - 25) * Math.PI) / 50);
         };
-
+        const rungYPositions = [-52, -42, -32, -15, -5, 5, 15, 32, 42, 52];
+        const points1: string[] = [];
+        const points2: string[] = [];
+        for (let y = -60; y <= 60; y += 2) {
+          const x = getDNAX(y);
+          points1.push(`${x},${y}`);
+          points2.push(`${-x},${y}`);
+        }
         return (
-          <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 140">
-            <g transform="translate(120, 70)">
+          <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 160">
+            <g transform="translate(120, 80)">
               <g className="dna-subtle-breathing">
-                
-                {/* RUNGS */}
-                <g className="dna-strands-layer">
-                  {rungPositions.map((y, i) => {
-                    const x = getDNAX(y);
+                <g>
+                  {rungYPositions.map((y, i) => {
+                    const x = Math.abs(getDNAX(y));
                     return (
                       <line 
                         key={i} 
                         x1={-x} y1={y} x2={x} y2={y} 
                         stroke="currentColor" 
-                        strokeWidth="3.5" 
+                        strokeWidth="2" 
                         strokeLinecap="round"
-                        className="dna-rung-pulse"
-                        style={{ 
-                          animationDelay: `${i * 0.1}s`,
-                          opacity: 0.8
-                        } as React.CSSProperties}
+                        className="dna-rung-pulse opacity-60"
+                        style={{ animationDelay: `${i * 0.15}s` } as React.CSSProperties}
                       />
                     );
                   })}
                 </g>
-
-                {/* BACKBONES - Cubic Beziers for smooth "twist" crossing at center */}
-                <g className="dna-backbones-sketch">
-                  {/* Strand 1: Starts Left-Bottom (-24, 50), curves through (0,0) to Left-Top (-24, -50) */}
-                  {/* Wait, the sketch is: Top Open (\ /), Mid Crossing (X), Bottom Open (/ \) */}
-                  {/* Top (-24, -50) to Bottom (24, 50) */}
-                  <path 
-                    d="M -24 -50 C -24 -25, 0 -20, 0 0 C 0 20, 24 25, 24 50" 
-                    fill="none" stroke="currentColor" strokeWidth="6.5" strokeLinecap="round" 
-                  />
-                  {/* Strand 2: Top (24, -50) to Bottom (-24, 50) */}
-                  <path 
-                    d="M 24 -50 C 24 -25, 0 -20, 0 0 C 0 20, -24 25, -24 50" 
-                    fill="none" stroke="currentColor" strokeWidth="6.5" strokeLinecap="round" opacity="0.9"
-                  />
+                <g>
+                  <polyline points={points1.join(' ')} fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                  <polyline points={points2.join(' ')} fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="opacity-90" />
                 </g>
               </g>
             </g>
           </svg>
         );
       case "FIN-TECH":
+        // Refined Botanical Digital Tree - Pro Interaction Model
+        const ProBotanicalLeaf = ({ index, rotate, scale = 1, x = 0, y = 0 }: { index: number, rotate: number, scale?: number, x?: number, y?: number }) => (
+          <g transform={`translate(${x}, ${y}) rotate(${rotate}) scale(${scale})`}>
+            {/* 
+              This leaf uses staggered transition delays.
+              On HOVER, it FALLS with gravity.
+              On EXIT, it POPS back in with a bouncy elastic transition.
+            */}
+            <path 
+              d="M 0 0 C -4 -8, -4 -13, 0 -18 C 4 -13, 4 -8, 0 0" 
+              fill="currentColor" 
+              className="
+                leaf-dynamic-state
+                transition-all duration-[700ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                group-hover:translate-y-[180px] group-hover:rotate-[280deg] group-hover:opacity-0 group-hover:scale-0 group-hover:duration-[900ms] group-hover:ease-[cubic-bezier(0.5,0,1,1)]
+              "
+              style={{ 
+                transformOrigin: 'bottom center',
+                // Delay for sequential falling/popping
+                transitionDelay: `${index * 0.08}s`
+              } as React.CSSProperties} 
+            />
+          </g>
+        );
+
         return (
-          <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 120">
-            <g className="animate-data-flow">
-              <circle cx="70" cy="60" r="6" fill="currentColor" className="animate-pulse" />
-              <circle cx="120" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
-              <circle cx="170" cy="60" r="6" fill="currentColor" className="animate-pulse delay-1000" />
-              <path d="M 76 60 Q 120 80 164 60" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" className="opacity-40" />
-              <path d="M 70 54 Q 120 10 170 54" fill="none" stroke="currentColor" strokeWidth="1" className="animate-flow-dash" />
+          <svg className={`w-full h-full ${colorClass}`} viewBox="0 0 240 130">
+            <defs>
+              <filter id="pro-tree-glow-clean" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <g transform="translate(120, 120) scale(0.85)">
+              <g className="animate-tree-sway">
+                {/* Unified idle breathing - whole tree sways together */}
+                <path d="M -8 0 Q -6 -35 0 -55 L 8 0 Z" fill="#050505" stroke="currentColor" strokeWidth="2" />
+                <line x1="0" y1="-6" x2="0" y2="-50" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
+
+                {/* Branches with Staggered Pro Leaves */}
+                <g>
+                  <path d="M -4 -20 Q -22 -28 -40 -45" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <ProBotanicalLeaf index={0} x={-20} y={-26} rotate={-100} scale={0.8} />
+                  <ProBotanicalLeaf index={1} x={-40} y={-45} rotate={-55} scale={1.1} />
+                </g>
+
+                <g>
+                  <path d="M 4 -24 Q 28 -32 48 -48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <ProBotanicalLeaf index={2} x={24} y={-30} rotate={100} scale={0.8} />
+                  <ProBotanicalLeaf index={3} x={48} y={-48} rotate={55} scale={1.1} />
+                </g>
+
+                <g>
+                  <path d="M -2 -40 Q -28 -52 -36 -85" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <ProBotanicalLeaf index={4} x={-36} y={-85} rotate={-12} scale={1.3} />
+                  <ProBotanicalLeaf index={5} x={-31} y={-65} rotate={-40} scale={0.9} />
+                  <ProBotanicalLeaf index={6} x={-18} y={-46} rotate={-85} scale={0.7} />
+                </g>
+
+                <g>
+                  <path d="M 2 -44 Q 32 -56 36 -95" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <ProBotanicalLeaf index={7} x={36} y={-95} rotate={12} scale={1.3} />
+                  <ProBotanicalLeaf index={8} x={31} y={-68} rotate={40} scale={0.9} />
+                  <ProBotanicalLeaf index={9} x={18} y={-50} rotate={85} scale={0.7} />
+                </g>
+
+                <g>
+                  <path d="M 0 -55 Q 0 -80 10 -110" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <ProBotanicalLeaf index={10} x={10} y={-110} rotate={0} scale={1.2} />
+                  <ProBotanicalLeaf index={11} x={0} y={-80} rotate={0} scale={1.0} />
+                </g>
+
+                <g filter="url(#pro-tree-glow-clean)">
+                  <ProBotanicalLeaf index={12} x={-6} y={-45} rotate={-155} scale={0.6} />
+                  <ProBotanicalLeaf index={13} x={6} y={-50} rotate={155} scale={0.6} />
+                </g>
+              </g>
             </g>
           </svg>
         );
@@ -539,17 +587,14 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
            animation: shield-vibrate 0.08s linear infinite;
         }
 
-        /* BIO-TECH - SUBTLE IDLE & SEQUENTIAL RUNGS */
+        /* BIO-TECH - ORGANIC PERSISTENT BREATHING */
         @keyframes dna-breathe {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-3px) scale(1.03); }
+          0%, 100% { transform: translateY(0) scale(1, 1); }
+          50% { transform: translateY(-4px) scale(1.05, 0.98); }
         }
         .dna-subtle-breathing {
-          animation: dna-breathe 5s ease-in-out infinite;
+          animation: dna-breathe 4s ease-in-out infinite;
           transform-origin: center;
-        }
-        .group:hover .dna-subtle-breathing {
-          animation-play-state: paused;
         }
 
         /* DNA RUNG SEQUENTIAL "OFF" PULSE */
@@ -561,11 +606,27 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           animation: rung-blink-sequence 1.5s linear infinite;
         }
 
-        /* FIN-TECH - DATA FLOW */
-        @keyframes data-flow { 0% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 100% { transform: translateX(-2px); } }
-        .animate-data-flow { animation: data-flow 4s ease-in-out infinite; }
-        .animate-flow-dash { stroke-dasharray: 150; stroke-dashoffset: 150; animation: dash-move 3s linear infinite; }
-        @keyframes dash-move { to { stroke-dashoffset: 0; } }
+        /* FIN-TECH - REFINED ORGANIC TREE ANIMATIONS */
+        @keyframes tree-sway {
+          0%, 100% { transform: rotate(-1.5deg); }
+          50% { transform: rotate(1.5deg); }
+        }
+        .animate-tree-sway {
+          /* Restore organic breathing sway - leaves are transitionally static within this group unless hovered */
+          animation: tree-sway 7s ease-in-out infinite;
+          transform-origin: bottom center;
+        }
+        
+        /* 
+          Leaf state is strictly managed via transitions on the ProBotanicalLeaf.
+          The staggered delays handle the "one-by-one" requirement perfectly.
+          The elastic cubic-bezier handles the "pop" on exit.
+        */
+        .leaf-dynamic-state {
+            /* Ensures no jitter - leaf is perfectly static until card is hovered */
+            transform: translate(0,0) rotate(0deg) scale(1);
+            opacity: 1;
+        }
 
         @keyframes home-entry { from { opacity: 0; transform: scale(1.05) translateY(40px); filter: blur(15px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
         .animate-home-entry { animation: home-entry 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
