@@ -17,6 +17,14 @@ const NavbarSlider: React.FC<NavbarSliderProps> = ({ onSelect, initialSection = 
   const trackRef = useRef<HTMLDivElement>(null);
   const stickyTimerRef = useRef<number | null>(null);
 
+  // Sync state if initialSection changes from parent (e.g. clicking Logo)
+  useEffect(() => {
+    const idx = SECTIONS.indexOf(initialSection);
+    if (idx >= 0 && idx !== activeIndex) {
+      setActiveIndex(idx);
+    }
+  }, [initialSection]);
+
   useEffect(() => {
     startStickyTimer();
     return () => {
@@ -36,17 +44,21 @@ const NavbarSlider: React.FC<NavbarSliderProps> = ({ onSelect, initialSection = 
     }, 300000); 
   };
 
-  const handleClick = (index: number) => {
-    setActiveIndex(index);
-    const audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_730b227c1d.mp3');
-    audio.volume = 0.15;
-    audio.play().catch(() => {});
-    refreshExpansion();
-
-    // Notify the parent component of the section change
+  const notifyChange = (index: number) => {
     if (onSelect) {
-        onSelect(SECTIONS[index]);
+      onSelect(SECTIONS[index]);
     }
+    // High-tech feedback sound
+    const audio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_730b227c1d.mp3');
+    audio.volume = 0.1;
+    audio.play().catch(() => {});
+  };
+
+  const handleClick = (index: number) => {
+    if (index === activeIndex) return;
+    setActiveIndex(index);
+    notifyChange(index);
+    refreshExpansion();
   };
 
   const refreshExpansion = () => {
@@ -71,9 +83,16 @@ const NavbarSlider: React.FC<NavbarSliderProps> = ({ onSelect, initialSection = 
     const x = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
     const index = Math.floor(percentage / 20);
+    
+    // NEW: Real-time update during drag
     if (index !== activeIndex && index >= 0 && index < SECTIONS.length) {
         setActiveIndex(index);
+        notifyChange(index);
     }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   const isActive = hovering || isDragging || isSticky;
@@ -89,8 +108,12 @@ const NavbarSlider: React.FC<NavbarSliderProps> = ({ onSelect, initialSection = 
                 hover:border-fuchsia-500/40 cursor-pointer select-none
             `}
             onMouseMove={handleMouseMove}
-            onMouseDown={() => { setIsDragging(true); refreshExpansion(); }}
-            onMouseUp={() => setIsDragging(false)}
+            onMouseDown={(e) => { 
+                e.preventDefault(); 
+                setIsDragging(true); 
+                refreshExpansion(); 
+            }}
+            onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
             onMouseEnter={handleMouseEnter}
         >

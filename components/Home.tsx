@@ -7,6 +7,7 @@ interface HomeProps {
   onBack?: () => void;
   onSectionChange?: (section: string) => void;
   initialSection?: string;
+  hideNavbar?: boolean;
 }
 
 interface NoteParticle {
@@ -27,7 +28,7 @@ interface Laser {
   thickness: number;
 }
 
-const Home: React.FC<HomeProps> = ({ onBack, onSectionChange, initialSection = 'HOME' }) => {
+const Home: React.FC<HomeProps> = ({ onBack, onSectionChange, initialSection = 'HOME', hideNavbar = false }) => {
   const [showCursor, setShowCursor] = useState(true);
   const [rotation, setRotation] = useState(0); 
   const [isDragging, setIsDragging] = useState(false);
@@ -411,18 +412,21 @@ const Home: React.FC<HomeProps> = ({ onBack, onSectionChange, initialSection = '
 
   return (
     <div ref={scrollContainerRef} className="h-screen w-full bg-transparent text-white font-mono relative overflow-y-auto overflow-x-hidden z-[100] scroll-smooth pointer-events-auto select-none">
-      <header className="sticky top-0 w-full h-20 md:h-24 flex items-center justify-between px-6 md:px-12 z-[150] bg-black/40 backdrop-blur-3xl border-b border-fuchsia-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-300">
-        <div className="flex items-center gap-4 md:gap-5 group select-none shrink-0">
-          <div onClick={onBack} className="w-10 h-10 md:w-12 md:h-12 bg-[#1e1e1e] border border-gray-700 rounded-sm md:rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.25)] hover:scale-105 hover:border-fuchsia-500 hover:shadow-[0_0_25px_rgba(217,70,239,0.5)] transition-all duration-300 cursor-pointer">
-            <span className="text-fuchsia-500 font-bold text-xl md:text-2xl font-mono flex pointer-events-none"><span>&gt;</span><span className={`${showCursor ? 'opacity-100' : 'opacity-0'}`}>_</span></span>
-          </div>
-          <span onClick={onBack} className="text-xl md:text-3xl font-anton tracking-[0.08em] text-white hover:text-fuchsia-400 hover:drop-shadow-[0_0_10px_rgba(217,70,239,0.4)] transition-all duration-500 uppercase cursor-pointer">YANTRAKSH</span>
-        </div>
-        <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-40">
-            <NavbarSlider onSelect={onSectionChange} initialSection={initialSection} />
-        </div>
-        <div className="flex items-center z-50 shrink-0"><RegisterButton size="sm" /></div>
-      </header>
+      
+      {!hideNavbar && (
+        <header className="sticky top-0 w-full h-20 md:h-24 flex items-center justify-between px-6 md:px-12 z-[150] bg-black/40 backdrop-blur-3xl border-b border-fuchsia-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-300">
+            <div className="flex items-center gap-4 md:gap-5 group select-none shrink-0">
+            <div onClick={onBack} className="w-10 h-10 md:w-12 md:h-12 bg-[#1e1e1e] border border-gray-700 rounded-sm md:rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.25)] hover:scale-105 hover:border-fuchsia-500 hover:shadow-[0_0_25px_rgba(217,70,239,0.5)] transition-all duration-300 cursor-pointer">
+                <span className="text-fuchsia-500 font-bold text-xl md:text-2xl font-mono flex pointer-events-none"><span>&gt;</span><span className={`${showCursor ? 'opacity-100' : 'opacity-0'}`}>_</span></span>
+            </div>
+            <span onClick={onBack} className="text-xl md:text-3xl font-anton tracking-[0.08em] text-white hover:text-fuchsia-400 hover:drop-shadow-[0_0_10px_rgba(217,70,239,0.4)] transition-all duration-500 uppercase cursor-pointer">YANTRAKSH</span>
+            </div>
+            <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-40">
+                <NavbarSlider onSelect={onSectionChange} initialSection={initialSection} />
+            </div>
+            <div className="flex items-center z-50 shrink-0"><RegisterButton size="sm" /></div>
+        </header>
+      )}
 
       <div className="relative z-10">
         <section id="home" className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center px-4 relative">
