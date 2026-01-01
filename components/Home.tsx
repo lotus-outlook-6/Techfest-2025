@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import NavbarSlider from './NavbarSlider';
 import RegisterButton from './RegisterButton';
@@ -946,7 +945,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                </div>
                {/* CREDITS LINE */}
                <p className="text-gray-500 text-[8px] md:text-[9px] uppercase tracking-[0.3em] font-space opacity-50">
-                 made in collaboration of Lotus_Proton_6 & Shaunak_Sen
+                 made in collaboration of Lotus_Proton_6 & REET
                </p>
             </div>
           </div>
