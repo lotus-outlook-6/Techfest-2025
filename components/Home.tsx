@@ -42,6 +42,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
   const [isYearForward, setIsYearForward] = useState(false);
   const yearResetTimer = useRef<number | null>(null);
   const footerRef = useRef<HTMLElement>(null);
+  const aboutRef = useRef<HTMLElement>(null);
 
   const startX = useRef(0);
   const startRotation = useRef(0);
@@ -209,7 +210,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
     };
   }, [isMusiciaHovered]);
 
-  // Observer for automatic "2026" pop when scrolling to footer
+  // Observer for automatic year pop when scrolling to footer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -542,35 +543,64 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
         </section>
 
-        {/* ABOUT SECTION WITH PITCH BLACK BACKGROUND */}
-        <section id="about" className="min-h-screen flex flex-col items-center justify-center px-4 relative bg-black overflow-hidden">
+        {/* ABOUT SECTION WITH EXPANSIVE SPACE BACKGROUND (Removed circular mask and black borders) */}
+        <section id="about" ref={aboutRef} className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+            
+            {/* CINEMATIC SPACE BACKGROUND LAYER (Clean, Bleeding fully to edges) */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+                {/* 1. Starfield Layer - Dense and expansive */}
+                <div className="absolute inset-0 bg-black bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-60"></div>
+                
+                {/* 2. Cinematic Orbital Earth (City Lights) - Clean Full Bleed */}
+                <div className="absolute inset-0 w-full h-full flex justify-center items-center opacity-85">
+                    <div className="relative w-full h-full">
+                        {/* Realistic atmospheric rim light - no hard edges */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 via-transparent to-transparent z-10 pointer-events-none"></div>
+                        <img 
+                            src="https://wallpaperaccess.com/full/6863838.jpg" 
+                            className="w-full h-full object-cover animate-earth-orbit-float"
+                            alt="Expansive Orbital View"
+                        />
+                    </div>
+                </div>
+
+                {/* Subtlest background texture to tie everything together without blocking the stars */}
+                <div className="absolute inset-0 bg-[#050505]/5 z-1"></div>
+            </div>
+
+            {/* FOREGROUND CONTENT WRAPPER */}
             <div 
               onMouseEnter={() => setArrowsHovered(true)}
               onMouseLeave={() => setArrowsHovered(false)}
-              className="relative z-10 w-full max-w-7xl flex items-center justify-center mt-12 px-12 md:px-24"
+              className="relative z-[50] w-full max-w-7xl flex items-center justify-center px-12 md:px-24"
             >
+                {/* Navigation Arrows */}
                 <button onClick={prevSlide} className="absolute left-0 md:left-4 z-40 group outline-none transition-transform hover:scale-110 active:scale-95">
                     <svg className={`w-12 h-16 md:w-16 md:h-24 transition-all duration-300 ${arrowsHovered ? 'opacity-100' : 'animate-rapid-arrow-blink'}`} viewBox="0 0 40 100" style={{ color: currentAbout.rawThemeColor, filter: arrowsHovered ? `drop-shadow(0 0 20px ${currentAbout.rawThemeColor})` : 'none' }}>
                         <polyline points="35,10 5,50 35,90" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
 
-                {/* ABOUT CARD */}
+                {/* ABOUT CARD (Translucent box with subtle shadow) */}
                 <div className={`
-                    bg-[#0c0c0c]/80 backdrop-blur-3xl border p-8 md:p-16 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] 
-                    flex flex-col items-center relative overflow-hidden w-full md:w-[90%] transition-all duration-1000 min-h-[400px] 
+                    relative overflow-hidden w-full md:w-[90%] rounded-[2.5rem] shadow-[0_0_150px_rgba(0,0,0,0.85)] 
+                    flex flex-col items-center transition-all duration-1000 min-h-[400px] border
+                    bg-[#0c0c0c]/80 backdrop-blur-3xl
                     ${aboutSlide === 0 ? 'border-white/5' : 'border-lime-400/10'}
                 `}>
                     {/* DOTTED GRID PATTERN */}
-                    <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(rgba(255,255,255,0.08)_1.5px,transparent_1.5px)] bg-[size:24px_24px]"></div>
+                    <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(rgba(255,255,255,0.06)_1.2px,transparent_1.2px)] bg-[size:24px_24px] z-10"></div>
 
-                    <h3 key={`title-${aboutSlide}`} className="relative z-10 text-3xl md:text-6xl font-anton tracking-tight text-white mb-10 text-center uppercase flex flex-wrap justify-center items-center gap-x-4 animate-char-reveal">
-                        <span className="text-gray-400">ABOUT</span>
-                        <span className={`${currentAbout.themeColor} transition-all duration-1000 ${currentAbout.glowClass} px-4 py-2 rounded-xl`}>{currentAbout.title}</span>
-                    </h3>
-                    <p key={`desc-${aboutSlide}`} className="relative z-10 text-gray-300 text-base md:text-xl font-space leading-relaxed text-center max-w-4xl opacity-90 drop-shadow-lg font-light tracking-wide animate-char-reveal">{currentAbout.description}</p>
+                    <div className="relative z-20 w-full flex flex-col items-center p-8 md:p-16">
+                        <h3 key={`title-${aboutSlide}`} className="relative z-10 text-3xl md:text-6xl font-anton tracking-tight text-white mb-10 text-center uppercase flex flex-wrap justify-center items-center gap-x-4 animate-char-reveal">
+                            <span className="text-gray-400/80">ABOUT</span>
+                            <span className={`${currentAbout.themeColor} transition-all duration-1000 ${currentAbout.glowClass} px-4 py-2 rounded-xl`}>{currentAbout.title}</span>
+                        </h3>
+                        <p key={`desc-${aboutSlide}`} className="relative z-10 text-gray-200 text-base md:text-xl font-space leading-relaxed text-center max-w-4xl opacity-95 drop-shadow-[0_4px_12px_rgba(0,0,0,1)] font-light tracking-wide animate-char-reveal">{currentAbout.description}</p>
+                    </div>
                 </div>
 
+                {/* Right Arrow */}
                 <button onClick={nextSlide} className="absolute right-0 md:right-4 z-40 group outline-none transition-transform hover:scale-110 active:scale-95">
                     <svg className={`w-12 h-16 md:w-16 md:h-24 transition-all duration-300 ${arrowsHovered ? 'opacity-100' : 'animate-rapid-arrow-blink'}`} viewBox="0 0 40 100" style={{ color: currentAbout.rawThemeColor, filter: arrowsHovered ? `drop-shadow(0 0 20px ${currentAbout.rawThemeColor})` : 'none' }}>
                         <polyline points="5,10 35,50 5,90" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
@@ -766,17 +796,56 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
         </section>
 
-        {/* UPDATED FOOTER SECTION - YANTRAKSH LARGER & 2026 PRECISELY CONSTRAINED TO T-A BOX */}
-        <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500">
-          <div className="absolute inset-0 bg-[#250000] z-0 overflow-hidden">
-             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_30%,#550000_0%,transparent_50%),radial-gradient(circle_at_80%_70%,#440000_0%,transparent_50%),radial-gradient(circle_at_50%_50%,#7a1a1a_0%,transparent_70%)] opacity-80"></div>
-             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]"></div>
+        {/* CINEMATIC SPACE FOOTER SECTION */}
+        <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black">
+          {/* CINEMATIC SPACE BACKGROUND ELEMENTS */}
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+             {/* Nebula Base */}
+             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>
+             
+             {/* Starfield */}
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-40"></div>
+
+             {/* BLACK HOLE ENTITY (Right Side) */}
+             <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] flex items-center justify-center">
+                {/* Gravitational Lensing Rings */}
+                <div className="absolute w-[110%] h-[110%] rounded-full border border-fuchsia-500/10 blur-xl animate-lensing-pulse"></div>
+                <div className="absolute w-[105%] h-[105%] rounded-full border border-cyan-400/5 blur-md"></div>
+                
+                {/* Main Rotating Accretion Disk */}
+                <div className="absolute w-[140%] h-[35%] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent blur-[40px] rotate-[25deg] animate-accretion-spin"></div>
+                <div className="absolute w-[130%] h-[15%] bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[15px] rotate-[25deg] animate-accretion-spin-reverse opacity-80"></div>
+                
+                {/* Event Horizon */}
+                <div className="relative w-[18vw] h-[18vw] bg-black rounded-full shadow-[0_0_100px_rgba(0,0,0,1)] z-10">
+                   <div className="absolute inset-0 rounded-full shadow-[inset_0_0_30px_rgba(255,165,0,0.4)]"></div>
+                </div>
+             </div>
+
+             {/* FUTURISTIC SPACE SHUTTLE (Left Side) */}
+             <div className="absolute left-[15%] top-1/2 -translate-y-1/2 w-48 h-32 animate-shuttle-drift">
+                <div className="relative w-full h-full animate-shuttle-spin">
+                   <svg viewBox="0 0 200 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                      {/* Shuttle Body */}
+                      <path d="M 20 50 L 50 30 L 140 30 L 170 50 L 140 70 L 50 70 Z" fill="#1a1a1a" stroke="#444" strokeWidth="1" />
+                      <path d="M 50 30 L 70 10 L 130 10 L 140 30 Z" fill="#222" />
+                      {/* Windows */}
+                      <rect x="145" y="45" width="15" height="10" rx="2" fill="rgba(34,211,238,0.6)" />
+                      {/* Wing Details */}
+                      <path d="M 60 30 L 40 15 L 100 15 L 110 30" fill="#111" />
+                      <path d="M 60 70 L 40 85 L 100 85 L 110 70" fill="#111" />
+                      {/* Thruster Base */}
+                      <rect x="15" y="42" width="10" height="16" fill="#333" />
+                   </svg>
+                   {/* Realistic Thruster Glow */}
+                   <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-cyan-400 blur-xl opacity-0 animate-thruster-pulse"></div>
+                   <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full blur-sm opacity-0 animate-thruster-pulse delay-75"></div>
+                </div>
+             </div>
           </div>
 
           <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-full w-full flex-1 group/footer overflow-hidden">
-            {/* 2026 Background Year - Constrained to the horizontal space between T and A of YANTRAKSH */}
-            {/* ADJUST THESE VALUES BELOW TO MANUALLY RESIZE THE 2026 TEXT (Font size and scales) */}
-            {/* top-[40%] moved up further to ensure no overlap and perfect balance */}
+            {/* 2025 Background Year - Constrained precisely */}
             <div className={`
               absolute left-1/2 -translate-x-1/2 pointer-events-none select-none
               transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]
@@ -785,11 +854,10 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'}
               top-[40%] md:top-[38%] translate-y-0
             `}>
-               {/* Increase text-[12vw]/10rem and scale-y for larger size; current scaled to fill user's pink box region */}
-               <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
+               <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2025</span>
             </div>
 
-            {/* MAIN YANTRAKSH TEXT - LARGER SIZE, SHIFTED UPPER */}
+            {/* MAIN YANTRAKSH TEXT - LARGER SIZE */}
             <h2 
               onMouseEnter={handleYearTrigger}
               className="relative z-10 text-[28vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20"
@@ -797,7 +865,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               YANTRAKSH
             </h2>
 
-            {/* PINNED SOCIAL HANDLES TO THE BOTTOM OF THE 75% SECTION */}
+            {/* PINNED SOCIAL HANDLES */}
             <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4">
                <span className="text-white text-xs md:text-lg font-anton tracking-[0.4em] uppercase opacity-90 drop-shadow-lg">OUR SOCIAL HANDLES</span>
                
@@ -912,6 +980,51 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           50% { text-shadow: 0 0 8px #a3e635, 0 0 15px rgba(163, 230, 53, 0.4); }
         }
         .animate-lime-glow { animation: lime-glow-pulse 3s ease-in-out infinite; }
+
+        /* SPACE FOOTER ANIMATIONS */
+        @keyframes nebula-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.1); opacity: 1; }
+        }
+        @keyframes accretion-spin {
+          from { transform: rotate(25deg) scale(1); filter: blur(40px) brightness(1); }
+          50% { transform: rotate(25deg) scale(1.05); filter: blur(45px) brightness(1.2); }
+          to { transform: rotate(385deg) scale(1); filter: blur(40px) brightness(1); }
+        }
+        @keyframes accretion-spin-reverse {
+          from { transform: rotate(25deg) scale(1); }
+          to { transform: rotate(-335deg) scale(1); }
+        }
+        @keyframes lensing-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.1; }
+          50% { transform: scale(1.02); opacity: 0.2; }
+        }
+        @keyframes shuttle-drift {
+          0%, 100% { transform: translateY(-50%) translateX(0); }
+          50% { transform: translateY(-55%) translateX(15px); }
+        }
+        @keyframes shuttle-spin {
+          from { transform: rotateY(0deg) rotateX(0deg); }
+          to { transform: rotateY(360deg) rotateX(10deg); }
+        }
+        @keyframes thruster-pulse {
+          0%, 100% { opacity: 0; transform: translateY(-50%) scale(0.8); }
+          50% { opacity: 0.6; transform: translateY(-50%) scale(1.2); }
+        }
+        .animate-nebula-pulse { animation: nebula-pulse 10s ease-in-out infinite; }
+        .animate-accretion-spin { animation: accretion-spin 15s linear infinite; }
+        .animate-accretion-spin-reverse { animation: accretion-spin-reverse 10s linear infinite; }
+        .animate-lensing-pulse { animation: lensing-pulse 4s ease-in-out infinite; }
+        .animate-shuttle-drift { animation: shuttle-drift 8s ease-in-out infinite; }
+        .animate-shuttle-spin { animation: shuttle-spin 12s linear infinite; transform-style: preserve-3d; perspective: 500px; }
+        .animate-thruster-pulse { animation: thruster-pulse 0.2s ease-in-out infinite; }
+
+        /* ABOUT SPACE ANIMATIONS (Cinematic movement) */
+        @keyframes earth-orbit-float {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            50% { transform: translateY(-20px) scale(1.01) rotate(0.3deg); }
+        }
+        .animate-earth-orbit-float { animation: earth-orbit-float 40s ease-in-out infinite; }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
