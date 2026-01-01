@@ -32,6 +32,9 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
   const [aboutSlide, setAboutSlide] = useState(0); // 0: Yantraksh, 1: AU Silchar
   const [arrowsHovered, setArrowsHovered] = useState(false);
   
+  // Parallax state for Earth image
+  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
+
   // Musicia Hover Effect States
   const [isMusiciaHovered, setIsMusiciaHovered] = useState(false);
   const [notes, setNotes] = useState<NoteParticle[]>([]);
@@ -181,6 +184,24 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
       setTimeout(() => setShowCursor(true), 150);
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Window-wide Mouse Move Handler for Parallax
+  useEffect(() => {
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      // Calculate normalized mouse position (-0.5 to 0.5)
+      const nx = (e.clientX / window.innerWidth) - 0.5;
+      const ny = (e.clientY / window.innerHeight) - 0.5;
+      
+      // Subtle parallax intensity
+      setParallaxOffset({
+        x: nx * 30, // Max 15px drift
+        y: ny * 30
+      });
+    };
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    return () => window.removeEventListener('mousemove', handleWindowMouseMove);
   }, []);
 
   // Music Note Spawning Logic
@@ -543,28 +564,30 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
         </section>
 
-        {/* ABOUT SECTION WITH EXPANSIVE SPACE BACKGROUND (Removed circular mask and black borders) */}
+        {/* ABOUT SECTION WITH EXPANSIVE SPACE BACKGROUND */}
         <section id="about" ref={aboutRef} className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
             
-            {/* CINEMATIC SPACE BACKGROUND LAYER (Clean, Bleeding fully to edges) */}
+            {/* CINEMATIC SPACE BACKGROUND LAYER */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
-                {/* 1. Starfield Layer - Dense and expansive */}
+                {/* 1. Starfield Layer */}
                 <div className="absolute inset-0 bg-black bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-60"></div>
                 
-                {/* 2. Cinematic Orbital Earth (City Lights) - Clean Full Bleed */}
-                <div className="absolute inset-0 w-full h-full flex justify-center items-center opacity-85">
+                {/* 2. Cinematic Orbital Earth with Mouse Parallax & Enhanced Idle Animation */}
+                <div 
+                  className="absolute inset-0 w-full h-full flex justify-center items-center opacity-85 transition-transform duration-[1200ms] ease-out"
+                  style={{ transform: `translate3d(${parallaxOffset.x}px, ${parallaxOffset.y}px, 0)` }}
+                >
                     <div className="relative w-full h-full">
-                        {/* Realistic atmospheric rim light - no hard edges */}
                         <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 via-transparent to-transparent z-10 pointer-events-none"></div>
                         <img 
                             src="https://wallpaperaccess.com/full/6863838.jpg" 
-                            className="w-full h-full object-cover animate-earth-orbit-float"
+                            className="w-full h-full object-cover animate-earth-orbit-drift"
                             alt="Expansive Orbital View"
                         />
                     </div>
                 </div>
 
-                {/* Subtlest background texture to tie everything together without blocking the stars */}
+                {/* Subtlest background texture */}
                 <div className="absolute inset-0 bg-[#050505]/5 z-1"></div>
             </div>
 
@@ -574,15 +597,25 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
               onMouseLeave={() => setArrowsHovered(false)}
               className="relative z-[50] w-full max-w-7xl flex items-center justify-center px-12 md:px-24"
             >
-                {/* Navigation Arrows */}
+                {/* Navigation Arrows with persistent layered soft shadow */}
                 <button onClick={prevSlide} className="absolute left-0 md:left-4 z-40 group outline-none transition-transform hover:scale-110 active:scale-95">
-                    <svg className={`w-12 h-16 md:w-16 md:h-24 transition-all duration-300 ${arrowsHovered ? 'opacity-100' : 'animate-rapid-arrow-blink'}`} viewBox="0 0 40 100" style={{ color: currentAbout.rawThemeColor, filter: arrowsHovered ? `drop-shadow(0 0 20px ${currentAbout.rawThemeColor})` : 'none' }}>
+                    <svg 
+                      className={`w-12 h-16 md:w-16 md:h-24 transition-all duration-300 ${arrowsHovered ? 'opacity-100' : 'animate-rapid-arrow-blink'}`} 
+                      viewBox="0 0 40 100" 
+                      style={{ 
+                        color: currentAbout.rawThemeColor, 
+                        filter: arrowsHovered 
+                          ? `drop-shadow(0 0 25px ${currentAbout.rawThemeColor}) drop-shadow(0 0 30px rgba(0,0,0,0.95))` 
+                          : 'drop-shadow(0 0 12px rgba(0,0,0,0.9)) drop-shadow(0 0 2px rgba(0,0,0,0.8))' 
+                      }}
+                    >
                         <polyline points="35,10 5,50 35,90" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
 
-                {/* ABOUT CARD (Translucent box with subtle shadow) */}
+                {/* ABOUT CARD (Translucent box) */}
                 <div className={`
+                    group/aboutcard
                     relative overflow-hidden w-full md:w-[90%] rounded-[2.5rem] shadow-[0_0_150px_rgba(0,0,0,0.85)] 
                     flex flex-col items-center transition-all duration-1000 min-h-[400px] border
                     bg-[#0c0c0c]/80 backdrop-blur-3xl
@@ -592,17 +625,32 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                     <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(rgba(255,255,255,0.06)_1.2px,transparent_1.2px)] bg-[size:24px_24px] z-10"></div>
 
                     <div className="relative z-20 w-full flex flex-col items-center p-8 md:p-16">
-                        <h3 key={`title-${aboutSlide}`} className="relative z-10 text-3xl md:text-6xl font-anton tracking-tight text-white mb-10 text-center uppercase flex flex-wrap justify-center items-center gap-x-4 animate-char-reveal">
+                        <h3 className="relative z-10 text-3xl md:text-6xl font-anton tracking-tight text-white mb-10 text-center uppercase flex flex-wrap justify-center items-center gap-x-4 animate-char-reveal">
                             <span className="text-gray-400/80">ABOUT</span>
-                            <span className={`${currentAbout.themeColor} transition-all duration-1000 ${currentAbout.glowClass} px-4 py-2 rounded-xl`}>{currentAbout.title}</span>
+                            {/* key={aboutSlide} ensures the element re-renders and triggers animate-blink-once on switch. group-hover triggers animate-blink-flicker on card hover */}
+                            <span 
+                              key={aboutSlide} 
+                              className={`${currentAbout.themeColor} transition-all duration-1000 ${currentAbout.glowClass} px-4 py-2 rounded-xl group-hover/aboutcard:animate-blink-flicker animate-blink-once`}
+                            >
+                              {currentAbout.title}
+                            </span>
                         </h3>
                         <p key={`desc-${aboutSlide}`} className="relative z-10 text-gray-200 text-base md:text-xl font-space leading-relaxed text-center max-w-4xl opacity-95 drop-shadow-[0_4px_12px_rgba(0,0,0,1)] font-light tracking-wide animate-char-reveal">{currentAbout.description}</p>
                     </div>
                 </div>
 
-                {/* Right Arrow */}
+                {/* Right Arrow with persistent layered soft shadow */}
                 <button onClick={nextSlide} className="absolute right-0 md:right-4 z-40 group outline-none transition-transform hover:scale-110 active:scale-95">
-                    <svg className={`w-12 h-16 md:w-16 md:h-24 transition-all duration-300 ${arrowsHovered ? 'opacity-100' : 'animate-rapid-arrow-blink'}`} viewBox="0 0 40 100" style={{ color: currentAbout.rawThemeColor, filter: arrowsHovered ? `drop-shadow(0 0 20px ${currentAbout.rawThemeColor})` : 'none' }}>
+                    <svg 
+                      className={`w-12 h-16 md:w-16 md:h-24 transition-all duration-300 ${arrowsHovered ? 'opacity-100' : 'animate-rapid-arrow-blink'}`} 
+                      viewBox="0 0 40 100" 
+                      style={{ 
+                        color: currentAbout.rawThemeColor, 
+                        filter: arrowsHovered 
+                          ? `drop-shadow(0 0 25px ${currentAbout.rawThemeColor}) drop-shadow(0 0 30px rgba(0,0,0,0.95))` 
+                          : 'drop-shadow(0 0 12px rgba(0,0,0,0.9)) drop-shadow(0 0 2px rgba(0,0,0,0.8))' 
+                      }}
+                    >
                         <polyline points="5,10 35,50 5,90" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
@@ -845,7 +893,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
           </div>
 
           <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-full w-full flex-1 group/footer overflow-hidden">
-            {/* 2025 Background Year - Constrained precisely */}
+            {/* 2026 Background Year - Constrained precisely */}
             <div className={`
               absolute left-1/2 -translate-x-1/2 pointer-events-none select-none
               transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]
@@ -854,7 +902,7 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
                 : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'}
               top-[40%] md:top-[38%] translate-y-0
             `}>
-               <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2025</span>
+               <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
             </div>
 
             {/* MAIN YANTRAKSH TEXT - LARGER SIZE */}
@@ -970,6 +1018,21 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         .animate-rapid-arrow-blink { animation: rapid-arrow-blink 5s infinite ease-in-out; }
         @keyframes char-reveal { from { opacity: 0; filter: blur(8px); transform: translateY(10px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
         .animate-char-reveal { animation: char-reveal 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        
+        /* THE SPECIFIC TEXT BLINK EFFECTS */
+        @keyframes blink-active-stutter {
+          0%, 10%, 20%, 30%, 40%, 100% { opacity: 1; filter: brightness(1); }
+          5%, 15%, 25%, 35% { opacity: 0.3; filter: brightness(1.6) contrast(1.2); }
+        }
+        /* triggers on hover */
+        .animate-blink-flicker { 
+          animation: blink-active-stutter 0.7s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards; 
+        }
+        /* triggers on entry/re-mount */
+        .animate-blink-once { 
+          animation: blink-active-stutter 0.35s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards; 
+        }
+
         @keyframes fuchsia-glow-pulse {
           0%, 100% { text-shadow: 0 0 4px #d946ef, 0 0 10px rgba(217, 70, 239, 0.2); }
           50% { text-shadow: 0 0 8px #d946ef, 0 0 15px rgba(217, 70, 239, 0.4); }
@@ -1019,12 +1082,14 @@ const Home: React.FC<HomeProps> = ({ onBack }) => {
         .animate-shuttle-spin { animation: shuttle-spin 12s linear infinite; transform-style: preserve-3d; perspective: 500px; }
         .animate-thruster-pulse { animation: thruster-pulse 0.2s ease-in-out infinite; }
 
-        /* ABOUT SPACE ANIMATIONS (Cinematic movement) */
-        @keyframes earth-orbit-float {
-            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-            50% { transform: translateY(-20px) scale(1.01) rotate(0.3deg); }
+        /* ABOUT SPACE ANIMATIONS (Enhanced organic drift) */
+        @keyframes earth-orbit-drift {
+            0%, 100% { transform: scale(1) translate(0, 0) rotate(0deg); }
+            25% { transform: scale(1.02) translate(15px, -8px) rotate(0.1deg); }
+            50% { transform: scale(1.01) translate(-10px, 15px) rotate(-0.15deg); }
+            75% { transform: scale(1.03) translate(-15px, -10px) rotate(0.05deg); }
         }
-        .animate-earth-orbit-float { animation: earth-orbit-float 40s ease-in-out infinite; }
+        .animate-earth-orbit-drift { animation: earth-orbit-drift 40s ease-in-out infinite; }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
