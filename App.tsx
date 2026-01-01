@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
@@ -9,6 +10,31 @@ import MusicPlayer from './components/MusicPlayer';
 import Home from './components/Home';
 import LoadingScreen from './components/LoadingScreen';
 import SocialButtons from './components/SocialButtons';
+
+// Simple Centered SubPage Component
+const SubPage: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
+  <div className="fixed inset-0 z-[250] flex flex-col items-center justify-center bg-[#050505] font-mono select-none">
+    {/* Background Gradient */}
+    <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_100%,rgba(20,5,25,1)_0%,rgba(5,5,5,1)_100%)] opacity-100"></div>
+    
+    <div className="relative z-10 flex flex-col items-center animate-fade-in">
+        <h1 className="text-5xl md:text-8xl lg:text-9xl font-mono font-bold tracking-[0.2em] text-white uppercase drop-shadow-[0_0_30px_rgba(217,70,239,0.5)] mb-12">
+          {title}
+        </h1>
+        
+        <button 
+          onClick={onBack}
+          className="px-8 py-3 border border-fuchsia-500/30 text-fuchsia-400 font-mono text-sm tracking-widest rounded-md hover:bg-fuchsia-500/10 hover:shadow-[0_0_20px_rgba(217,70,239,0.3)] transition-all duration-300 active:scale-95"
+        >
+          {/* Fix: Use string literal for text containing '<' to avoid JSX parsing error */}
+          {"< RETURN_TO_BASE"}
+        </button>
+    </div>
+    
+    {/* Global Scanlines */}
+    <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 bg-[length:100%_2px,3px_100%] opacity-20"></div>
+  </div>
+);
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
@@ -21,6 +47,7 @@ function App() {
 
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [showHome, setShowHome] = useState(false);
+  const [currentSection, setCurrentSection] = useState('HOME');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showTransitionLoader, setShowTransitionLoader] = useState(false);
   
@@ -29,7 +56,7 @@ function App() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [bgBurst, setBgBurst] = useState(0);
 
-  // Initial Boot Sequence (Only happens once on site load)
+  // Initial Boot Sequence
   useEffect(() => {
     const loadTimer = setTimeout(() => {
       setIsAppLoading(false);
@@ -44,35 +71,44 @@ function App() {
   /**
    * Universal Transition Orchestrator
    */
-  const triggerTransition = (targetIsHome: boolean) => {
+  const triggerTransition = (targetIsHome: boolean, sectionName: string = 'HOME') => {
     setIsTransitioning(true);
     
-    // Step 2: Show the transition screen after the initial "zoom out" starts
     setTimeout(() => {
         setShowTransitionLoader(true);
     }, 800);
 
-    // Step 3: Swap the underlying content mid-transition
     setTimeout(() => {
         setShowHome(targetIsHome);
+        setCurrentSection(sectionName);
     }, 5500);
 
-    // Step 4: Final cleanup
     setTimeout(() => {
         setShowTransitionLoader(false);
         setIsTransitioning(false);
     }, 6500);
   };
 
-  const handleEnter = () => triggerTransition(true);
-  const handleHomeBack = () => triggerTransition(false);
+  const handleEnter = () => triggerTransition(true, 'HOME');
+  const handleHomeBack = () => triggerTransition(false, 'HOME');
+  const handleSectionSelect = (section: string) => {
+      // If choosing same section, do nothing
+      if (section === currentSection) return;
+      
+      // If clicking HOME from a subpage, or HOME from anywhere
+      if (section === 'HOME') {
+          triggerTransition(true, 'HOME');
+      } else {
+          // Navigating to GALLERY, MODULES, etc.
+          triggerTransition(true, section);
+      }
+  };
 
   const handleLogoClick = () => {
     if (isLayoutExpanded) {
         if (isMinimized) {
             setIsMinimized(false);
         } else {
-            // Adds more persistent gradient blobs to the background
             setBgBurst(prev => prev + 1);
         }
     } else {
@@ -93,11 +129,10 @@ function App() {
   return (
     <div className="min-h-screen w-full text-white flex flex-col items-center justify-center relative overflow-hidden font-sans bg-[#050505]">
       
-      {/* PERSISTENT STABLE BACKGROUND LAYER (Z-0) */}
+      {/* PERSISTENT BACKGROUND */}
       <div 
         className={`fixed inset-0 z-0 transition-opacity duration-1000 ${showHome ? 'opacity-40' : 'opacity-100'}`}
         style={{
-          // Deeper base to allow dynamic blobs to pop
           background: 'radial-gradient(circle at 50% 100%, rgba(20, 5, 25, 1) 0%, rgba(5, 5, 5, 1) 100%)'
         }}
       >
@@ -107,22 +142,17 @@ function App() {
         <MatrixRain active={isMusicPlaying} />
       </div>
 
-      {/* PERSISTENT AUDIO PLAYER (Z-300) */}
       <MusicPlayer 
         onPlayChange={setIsMusicPlaying} 
         hideButton={showHome || !showMain || isTransitioning} 
       />
       
-      {/* INITIAL BOOT LOADING SCREEN */}
       {isAppLoading && <LoadingScreen />}
-
-      {/* TRANSITION LOADING SCREEN (Z-500) */}
       {showTransitionLoader && <LoadingScreen isTransition={true} />}
 
-      {/* FULL-SCREEN BLACK VOID OVERLAY (Z-400) */}
       <div className={`fixed inset-0 z-[400] bg-black transition-opacity duration-1000 ${isTransitioning ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}></div>
 
-      {/* LANDING PAGE WRAPPER */}
+      {/* LANDING PAGE */}
       {!showHome && (
         <div className={`
           fixed inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out z-[200] pointer-events-none
@@ -158,17 +188,23 @@ function App() {
         </div>
       )}
 
-      {/* HOME PAGE WRAPPER */}
+      {/* RENDER HOME OR SUBPAGES */}
       {showHome && (
-        <div className={`
-          fixed inset-0 w-full h-full transition-all duration-[1200ms] ease-out z-[200] pointer-events-none
-          ${isTransitioning ? 'blur-[50px] scale-[0.8] opacity-0' : 'blur-0 scale-100 opacity-100'}
-        `}>
-          <Home onBack={handleHomeBack} />
-        </div>
+        <>
+          {currentSection === 'HOME' ? (
+            <div className={`
+              fixed inset-0 w-full h-full transition-all duration-[1200ms] ease-out z-[200] pointer-events-none
+              ${isTransitioning ? 'blur-[50px] scale-[0.8] opacity-0' : 'blur-0 scale-100 opacity-100'}
+            `}>
+              <Home onBack={handleHomeBack} onSectionChange={handleSectionSelect} initialSection={currentSection} />
+            </div>
+          ) : (
+            <SubPage title={currentSection} onBack={() => handleSectionSelect('HOME')} />
+          )}
+        </>
       )}
 
-      {/* GLOBAL SCANLINES / POST-PROCESS LAYER */}
+      {/* GLOBAL SCANLINES */}
       <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[600] bg-[length:100%_2px,3px_100%] opacity-20"></div>
 
     </div>

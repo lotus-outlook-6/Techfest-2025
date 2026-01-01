@@ -3,19 +3,22 @@ import React, { useState, useRef, useEffect } from 'react';
 
 const SECTIONS = ['HOME', 'GALLERY', 'MODULES', 'EVENTS', 'TEAM'];
 
-const NavbarSlider: React.FC = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+interface NavbarSliderProps {
+  onSelect?: (section: string) => void;
+  initialSection?: string;
+}
+
+const NavbarSlider: React.FC<NavbarSliderProps> = ({ onSelect, initialSection = 'HOME' }) => {
+  const initialIndex = SECTIONS.indexOf(initialSection);
+  const [activeIndex, setActiveIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
   const [hovering, setHovering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  // Default to true so it starts as a pill on entry
   const [isSticky, setIsSticky] = useState(true);
   const trackRef = useRef<HTMLDivElement>(null);
   const stickyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Start the 5-minute countdown immediately on mount
     startStickyTimer();
-    
     return () => {
       if (stickyTimerRef.current) window.clearTimeout(stickyTimerRef.current);
     };
@@ -27,7 +30,6 @@ const NavbarSlider: React.FC = () => {
 
   const startStickyTimer = () => {
     if (stickyTimerRef.current) window.clearTimeout(stickyTimerRef.current);
-    // 5 minutes (300,000ms)
     stickyTimerRef.current = window.setTimeout(() => {
       setIsSticky(false);
       stickyTimerRef.current = null;
@@ -40,6 +42,11 @@ const NavbarSlider: React.FC = () => {
     audio.volume = 0.15;
     audio.play().catch(() => {});
     refreshExpansion();
+
+    // Notify the parent component of the section change
+    if (onSelect) {
+        onSelect(SECTIONS[index]);
+    }
   };
 
   const refreshExpansion = () => {
@@ -72,7 +79,7 @@ const NavbarSlider: React.FC = () => {
   const isActive = hovering || isDragging || isSticky;
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center pointer-events-auto">
         {/* The Slider Track */}
         <div 
             ref={trackRef}
