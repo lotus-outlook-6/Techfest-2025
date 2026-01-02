@@ -6,6 +6,7 @@ const Gallery: React.FC = () => {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const parallaxRef = useRef<SVGGElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Ref-based tracking for high-performance animation
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -13,29 +14,93 @@ const Gallery: React.FC = () => {
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    
+    const handleResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      
-      // Target values normalized from -1 to 1
       mouseRef.current.x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
       mouseRef.current.y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
     };
 
-    const animate = () => {
-      // Linear Interpolation (lerp) for smooth easing
+    const animate = (time: number) => {
       const easing = 0.08; 
-      
       smoothedRef.current.x += (mouseRef.current.x - smoothedRef.current.x) * easing;
       smoothedRef.current.y += (mouseRef.current.y - smoothedRef.current.y) * easing;
 
+      // Parallax for the logo
       if (parallaxRef.current) {
-        // Multiplier reduced to 5 for "very slight" movement
         const moveX = smoothedRef.current.x * 5;
         const moveY = smoothedRef.current.y * 5;
-        
-        // translate3d combined with toFixed(4) keeps the rendering crisp on sub-pixels
         parallaxRef.current.style.transform = `translate3d(${moveX.toFixed(4)}px, ${moveY.toFixed(4)}px, 0)`;
+      }
+
+      // Draw Canvas Matrix
+      ctx.clearRect(0, 0, width, height);
+      
+      const spacing = 32;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      
+      // Counter-parallax for the matrix background
+      const offsetX = smoothedRef.current.x * -30;
+      const offsetY = smoothedRef.current.y * -30;
+
+      // Pulse logic
+      const speed = 0.002;
+      const waveFrequency = 0.008;
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
+      ctx.shadowBlur = 8;
+
+      for (let x = -spacing; x < width + spacing * 2; x += spacing) {
+        for (let y = -spacing; y < height + spacing * 2; y += spacing) {
+          const posX = x + offsetX;
+          const posY = y + offsetY;
+          
+          const dx = posX - centerX;
+          const dy = posY - centerY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          // Radial wave calculation
+          const pulse = Math.sin(time * speed - dist * waveFrequency);
+          const normalizedPulse = (pulse + 1) / 2; // 0 to 1
+          
+          // Dot scaling - larger as requested
+          const baseRadius = 1.2;
+          const extraRadius = 3.5; // Making it significantly larger during enlarge
+          const currentRadius = baseRadius + (normalizedPulse * extraRadius);
+          
+          // Apply opacity based on pulse
+          const opacity = 0.1 + (normalizedPulse * 0.5);
+          
+          // Radial mask imitation: fade out towards edges
+          const maskStrength = Math.max(0, 1 - dist / (width * 0.6));
+          
+          if (maskStrength > 0.05) {
+            ctx.globalAlpha = opacity * maskStrength;
+            ctx.beginPath();
+            ctx.arc(posX, posY, currentRadius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
       }
 
       rafRef.current = requestAnimationFrame(animate);
@@ -45,6 +110,7 @@ const Gallery: React.FC = () => {
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
@@ -59,19 +125,37 @@ const Gallery: React.FC = () => {
       <style>{`
         @keyframes subtle-breathing {
           0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.015); } /* Minimal zoom for professional look */
+          50% { transform: scale(1.015); }
         }
         .animate-subtle-breathing {
           animation: subtle-breathing 16s ease-in-out infinite;
         }
         .parallax-layer {
           will-change: transform;
-          backface-visibility: hidden; /* Fixes "sudden blur" by keeping layer in GPU */
+          backface-visibility: hidden;
           transform-style: preserve-3d;
+        }
+
+        @keyframes neon-flicker-subtle {
+          0%, 100% { filter: drop-shadow(0 0 10px #ff00ff) drop-shadow(0 0 25px rgba(255, 0, 255, 0.6)); stroke-opacity: 1; }
+          50% { filter: drop-shadow(0 0 18px #ff00ff) drop-shadow(0 0 40px rgba(255, 0, 255, 0.8)); stroke-opacity: 0.9; }
+        }
+
+        .neon-y-outline {
+          animation: neon-flicker-subtle 4s ease-in-out infinite;
+          stroke: #ff00ff;
+          stroke-width: 2.5;
         }
       `}</style>
 
-      <div className="relative z-10 w-[300px] md:w-[500px] aspect-square flex items-center justify-center">
+      {/* OPTIMIZED CANVAS BACKGROUND */}
+      <canvas 
+        ref={canvasRef}
+        className="absolute inset-0 z-1 pointer-events-none"
+      />
+
+      {/* MAIN LOGO CONTENT */}
+      <div className="relative z-20 w-[300px] md:w-[500px] aspect-square flex items-center justify-center">
         <svg 
           viewBox="0 0 240 240" 
           className="w-full h-full"
@@ -100,7 +184,6 @@ const Gallery: React.FC = () => {
 
           {/* MAIN CLIPPED CONTENT */}
           <g clipPath="url(#yClipStrict)">
-            {/* Solid background to prevent bleed-through */}
             <path d={yPath} fill="#050505" />
             
             {/* Parallax Group */}
@@ -116,18 +199,15 @@ const Gallery: React.FC = () => {
               </g>
             </g>
             
-            {/* Dark wash for contrast */}
             <path d={yPath} fill="black" opacity="0.1" pointerEvents="none" />
           </g>
 
-          {/* WHITE FRAME OUTLINE */}
+          {/* NEON FRAME OUTLINE */}
           <path 
             d={yPath} 
-            stroke="white" 
-            strokeWidth="2" 
             strokeLinejoin="round" 
             strokeLinecap="round"
-            className="drop-shadow-[0_0_12px_rgba(255,255,255,0.6)]"
+            className="neon-y-outline"
           />
 
           {/* TECHNICAL MEASUREMENT MARKS */}
