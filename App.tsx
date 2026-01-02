@@ -11,6 +11,7 @@ import LoadingScreen from './components/LoadingScreen';
 import SocialButtons from './components/SocialButtons';
 import NavbarSlider from './components/NavbarSlider';
 import RegisterButton from './components/RegisterButton';
+import Gallery from './components/Gallery';
 
 // Generic View for Sub-Sections
 const SectionView: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
@@ -215,7 +216,9 @@ function App() {
               <SectionView title="HOME">
                 <Home onBack={handleHomeBack} onSectionChange={handleSectionSelect} initialSection={currentSection} hideNavbar={true} />
               </SectionView>
-              <SectionView title="GALLERY" />
+              <SectionView title="GALLERY">
+                <Gallery />
+              </SectionView>
               <SectionView title="MODULES" />
               <SectionView title="EVENTS" />
               <SectionView title="TEAM" />
