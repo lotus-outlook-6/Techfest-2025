@@ -1,5 +1,7 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+type AnimPhase = 'idle' | 'y' | 't' | 'g' | 'waiting' | 'all';
 
 const Gallery: React.FC = () => {
   const yPath = "M 25 30 H 85 L 120 80 L 155 30 H 215 L 145 130 V 210 H 95 V 130 L 25 30 Z";
@@ -8,6 +10,10 @@ const Gallery: React.FC = () => {
   const parallaxRef = useRef<SVGGElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
+  const [phase, setPhase] = useState<AnimPhase>('idle');
+  const [isHovered, setIsHovered] = useState(false);
+  const isAnimatingRef = useRef(false);
+
   // Ref-based tracking for high-performance animation
   const mouseRef = useRef({ x: 0, y: 0 });
   const smoothedRef = useRef({ x: 0, y: 0 });
@@ -44,68 +50,43 @@ const Gallery: React.FC = () => {
       smoothedRef.current.x += (mouseRef.current.x - smoothedRef.current.x) * easing;
       smoothedRef.current.y += (mouseRef.current.y - smoothedRef.current.y) * easing;
 
-      // Parallax for the logo
       if (parallaxRef.current) {
         const moveX = smoothedRef.current.x * 5;
         const moveY = smoothedRef.current.y * 5;
         parallaxRef.current.style.transform = `translate3d(${moveX.toFixed(4)}px, ${moveY.toFixed(4)}px, 0)`;
       }
 
-      // Draw Canvas Matrix
       ctx.clearRect(0, 0, width, height);
-      
       const spacing = 32;
       const centerX = width / 2;
       const centerY = height / 2;
-      
-      // Counter-parallax for the matrix background
       const offsetX = smoothedRef.current.x * -30;
       const offsetY = smoothedRef.current.y * -30;
-
-      // Pulse logic
       const speed = 0.002;
       const waveFrequency = 0.008;
 
-      // Global shadow settings for neon glow
       ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
-      
       for (let x = -spacing; x < width + spacing * 2; x += spacing) {
         for (let y = -spacing; y < height + spacing * 2; y += spacing) {
           const posX = x + offsetX;
           const posY = y + offsetY;
-          
           const dx = posX - centerX;
           const dy = posY - centerY;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          // Radial wave calculation
           const pulse = Math.sin(time * speed - dist * waveFrequency);
-          const normalizedPulse = (pulse + 1) / 2; // 0 to 1
-          
-          // Dot scaling
-          const baseRadius = 1.0;
-          const extraRadius = 4.5; // Larger peak size for better "enlarge" effect
-          const currentRadius = baseRadius + (normalizedPulse * extraRadius);
-          
-          // Apply opacity based on pulse
+          const normalizedPulse = (pulse + 1) / 2;
+          const currentRadius = 1.0 + (normalizedPulse * 4.5);
           const opacity = 0.15 + (normalizedPulse * 0.6);
-          
-          // Radial mask imitation: fade out towards edges
           const maskStrength = Math.max(0, 1 - dist / (width * 0.65));
-          
           if (maskStrength > 0.05) {
-            // Enhanced white/grey neon glow
-            ctx.shadowBlur = 4 + (normalizedPulse * 12); // Dynamic glow intensity
+            ctx.shadowBlur = 4 + (normalizedPulse * 12);
             ctx.fillStyle = `rgba(255, 255, 255, ${opacity * maskStrength})`;
-            ctx.globalAlpha = 1.0; // Handled by fillStyle
-            
             ctx.beginPath();
             ctx.arc(posX, posY, currentRadius, 0, Math.PI * 2);
             ctx.fill();
           }
         }
       }
-
       rafRef.current = requestAnimationFrame(animate);
     };
 
@@ -119,11 +100,73 @@ const Gallery: React.FC = () => {
     };
   }, []);
 
+  const triggerAnimationSequence = () => {
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
+    setIsHovered(true);
+
+    // Sequence timing
+    // 1. Yantraksh pops (0 - 0.8s)
+    setPhase('y');
+    
+    setTimeout(() => {
+      // 2. Technical pops (0.8 - 1.6s)
+      setPhase('t');
+    }, 800);
+
+    setTimeout(() => {
+      // 3. Gallery pops (1.6 - 2.4s)
+      setPhase('g');
+    }, 1600);
+
+    setTimeout(() => {
+      // 4. Waiting / Reset Phase (2.4 - 3.4s) - Duration reduced to 1.0s
+      // All text stays behind Y, glowing, in a scale-down state
+      setPhase('waiting');
+    }, 2400);
+
+    setTimeout(() => {
+      // 5. All together in FRONT (3.4 - 5.4s) - Duration: 2s
+      setPhase('all');
+    }, 3400);
+
+    setTimeout(() => {
+      // End of animation
+      setPhase('idle');
+      setIsHovered(false);
+      isAnimatingRef.current = false;
+    }, 5400);
+  };
+
+  const getTextStyle = (target: AnimPhase) => {
+    const isActivelyPopped = phase === 'all' || phase === target;
+    const isGlowVisible = isHovered;
+
+    return {
+      // Use opacity high when hovered
+      opacity: isGlowVisible ? 1 : 0.7,
+      
+      // Intense glow when popped, soft glow when behind during sequence
+      filter: isGlowVisible 
+        ? `drop-shadow(0 0 30px rgba(255,255,255,${isActivelyPopped ? 0.8 : 0.2}))` 
+        : 'none',
+      
+      // Depth Sorting:
+      // Popped: translateZ(150px) - clearly in front of the logo (which is at 0)
+      // Normal/Waiting: translateZ(-80px) - clearly behind the logo
+      transform: isActivelyPopped 
+        ? 'scale(1.15) translateZ(150px)' 
+        : 'scale(1) translateZ(-80px)',
+      
+      transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
+    };
+  };
+
   return (
     <div 
       ref={containerRef}
       className="relative flex items-center justify-center w-full h-full bg-transparent select-none overflow-hidden"
-      style={{ WebkitFontSmoothing: 'antialiased' }}
+      style={{ WebkitFontSmoothing: 'antialiased', perspective: '1200px' }}
     >
       <style>{`
         @keyframes subtle-breathing {
@@ -153,122 +196,108 @@ const Gallery: React.FC = () => {
         .gallery-depth-text {
           font-family: 'Anton', sans-serif;
           letter-spacing: 0.15em;
-          filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
           color: white;
           white-space: nowrap;
           line-height: 1;
-          display: inline-block;
-          opacity: 0.7;
-          /* Normal scaling, no elongation */
-          transform: none;
+          display: block;
+          text-align: center;
+          will-change: transform, opacity, filter;
+        }
+
+        .preserve-3d-scene {
+          transform-style: preserve-3d;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
         }
       `}</style>
 
-      {/* OPTIMIZED CANVAS BACKGROUND */}
+      {/* CANVAS BACKGROUND */}
       <canvas 
         ref={canvasRef}
-        className="absolute inset-0 z-1 pointer-events-none"
+        className="absolute inset-0 z-0 pointer-events-none"
       />
 
-      {/* MAIN LAYOUT WRAPPER */}
-      <div className="relative z-20 flex items-center justify-center w-full max-w-7xl h-full px-4 overflow-visible">
+      {/* 3D PERSPECTIVE SCENE CONTAINER */}
+      <div className="preserve-3d-scene">
         
-        {/* LEFT BOX REGION - YANTRAKSH */}
-        <div className="hidden md:flex flex-1 items-center justify-end h-full overflow-visible pr-0 relative">
-          <div className="absolute right-[-80px] lg:right-[-140px] z-10 pointer-events-none">
-            <span className="gallery-depth-text md:text-[3.8rem] lg:text-[6.5rem]">
-              YANTRAKSH
-            </span>
-          </div>
-        </div>
-
-        {/* CENTER LOGO - Foreground */}
-        <div className="relative z-30 w-[240px] md:w-[380px] lg:w-[460px] aspect-square flex items-center justify-center shrink-0">
-          <svg 
-            viewBox="0 0 240 240" 
-            className="w-full h-full drop-shadow-[0_0_60px_rgba(0,0,0,0.95)]"
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
+        {/* TEXT LAYER - Sorted by translateZ in getTextStyle */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-16 md:gap-20 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
+          <span 
+            className="gallery-depth-text text-[4rem] md:text-[6rem] lg:text-[8rem]"
+            style={getTextStyle('y')}
           >
-            <defs>
-              <pattern 
-                id="spacePattern" 
-                patternUnits="userSpaceOnUse" 
-                width="80" 
-                height="80"
-              >
-                <image 
-                  href="https://img.freepik.com/premium-vector/seamless-pattern-with-cute-space-doodles-black-background_150234-147063.jpg?w=1480" 
-                  width="80" 
-                  height="80" 
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              </pattern>
-
-              <clipPath id="yClipStrict">
-                <path d={yPath} />
-              </clipPath>
-            </defs>
-
-            {/* MAIN CLIPPED CONTENT */}
-            <g clipPath="url(#yClipStrict)">
-              <path d={yPath} fill="#050505" />
-              
-              {/* Parallax Group */}
-              <g ref={parallaxRef} className="parallax-layer">
-                <g className="animate-subtle-breathing" style={{ transformOrigin: '120px 120px' }}>
-                  <rect 
-                    x="-40" 
-                    y="-40" 
-                    width="320" 
-                    height="320" 
-                    fill="url(#spacePattern)" 
-                  />
-                </g>
-              </g>
-              
-              <path d={yPath} fill="black" opacity="0.1" pointerEvents="none" />
-            </g>
-
-            {/* NEON FRAME OUTLINE */}
-            <path 
-              d={yPath} 
-              strokeLinejoin="round" 
-              strokeLinecap="round"
-              className="neon-y-outline"
-            />
-
-            {/* TECHNICAL MEASUREMENT MARKS */}
-            <g stroke="white" strokeWidth="0.5" opacity="0.2">
-              <line x1="25" y1="20" x2="25" y2="40" />
-              <line x1="15" y1="30" x2="35" y2="30" />
-              
-              <line x1="215" y1="20" x2="215" y2="40" />
-              <line x1="205" y1="30" x2="225" y2="30" />
-              
-              <line x1="120" y1="70" x2="120" y2="90" />
-              <line x1="110" y1="80" x2="130" y2="80" />
-            </g>
-          </svg>
+            YANTRAKSH
+          </span>
+          <span 
+            className="gallery-depth-text text-[5rem] md:text-[7.5rem] lg:text-[10rem]"
+            style={getTextStyle('t')}
+          >
+            TECHNICAL
+          </span>
+          <span 
+            className="gallery-depth-text text-[4rem] md:text-[6rem] lg:text-[8rem]"
+            style={getTextStyle('g')}
+          >
+            GALLERY
+          </span>
         </div>
 
-        {/* RIGHT BOX REGION - GALLERY */}
-        <div className="hidden md:flex flex-1 items-center justify-start h-full overflow-visible pl-0 relative">
-          <div className="absolute left-[-80px] lg:left-[-140px] z-10 pointer-events-none">
-            <span className="gallery-depth-text md:text-[3.8rem] lg:text-[6.5rem]">
-              GALLERY
-            </span>
+        {/* LOGO LAYER - Anchored at Z=0 */}
+        <div 
+          className="relative pointer-events-auto"
+          style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
+          onMouseEnter={triggerAnimationSequence}
+        >
+          <div className="relative w-[240px] md:w-[380px] lg:w-[460px] aspect-square flex items-center justify-center shrink-0 cursor-pointer">
+            <svg 
+              viewBox="0 0 240 240" 
+              className="w-full h-full drop-shadow-[0_0_60px_rgba(0,0,0,0.95)]"
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <pattern id="spacePattern" patternUnits="userSpaceOnUse" width="80" height="80">
+                  <image 
+                    href="https://img.freepik.com/premium-vector/seamless-pattern-with-cute-space-doodles-black-background_150234-147063.jpg?w=1480" 
+                    width="80" height="80" preserveAspectRatio="xMidYMid slice"
+                  />
+                </pattern>
+                <clipPath id="yClipStrict">
+                  <path d={yPath} />
+                </clipPath>
+              </defs>
+
+              <g clipPath="url(#yClipStrict)">
+                <path d={yPath} fill="#050505" />
+                <g ref={parallaxRef} className="parallax-layer">
+                  <g className="animate-subtle-breathing" style={{ transformOrigin: '120px 120px' }}>
+                    <rect x="-40" y="-40" width="320" height="320" fill="url(#spacePattern)" />
+                  </g>
+                </g>
+                <path d={yPath} fill="black" opacity="0.1" pointerEvents="none" />
+              </g>
+
+              <path d={yPath} strokeLinejoin="round" strokeLinecap="round" className="neon-y-outline" />
+
+              <g stroke="white" strokeWidth="0.5" opacity="0.2">
+                <line x1="25" y1="20" x2="25" y2="40" />
+                <line x1="15" y1="30" x2="35" y2="30" />
+                <line x1="215" y1="20" x2="215" y2="40" />
+                <line x1="205" y1="30" x2="225" y2="30" />
+                <line x1="120" y1="70" x2="120" y2="90" />
+                <line x1="110" y1="80" x2="130" y2="80" />
+              </g>
+            </svg>
           </div>
         </div>
 
-        {/* MOBILE FALLBACK */}
-        <div className="md:hidden absolute -bottom-16 left-0 right-0 flex justify-center gap-4">
-           <span className="gallery-depth-text text-xl">YANTRAKSH</span>
-           <span className="gallery-depth-text text-xl">GALLERY</span>
-        </div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/5 font-mono text-[8px] tracking-[2.5em] uppercase">
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/5 font-mono text-[8px] tracking-[2.5em] uppercase pointer-events-none">
         AXIS_PATTERN_UPLINK
       </div>
     </div>
