@@ -10,7 +10,7 @@ interface GalleryImage {
   category: string;
 }
 
-const GALLERY_IMAGES: GalleryImage[] = [
+const INITIAL_IMAGES: GalleryImage[] = [
   { id: 1, title: 'NEURAL_LINK_v1', category: 'BIOTECH', url: 'https://images.unsplash.com/photo-1555664424-778a1e5e1b48?q=80&w=1000' },
   { id: 2, title: 'QUANTUM_CORE', category: 'ENERGY', url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000' },
   { id: 3, title: 'ORBITAL_STATION', category: 'AEROSPACE', url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000' },
@@ -27,10 +27,22 @@ const Gallery: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gallerySectionRef = useRef<HTMLDivElement>(null);
   
+  const [images, setImages] = useState<GalleryImage[]>(INITIAL_IMAGES);
   const [phase, setPhase] = useState<AnimPhase>('idle');
   const [isHovered, setIsHovered] = useState(false);
   const isAnimatingRef = useRef(false);
   const dwellTimerRef = useRef<number | null>(null);
+
+  // States for the 3D Stack / Carousel
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [autoRotation, setAutoRotation] = useState(0);
+  const rotationRef = useRef(0);
+  
+  // Spring-Loaded Slider States
+  const [sliderValue, setSliderValue] = useState(0); // -100 to 100
+  const isHoldingSlider = useRef(false);
+  const [isManualInteraction, setIsManualInteraction] = useState(false);
+  const resumeTimerRef = useRef<number | null>(null);
 
   const mouseRef = useRef({ x: 0, y: 0 });
   const smoothedRef = useRef({ x: 0, y: 0 });
@@ -73,6 +85,25 @@ const Gallery: React.FC = () => {
         parallaxRef.current.style.transform = `translate3d(${moveX.toFixed(4)}px, ${moveY.toFixed(4)}px, 0)`;
       }
 
+      // 1. Rotation Logic
+      if (isExpanded) {
+        if (Math.abs(sliderValue) > 1) {
+          const sensitivity = 0.035;
+          rotationRef.current = (rotationRef.current + sliderValue * sensitivity) % 360;
+        } else if (!isManualInteraction) {
+          rotationRef.current = (rotationRef.current + 0.15) % 360;
+        }
+        setAutoRotation(rotationRef.current);
+      }
+
+      // 2. Spring Physics for Slider
+      if (!isHoldingSlider.current && Math.abs(sliderValue) > 0.1) {
+        setSliderValue(prev => prev * 0.82); // Rapid decay to 0
+      } else if (!isHoldingSlider.current && Math.abs(sliderValue) <= 0.1) {
+        setSliderValue(0);
+      }
+
+      // Background Rendering
       ctx.clearRect(0, 0, width, height);
       const spacing = 32;
       const centerX = width / 2;
@@ -88,8 +119,7 @@ const Gallery: React.FC = () => {
           const posX = x + offsetX;
           const posY = y + offsetY;
           const dx = posX - centerX;
-          const dy = posY - centerY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dist = Math.sqrt(dx * dx + (posY - centerY) * (posY - centerY));
           const pulse = Math.sin(time * speed - dist * waveFrequency);
           const normalizedPulse = (pulse + 1) / 2;
           const currentRadius = 1.0 + (normalizedPulse * 4.5);
@@ -116,7 +146,15 @@ const Gallery: React.FC = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (dwellTimerRef.current) window.clearTimeout(dwellTimerRef.current);
     };
-  }, []);
+  }, [isExpanded, isManualInteraction, sliderValue]);
+
+  const resetManualInteractionTimer = () => {
+    setIsManualInteraction(true);
+    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = window.setTimeout(() => {
+      setIsManualInteraction(false);
+    }, 2000); 
+  };
 
   const triggerAnimationSequence = () => {
     if (isAnimatingRef.current) return;
@@ -168,6 +206,46 @@ const Gallery: React.FC = () => {
     };
   };
 
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isExpanded) return;
+    const val = parseFloat(e.target.value);
+    setSliderValue(val);
+    resetManualInteractionTimer();
+  };
+
+  const handleCollapse = () => {
+    if (!isExpanded) return;
+
+    // FIND THE FRONT-MOST IMAGE INDEX
+    const count = images.length;
+    const angleStep = 360 / count;
+    let frontIndex = 0;
+    let maxCos = -2;
+
+    for (let i = 0; i < count; i++) {
+      const itemRotation = (i * angleStep) + autoRotation;
+      const rad = (itemRotation * Math.PI) / 180;
+      const currentCos = Math.cos(rad);
+      if (currentCos > maxCos) {
+        maxCos = currentCos;
+        frontIndex = i;
+      }
+    }
+
+    const newImages = [...images];
+    const shifted = [];
+    for (let i = 0; i < count; i++) {
+      shifted.push(newImages[(frontIndex + i) % count]);
+    }
+
+    setImages(shifted);
+    setIsExpanded(false);
+    rotationRef.current = 0;
+    setAutoRotation(0);
+    setIsManualInteraction(false);
+    setSliderValue(0);
+  };
+
   return (
     <div 
       ref={containerRef}
@@ -213,6 +291,52 @@ const Gallery: React.FC = () => {
           50% { transform: translateY(-10px); }
         }
         .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
+
+        input[type=range].gallery-slider {
+          -webkit-appearance: none;
+          width: 100%;
+          background: transparent;
+          z-index: 10;
+        }
+        input[type=range].gallery-slider::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 4px;
+          cursor: pointer;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          border: none;
+        }
+        input[type=range].gallery-slider::-webkit-slider-thumb {
+          height: 24px;
+          width: 100px;
+          border-radius: 12px;
+          background: white;
+          cursor: pointer;
+          -webkit-appearance: none;
+          margin-top: -10px;
+          opacity: 0; /* Visual thumb is rendered separately below */
+        }
+
+        @keyframes flow-arrows-left {
+          0% { background-position: 100% 0; }
+          100% { background-position: 0% 0; }
+        }
+        @keyframes flow-arrows-right {
+          0% { background-position: 0% 0; }
+          100% { background-position: 100% 0; }
+        }
+
+        .arrow-flow-text {
+          background: linear-gradient(90deg, #d946ef 0%, #ffffff 50%, #d946ef 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          font-weight: 900;
+          font-family: monospace;
+          font-size: 16px;
+        }
+        .flow-left { animation: flow-arrows-left 2s linear infinite; }
+        .flow-right { animation: flow-arrows-right 2s linear infinite; }
       `}</style>
 
       {/* HERO SECTION */}
@@ -254,7 +378,6 @@ const Gallery: React.FC = () => {
           </div>
         </div>
 
-        {/* SCROLL TRIGGER BUTTON - Simplified grey arrow, moved higher */}
         <button 
           onClick={scrollToGallery}
           className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 group flex flex-col items-center outline-none animate-bounce-subtle"
@@ -270,47 +393,136 @@ const Gallery: React.FC = () => {
         </button>
       </section>
 
-      {/* SCROLLABLE IMAGES SECTION */}
-      <section ref={gallerySectionRef} className="min-h-screen w-full bg-[#050505]/80 backdrop-blur-md pt-20 pb-40 px-6 md:px-20 relative border-t border-fuchsia-500/10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
-            <div>
-              <h3 className="text-4xl md:text-6xl font-anton text-white tracking-wider uppercase mb-4">Project_Archives</h3>
-              <p className="text-gray-400 font-mono text-xs md:text-sm tracking-[0.2em] uppercase opacity-60">System Log: Accessing secure technical imagery...</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-px w-20 bg-fuchsia-500/30"></div>
-              <span className="text-fuchsia-500 font-mono text-xs font-bold">STATUS: STABLE</span>
-            </div>
+      {/* GALLERY SECTION */}
+      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent pt-2 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
+        <div className="max-w-7xl mx-auto flex flex-col items-center">
+          <div className="flex flex-col items-center justify-center mb-0">
+            <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
+              <span>YANTRAKSH</span>
+              <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">TECHNICAL GALLERY</span>
+            </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {GALLERY_IMAGES.map((img) => (
-              <div key={img.id} className="group relative aspect-[16/11] overflow-hidden rounded-2xl border border-white/5 bg-[#0c0c0c] transition-all duration-500 hover:border-fuchsia-500/40 hover:shadow-[0_0_40px_rgba(217,70,239,0.15)]">
-                <img 
-                  src={img.url} 
-                  alt={img.title} 
-                  className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+          {/* MAIN CLICKABLE REGION FOR CAROUSEL */}
+          <div 
+            className="relative w-full min-h-[420px] md:min-h-[460px] flex items-center justify-center perspective-[1500px] overflow-visible cursor-default"
+            onClick={() => { if(isExpanded) handleCollapse(); }}
+          >
+            <div 
+              className="relative w-[320px] md:w-[480px] aspect-[16/10] flex items-center justify-center"
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {images.map((img, index) => {
+                const count = images.length;
+                const angleStep = 360 / count;
+                const itemRotation = (index * angleStep) + autoRotation;
+                const rad = (itemRotation * Math.PI) / 180;
                 
-                <div className="absolute bottom-6 left-6 right-6 flex flex-col">
-                  <span className="text-[10px] text-fuchsia-500 font-bold tracking-widest mb-1">{img.category}</span>
-                  <h4 className="text-xl font-anton text-white tracking-wide uppercase transition-transform duration-500 group-hover:translate-x-2">{img.title}</h4>
-                </div>
+                const radius = window.innerWidth < 768 ? 200 : 380;
+                const x = isExpanded ? Math.sin(rad) * radius : 0;
+                const z = isExpanded ? Math.cos(rad) * radius - radius : -index * 20;
+                const rotateZ = isExpanded ? 0 : index * 2.5 - 5;
+                const opacity = isExpanded ? (0.2 + (Math.cos(rad) + 1) * 0.4) : 1;
+                const scale = isExpanded ? (0.75 + (Math.cos(rad) + 1) * 0.25) : 1;
+                const zIndex = isExpanded ? Math.round((Math.cos(rad) + 1) * 100) : count - index;
 
-                {/* TECH ACCENTS */}
-                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse"></div>
-                   <div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse delay-75"></div>
-                </div>
-              </div>
-            ))}
+                return (
+                  <div 
+                    key={img.id}
+                    className="absolute inset-0 rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]"
+                    style={{ 
+                      transform: `translate3d(${x}px, 0, ${z}px) rotateZ(${rotateZ}deg) scale(${scale})`,
+                      opacity: opacity,
+                      zIndex: zIndex,
+                      pointerEvents: isExpanded ? 'none' : (index === 0 ? 'auto' : 'none'),
+                      boxShadow: isExpanded ? `0 0 30px rgba(217,70,239,${(Math.cos(rad) + 1) * 0.1})` : '0 10px 40px rgba(0,0,0,0.5)',
+                      cursor: isExpanded ? 'default' : (index === 0 ? 'pointer' : 'default')
+                    }}
+                    onClick={(e) => {
+                      if (!isExpanded && index === 0) {
+                        e.stopPropagation();
+                        setIsExpanded(true);
+                      }
+                    }}
+                  >
+                    <img 
+                      src={img.url} 
+                      alt={img.title} 
+                      className={`w-full h-full object-cover transition-all duration-1000 ${isExpanded ? 'grayscale-0' : 'opacity-60 grayscale'}`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+                    
+                    <div className="absolute bottom-6 left-8 right-8 flex flex-col items-start">
+                      <span className="text-[10px] text-fuchsia-500 font-bold tracking-[0.3em] mb-1 uppercase">{img.category}</span>
+                      <h4 className="text-xl md:text-2xl font-anton text-white tracking-wide uppercase">{img.title}</h4>
+                    </div>
+
+                    <div className="absolute top-6 right-8 flex gap-1.5">
+                       <div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse"></div>
+                       <div className="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* SPRING-LOADED SCROLL BAR WITH CUSTOM THUMB */}
+          {isExpanded && (
+            <div className="w-full max-w-md px-10 mt-2 animate-fade-in flex flex-col items-center gap-4">
+               <div className="relative w-full h-8 flex items-center">
+                 {/* VISUAL TRACK */}
+                 <div className="absolute left-0 right-0 h-1 bg-white/10 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,1)]"></div>
+                 
+                 {/* ACTUAL SLIDER (Thumb hidden) */}
+                 <input 
+                   type="range" 
+                   min="-100" 
+                   max="100" 
+                   step="0.1"
+                   value={sliderValue}
+                   onChange={handleSliderChange}
+                   onMouseDown={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }}
+                   onMouseUp={() => { isHoldingSlider.current = false; }}
+                   onMouseLeave={() => { isHoldingSlider.current = false; }}
+                   onTouchStart={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }}
+                   onTouchEnd={() => { isHoldingSlider.current = false; }}
+                   className="gallery-slider relative z-20"
+                 />
+                 
+                 {/* CUSTOM VISUAL THUMB */}
+                 <div 
+                   className={`absolute top-1/2 -translate-y-1/2 w-[100px] h-[24px] bg-white rounded-full flex items-center justify-between px-3 pointer-events-none transition-all duration-300 ${isHoldingSlider.current ? 'scale-110 shadow-[0_0_50px_rgba(255,255,255,1),0_0_20px_rgba(217,70,239,0.8)]' : 'shadow-[0_0_25px_rgba(255,255,255,0.7)]'}`}
+                   style={{ 
+                     left: `calc(${(sliderValue + 100) / 2}% - 50px)`,
+                     zIndex: 15
+                   }}
+                 >
+                   <span className="arrow-flow-text flow-left opacity-80">«</span>
+                   <span className="arrow-flow-text flow-right opacity-80">»</span>
+                   
+                   {/* Central glowing vertical bar */}
+                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-3 bg-fuchsia-500/20 rounded-full"></div>
+                 </div>
+
+                 {/* Center Marker on Track */}
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-4 bg-white/20 pointer-events-none"></div>
+               </div>
+               
+               <div className="flex items-center gap-2 opacity-50 mt-1">
+                  <span className="text-[10px] text-white font-mono tracking-widest uppercase">
+                    {Math.abs(sliderValue) > 0 ? 'Manual Sync Active' : 'Auto Sync Stabilized'}
+                  </span>
+                  <div className={`w-1.5 h-1.5 rounded-full ${Math.abs(sliderValue) > 0 ? 'bg-fuchsia-500 animate-pulse' : 'bg-white/20'}`}></div>
+               </div>
+            </div>
+          )}
           
-          <div className="mt-32 text-center">
-            <div className="inline-block p-1 bg-gradient-to-r from-transparent via-fuchsia-500/20 to-transparent w-full mb-8"></div>
-            <p className="text-gray-500 font-mono text-[10px] tracking-[1em] uppercase">End of Directory</p>
+          <div className="mt-2 flex flex-col items-center gap-2 pointer-events-none opacity-50 transition-all duration-500">
+             <span className="text-white text-[10px] font-mono tracking-[0.5em] uppercase text-center px-4">
+               {isExpanded ? 'Drag slider left/right to rotate • Click carousel region to stack' : 'Click to expand files'}
+             </span>
+             <div className="w-12 h-px bg-white/20"></div>
           </div>
         </div>
       </section>
