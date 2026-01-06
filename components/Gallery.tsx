@@ -323,7 +323,7 @@ const Gallery: React.FC = () => {
         }
         input[type=range].gallery-slider::-webkit-slider-thumb {
           height: 22px;
-          width: 100px;
+          width: 80px;
           background: transparent;
           cursor: pointer;
           -webkit-appearance: none;
@@ -369,7 +369,7 @@ const Gallery: React.FC = () => {
           position: fixed;
           width: 180px;
           height: 180px;
-          background: radial-gradient(circle at center, rgba(217, 70, 239, 0.12) 0%, transparent 75%);
+          background: radial-gradient(circle at center, rgba(217, 70, 239, 0.2) 0%, transparent 75%);
           pointer-events: none;
           z-index: 50;
           transform: translate(-50%, -50%);
@@ -505,7 +505,7 @@ const Gallery: React.FC = () => {
           </div>
 
           {/* SPRING-LOADED SCROLL BAR (FADING PILL) */}
-          <div className="w-full max-w-lg px-10 relative overflow-hidden h-24 flex flex-col items-center">
+          <div className="w-full max-w-lg px-10 relative overflow-visible h-24 flex flex-col items-center">
             <div 
               className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             >
@@ -544,26 +544,20 @@ const Gallery: React.FC = () => {
                    className="gallery-slider relative z-20"
                  />
                  
-                 {/* CUSTOM VISUAL THUMB */}
+                 {/* CUSTOM VISUAL THUMB (Shortened and No Separator) */}
                  <div 
-                   className={`absolute top-1/2 -translate-y-1/2 w-[100px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
+                   className={`absolute top-1/2 -translate-y-1/2 w-[80px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
                     ${(isSliderHovered || isHoldingSlider.current) 
-                        ? 'bg-fuchsia-500 shadow-[0_0_60px_#d946ef,0_0_20px_rgba(255,255,255,0.4)] scale-110' 
-                        : 'bg-white shadow-[0_0_25px_rgba(255,255,255,0.7)]'}`}
+                        ? 'bg-fuchsia-500 shadow-[0_0_60px_#d946ef,0_0_30px_rgba(217,70,239,0.8),0_0_15px_rgba(255,255,255,0.4)] scale-110' 
+                        : 'bg-white shadow-[0_0_30px_rgba(255,255,255,0.7),0_0_10px_rgba(255,255,255,0.3)]'}`}
                    style={{ 
-                     left: `calc(${(sliderValue + 100) / 2}% - 50px)`,
+                     left: `calc(${(sliderValue + 100) / 2}% - 40px)`,
                      zIndex: 25
                    }}
                  >
                    <span className={`arrow-flow-text flow-left ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
                    <span className={`arrow-flow-text flow-right ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
-                   
-                   {/* Center bar */}
-                   <div className={`absolute left-1/2 -translate-x-1/2 w-[1.5px] h-3 rounded-full transition-colors duration-400 ${ (isSliderHovered || isHoldingSlider.current) ? 'bg-white/40' : 'bg-fuchsia-500/30'}`}></div>
                  </div>
-
-                 {/* Center Marker on Track */}
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-5 bg-white/20 pointer-events-none"></div>
                </div>
             </div>
           </div>
