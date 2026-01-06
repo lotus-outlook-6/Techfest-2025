@@ -40,6 +40,7 @@ const Gallery: React.FC = () => {
   
   // Spring-Loaded Slider States
   const [sliderValue, setSliderValue] = useState(0); // -100 to 100
+  const [isSliderHovered, setIsSliderHovered] = useState(false);
   const isHoldingSlider = useRef(false);
   const [isManualInteraction, setIsManualInteraction] = useState(false);
   const resumeTimerRef = useRef<number | null>(null);
@@ -87,18 +88,19 @@ const Gallery: React.FC = () => {
 
       // 1. Rotation Logic
       if (isExpanded) {
-        if (Math.abs(sliderValue) > 1) {
-          const sensitivity = 0.035;
-          rotationRef.current = (rotationRef.current + sliderValue * sensitivity) % 360;
+        if (Math.abs(sliderValue) > 0.5) {
+          const normalizedDisplacement = sliderValue / 100;
+          const variableSpeed = Math.sign(normalizedDisplacement) * Math.pow(Math.abs(normalizedDisplacement), 1.6) * 7.5;
+          rotationRef.current = (rotationRef.current + variableSpeed) % 360;
         } else if (!isManualInteraction) {
           rotationRef.current = (rotationRef.current + 0.15) % 360;
         }
         setAutoRotation(rotationRef.current);
       }
 
-      // 2. Spring Physics for Slider
+      // 2. Spring Physics for Slider (Snap back when not holding)
       if (!isHoldingSlider.current && Math.abs(sliderValue) > 0.1) {
-        setSliderValue(prev => prev * 0.82); // Rapid decay to 0
+        setSliderValue(prev => prev * 0.82); 
       } else if (!isHoldingSlider.current && Math.abs(sliderValue) <= 0.1) {
         setSliderValue(0);
       }
@@ -295,48 +297,74 @@ const Gallery: React.FC = () => {
         input[type=range].gallery-slider {
           -webkit-appearance: none;
           width: 100%;
+          height: 32px;
           background: transparent;
-          z-index: 10;
+          z-index: 30;
+          cursor: pointer;
         }
         input[type=range].gallery-slider::-webkit-slider-runnable-track {
           width: 100%;
-          height: 4px;
+          height: 6px;
           cursor: pointer;
           background: rgba(255, 255, 255, 0.1);
           border-radius: 4px;
-          border: none;
         }
         input[type=range].gallery-slider::-webkit-slider-thumb {
-          height: 24px;
+          height: 22px;
           width: 100px;
-          border-radius: 12px;
-          background: white;
+          background: transparent;
           cursor: pointer;
           -webkit-appearance: none;
-          margin-top: -10px;
-          opacity: 0; /* Visual thumb is rendered separately below */
+          margin-top: -8px;
         }
 
         @keyframes flow-arrows-left {
-          0% { background-position: 100% 0; }
+          0% { background-position: 200% 0; }
           100% { background-position: 0% 0; }
         }
         @keyframes flow-arrows-right {
-          0% { background-position: 0% 0; }
-          100% { background-position: 100% 0; }
+          0% { background-position: -200% 0; }
+          100% { background-position: 0% 0; }
         }
 
         .arrow-flow-text {
-          background: linear-gradient(90deg, #d946ef 0%, #ffffff 50%, #d946ef 100%);
           background-size: 200% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           font-weight: 900;
           font-family: monospace;
-          font-size: 16px;
+          font-size: 26px; 
+          letter-spacing: -3px;
+          transition: background 0.4s ease-in-out;
         }
-        .flow-left { animation: flow-arrows-left 2s linear infinite; }
-        .flow-right { animation: flow-arrows-right 2s linear infinite; }
+        
+        /* Normal State: White BG, Pink gradient arrows */
+        .arrows-normal {
+          background-image: linear-gradient(90deg, #d946ef 0%, #ffffff 50%, #d946ef 100%);
+        }
+        /* Hover State: Pink BG, White gradient arrows */
+        .arrows-inverted {
+          background-image: linear-gradient(90deg, #ffffff 0%, #d946ef 50%, #ffffff 100%);
+        }
+
+        .flow-left { animation: flow-arrows-left 1.2s linear infinite; }
+        .flow-right { animation: flow-arrows-right 1.2s linear infinite; }
+
+        .slider-pill-thumb {
+          transition: background-color 0.4s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+          will-change: left, transform, background-color;
+        }
+
+        .slider-cursor-glow {
+          position: fixed;
+          width: 180px;
+          height: 180px;
+          background: radial-gradient(circle at center, rgba(217, 70, 239, 0.12) 0%, transparent 75%);
+          pointer-events: none;
+          z-index: 50;
+          transform: translate(-50%, -50%);
+          mix-blend-mode: screen;
+        }
       `}</style>
 
       {/* HERO SECTION */}
@@ -467,12 +495,27 @@ const Gallery: React.FC = () => {
             </div>
           </div>
 
-          {/* SPRING-LOADED SCROLL BAR WITH CUSTOM THUMB */}
+          {/* SPRING-LOADED SCROLL BAR */}
           {isExpanded && (
-            <div className="w-full max-w-md px-10 mt-2 animate-fade-in flex flex-col items-center gap-4">
-               <div className="relative w-full h-8 flex items-center">
+            <div className="w-full max-w-lg px-10 mt-10 animate-fade-in flex flex-col items-center gap-4">
+               <div 
+                 className="relative w-full h-8 flex items-center group/slider"
+                 onMouseEnter={() => setIsSliderHovered(true)}
+                 onMouseLeave={() => setIsSliderHovered(false)}
+               >
+                 {/* CURSOR GLOW */}
+                 {(isSliderHovered || isHoldingSlider.current) && (
+                   <div 
+                     className="slider-cursor-glow"
+                     style={{ 
+                       left: `calc(${(sliderValue + 100) / 2}% - 0px)`,
+                       top: '50%'
+                     }}
+                   />
+                 )}
+
                  {/* VISUAL TRACK */}
-                 <div className="absolute left-0 right-0 h-1 bg-white/10 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,1)]"></div>
+                 <div className="absolute left-0 right-0 h-[3px] bg-white/10 rounded-full"></div>
                  
                  {/* ACTUAL SLIDER (Thumb hidden) */}
                  <input 
@@ -490,37 +533,40 @@ const Gallery: React.FC = () => {
                    className="gallery-slider relative z-20"
                  />
                  
-                 {/* CUSTOM VISUAL THUMB */}
+                 {/* CUSTOM VISUAL THUMB (Substantial Glowing Pill) */}
                  <div 
-                   className={`absolute top-1/2 -translate-y-1/2 w-[100px] h-[24px] bg-white rounded-full flex items-center justify-between px-3 pointer-events-none transition-all duration-300 ${isHoldingSlider.current ? 'scale-110 shadow-[0_0_50px_rgba(255,255,255,1),0_0_20px_rgba(217,70,239,0.8)]' : 'shadow-[0_0_25px_rgba(255,255,255,0.7)]'}`}
+                   className={`absolute top-1/2 -translate-y-1/2 w-[100px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
+                    ${(isSliderHovered || isHoldingSlider.current) 
+                        ? 'bg-fuchsia-500 shadow-[0_0_60px_#d946ef,0_0_20px_rgba(255,255,255,0.4)] scale-110' 
+                        : 'bg-white shadow-[0_0_25px_rgba(255,255,255,0.7)]'}`}
                    style={{ 
                      left: `calc(${(sliderValue + 100) / 2}% - 50px)`,
-                     zIndex: 15
+                     zIndex: 25
                    }}
                  >
-                   <span className="arrow-flow-text flow-left opacity-80">«</span>
-                   <span className="arrow-flow-text flow-right opacity-80">»</span>
+                   <span className={`arrow-flow-text flow-left ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
+                   <span className={`arrow-flow-text flow-right ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
                    
-                   {/* Central glowing vertical bar */}
-                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-3 bg-fuchsia-500/20 rounded-full"></div>
+                   {/* Center bar */}
+                   <div className={`absolute left-1/2 -translate-x-1/2 w-[1.5px] h-3 rounded-full transition-colors duration-400 ${ (isSliderHovered || isHoldingSlider.current) ? 'bg-white/40' : 'bg-fuchsia-500/30'}`}></div>
                  </div>
 
                  {/* Center Marker on Track */}
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-4 bg-white/20 pointer-events-none"></div>
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-5 bg-white/20 pointer-events-none"></div>
                </div>
                
-               <div className="flex items-center gap-2 opacity-50 mt-1">
+               <div className="flex items-center gap-2 opacity-50 mt-2">
                   <span className="text-[10px] text-white font-mono tracking-widest uppercase">
-                    {Math.abs(sliderValue) > 0 ? 'Manual Sync Active' : 'Auto Sync Stabilized'}
+                    {Math.abs(sliderValue) > 50 ? 'Full Throttle Rotation' : (Math.abs(sliderValue) > 0 ? 'Precision Manual Sync' : 'Auto Sync Stabilized')}
                   </span>
                   <div className={`w-1.5 h-1.5 rounded-full ${Math.abs(sliderValue) > 0 ? 'bg-fuchsia-500 animate-pulse' : 'bg-white/20'}`}></div>
                </div>
             </div>
           )}
           
-          <div className="mt-2 flex flex-col items-center gap-2 pointer-events-none opacity-50 transition-all duration-500">
+          <div className="mt-4 flex flex-col items-center gap-2 pointer-events-none opacity-50 transition-all duration-500">
              <span className="text-white text-[10px] font-mono tracking-[0.5em] uppercase text-center px-4">
-               {isExpanded ? 'Drag slider left/right to rotate • Click carousel region to stack' : 'Click to expand files'}
+               {isExpanded ? 'Drag further to accelerate • Release to stabilize' : 'Click to expand files'}
              </span>
              <div className="w-12 h-px bg-white/20"></div>
           </div>
