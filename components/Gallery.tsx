@@ -35,6 +35,7 @@ const Gallery: React.FC = () => {
 
   // States for the 3D Stack / Carousel
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showSlider, setShowSlider] = useState(false);
   const [autoRotation, setAutoRotation] = useState(0);
   const rotationRef = useRef(0);
   
@@ -215,8 +216,19 @@ const Gallery: React.FC = () => {
     resetManualInteractionTimer();
   };
 
+  const handleExpand = () => {
+    setIsExpanded(true);
+    // Delay slider appearance until expansion transition is well underway
+    setTimeout(() => {
+      setShowSlider(true);
+    }, 400);
+  };
+
   const handleCollapse = () => {
     if (!isExpanded) return;
+
+    // Hide slider immediately
+    setShowSlider(false);
 
     // FIND THE FRONT-MOST IMAGE INDEX
     const count = images.length;
@@ -338,11 +350,9 @@ const Gallery: React.FC = () => {
           transition: background 0.4s ease-in-out;
         }
         
-        /* Normal State: White BG, Pink gradient arrows */
         .arrows-normal {
           background-image: linear-gradient(90deg, #d946ef 0%, #ffffff 50%, #d946ef 100%);
         }
-        /* Hover State: Pink BG, White gradient arrows */
         .arrows-inverted {
           background-image: linear-gradient(90deg, #ffffff 0%, #d946ef 50%, #ffffff 100%);
         }
@@ -431,7 +441,6 @@ const Gallery: React.FC = () => {
             </h3>
           </div>
 
-          {/* MAIN CLICKABLE REGION FOR CAROUSEL */}
           <div 
             className="relative w-full min-h-[420px] md:min-h-[460px] flex items-center justify-center perspective-[1500px] overflow-visible cursor-default"
             onClick={() => { if(isExpanded) handleCollapse(); }}
@@ -469,7 +478,7 @@ const Gallery: React.FC = () => {
                     onClick={(e) => {
                       if (!isExpanded && index === 0) {
                         e.stopPropagation();
-                        setIsExpanded(true);
+                        handleExpand();
                       }
                     }}
                   >
@@ -495,11 +504,13 @@ const Gallery: React.FC = () => {
             </div>
           </div>
 
-          {/* SPRING-LOADED SCROLL BAR */}
-          {isExpanded && (
-            <div className="w-full max-w-lg px-10 mt-10 animate-fade-in flex flex-col items-center gap-4">
+          {/* SPRING-LOADED SCROLL BAR (FADING PILL) */}
+          <div className="w-full max-w-lg px-10 relative overflow-hidden h-24 flex flex-col items-center">
+            <div 
+              className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            >
                <div 
-                 className="relative w-full h-8 flex items-center group/slider"
+                 className="relative w-full h-12 flex items-center group/slider"
                  onMouseEnter={() => setIsSliderHovered(true)}
                  onMouseLeave={() => setIsSliderHovered(false)}
                >
@@ -533,7 +544,7 @@ const Gallery: React.FC = () => {
                    className="gallery-slider relative z-20"
                  />
                  
-                 {/* CUSTOM VISUAL THUMB (Substantial Glowing Pill) */}
+                 {/* CUSTOM VISUAL THUMB */}
                  <div 
                    className={`absolute top-1/2 -translate-y-1/2 w-[100px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
                     ${(isSliderHovered || isHoldingSlider.current) 
@@ -554,21 +565,7 @@ const Gallery: React.FC = () => {
                  {/* Center Marker on Track */}
                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-5 bg-white/20 pointer-events-none"></div>
                </div>
-               
-               <div className="flex items-center gap-2 opacity-50 mt-2">
-                  <span className="text-[10px] text-white font-mono tracking-widest uppercase">
-                    {Math.abs(sliderValue) > 50 ? 'Full Throttle Rotation' : (Math.abs(sliderValue) > 0 ? 'Precision Manual Sync' : 'Auto Sync Stabilized')}
-                  </span>
-                  <div className={`w-1.5 h-1.5 rounded-full ${Math.abs(sliderValue) > 0 ? 'bg-fuchsia-500 animate-pulse' : 'bg-white/20'}`}></div>
-               </div>
             </div>
-          )}
-          
-          <div className="mt-4 flex flex-col items-center gap-2 pointer-events-none opacity-50 transition-all duration-500">
-             <span className="text-white text-[10px] font-mono tracking-[0.5em] uppercase text-center px-4">
-               {isExpanded ? 'Drag further to accelerate • Release to stabilize' : 'Click to expand files'}
-             </span>
-             <div className="w-12 h-px bg-white/20"></div>
           </div>
         </div>
       </section>
