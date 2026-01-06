@@ -330,13 +330,13 @@ const Gallery: React.FC = () => {
           margin-top: -8px;
         }
 
-        @keyframes flow-arrows-left {
-          0% { background-position: 200% 0; }
-          100% { background-position: 0% 0; }
+        @keyframes flow-arrows-rtl {
+          0% { background-position: 0% 0; }
+          100% { background-position: 200% 0; }
         }
-        @keyframes flow-arrows-right {
-          0% { background-position: -200% 0; }
-          100% { background-position: 0% 0; }
+        @keyframes flow-arrows-ltr {
+          0% { background-position: 0% 0; }
+          100% { background-position: -200% 0; }
         }
 
         .arrow-flow-text {
@@ -357,8 +357,8 @@ const Gallery: React.FC = () => {
           background-image: linear-gradient(90deg, #ffffff 0%, #d946ef 50%, #ffffff 100%);
         }
 
-        .flow-left { animation: flow-arrows-left 1.2s linear infinite; }
-        .flow-right { animation: flow-arrows-right 1.2s linear infinite; }
+        .flow-rtl { animation: flow-arrows-rtl 1.2s linear infinite; }
+        .flow-ltr { animation: flow-arrows-ltr 1.2s linear infinite; }
 
         .slider-pill-thumb {
           transition: background-color 0.4s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
@@ -457,17 +457,23 @@ const Gallery: React.FC = () => {
                 
                 const radius = window.innerWidth < 768 ? 200 : 380;
                 const x = isExpanded ? Math.sin(rad) * radius : 0;
-                const z = isExpanded ? Math.cos(rad) * radius - radius : -index * 20;
+                // Use a larger range for Z depth sorting to ensure preserve-3d works cleanly
+                const z = isExpanded ? (Math.cos(rad) * radius - radius) : -index * 30;
                 const rotateZ = isExpanded ? 0 : index * 2.5 - 5;
                 const opacity = isExpanded ? (0.2 + (Math.cos(rad) + 1) * 0.4) : 1;
                 const scale = isExpanded ? (0.75 + (Math.cos(rad) + 1) * 0.25) : 1;
-                const zIndex = isExpanded ? Math.round((Math.cos(rad) + 1) * 100) : count - index;
+                
+                // When expanded, we rely on preserve-3d and translate3d Z position for sorting.
+                // When collapsed, we can use simple stack order.
+                const zIndex = isExpanded ? 0 : count - index;
 
                 return (
                   <div 
                     key={img.id}
-                    className="absolute inset-0 rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)]"
+                    className="absolute inset-0 rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
                     style={{ 
+                      // Removing discrete 'transform' from transition during continuous rotation to keep it smooth
+                      transitionProperty: isExpanded ? 'opacity, scale, border-color, box-shadow' : 'all',
                       transform: `translate3d(${x}px, 0, ${z}px) rotateZ(${rotateZ}deg) scale(${scale})`,
                       opacity: opacity,
                       zIndex: zIndex,
@@ -492,11 +498,6 @@ const Gallery: React.FC = () => {
                     <div className="absolute bottom-6 left-8 right-8 flex flex-col items-start">
                       <span className="text-[10px] text-fuchsia-500 font-bold tracking-[0.3em] mb-1 uppercase">{img.category}</span>
                       <h4 className="text-xl md:text-2xl font-anton text-white tracking-wide uppercase">{img.title}</h4>
-                    </div>
-
-                    <div className="absolute top-6 right-8 flex gap-1.5">
-                       <div className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse"></div>
-                       <div className="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
                     </div>
                   </div>
                 );
@@ -544,7 +545,7 @@ const Gallery: React.FC = () => {
                    className="gallery-slider relative z-20"
                  />
                  
-                 {/* CUSTOM VISUAL THUMB (Shortened and No Separator) */}
+                 {/* CUSTOM VISUAL THUMB (Optimized Light Flow) */}
                  <div 
                    className={`absolute top-1/2 -translate-y-1/2 w-[80px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
                     ${(isSliderHovered || isHoldingSlider.current) 
@@ -555,8 +556,8 @@ const Gallery: React.FC = () => {
                      zIndex: 25
                    }}
                  >
-                   <span className={`arrow-flow-text flow-left ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
-                   <span className={`arrow-flow-text flow-right ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
+                   <span className={`arrow-flow-text flow-rtl ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
+                   <span className={`arrow-flow-text flow-ltr ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
                  </div>
                </div>
             </div>
