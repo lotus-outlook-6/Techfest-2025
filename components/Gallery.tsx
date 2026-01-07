@@ -20,6 +20,7 @@ const INITIAL_IMAGES: GalleryImage[] = [
 ];
 
 const Gallery: React.FC = () => {
+  // Y-Path coordinates: Top is at y=30, Bottom is at y=210. Height is 180.
   const yPath = "M 25 30 H 85 L 120 80 L 155 30 H 215 L 145 130 V 210 H 95 V 130 L 25 30 Z";
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,8 +31,10 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>(INITIAL_IMAGES);
   const [phase, setPhase] = useState<AnimPhase>('idle');
   const [isHovered, setIsHovered] = useState(false);
+  const [fillProgress, setFillProgress] = useState(0); // 0 to 100
+  const [isDraining, setIsDraining] = useState(false);
   const isAnimatingRef = useRef(false);
-  const dwellTimerRef = useRef<number | null>(null);
+  const fillRequestRef = useRef<number | null>(null);
 
   // States for the 3D Stack / Carousel - Default to EXPANDED
   const [isExpanded, setIsExpanded] = useState(true);
@@ -147,9 +150,59 @@ const Gallery: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (dwellTimerRef.current) window.clearTimeout(dwellTimerRef.current);
     };
   }, [isExpanded, isManualInteraction, sliderValue]);
+
+  // Filling Wave Logic with new sequence: Fill -> Drain -> Trigger
+  useEffect(() => {
+    if (isAnimatingRef.current) return;
+
+    if (isDraining) {
+      const drain = () => {
+        setFillProgress(prev => {
+          const next = prev - 3.0; // Drain down faster
+          if (next <= 0) {
+            setIsDraining(false);
+            triggerAnimationSequence();
+            return 0;
+          }
+          fillRequestRef.current = requestAnimationFrame(drain);
+          return next;
+        });
+      };
+      if (fillRequestRef.current) cancelAnimationFrame(fillRequestRef.current);
+      fillRequestRef.current = requestAnimationFrame(drain);
+    } else if (isHovered && fillProgress < 100) {
+      const fill = () => {
+        setFillProgress(prev => {
+          const next = prev + 1.2; // Fill up
+          if (next >= 100) {
+            setIsDraining(true);
+            return 100;
+          }
+          fillRequestRef.current = requestAnimationFrame(fill);
+          return next;
+        });
+      };
+      if (fillRequestRef.current) cancelAnimationFrame(fillRequestRef.current);
+      fillRequestRef.current = requestAnimationFrame(fill);
+    } else if (!isHovered && fillProgress > 0) {
+      const unfill = () => {
+        setFillProgress(prev => {
+          const next = prev - 2.0; 
+          if (next <= 0) return 0;
+          fillRequestRef.current = requestAnimationFrame(unfill);
+          return next;
+        });
+      };
+      if (fillRequestRef.current) cancelAnimationFrame(fillRequestRef.current);
+      fillRequestRef.current = requestAnimationFrame(unfill);
+    }
+
+    return () => {
+      if (fillRequestRef.current) cancelAnimationFrame(fillRequestRef.current);
+    };
+  }, [isHovered, isDraining]);
 
   const resetManualInteractionTimer = () => {
     setIsManualInteraction(true);
@@ -162,7 +215,6 @@ const Gallery: React.FC = () => {
   const triggerAnimationSequence = () => {
     if (isAnimatingRef.current) return;
     isAnimatingRef.current = true;
-    setIsHovered(true);
 
     setPhase('y');
     setTimeout(() => setPhase('t'), 800);
@@ -171,22 +223,10 @@ const Gallery: React.FC = () => {
     setTimeout(() => setPhase('all'), 3400);
     setTimeout(() => {
       setPhase('idle');
-      setIsHovered(false);
       isAnimatingRef.current = false;
+      setFillProgress(0); // Reset for next interaction
+      setIsDraining(false);
     }, 5400);
-  };
-
-  const handleMouseEnter = () => {
-    if (isAnimatingRef.current) return;
-    if (dwellTimerRef.current) window.clearTimeout(dwellTimerRef.current);
-    dwellTimerRef.current = window.setTimeout(() => triggerAnimationSequence(), 3000);
-  };
-
-  const handleMouseLeave = () => {
-    if (dwellTimerRef.current) {
-      window.clearTimeout(dwellTimerRef.current);
-      dwellTimerRef.current = null;
-    }
   };
 
   const scrollToGallery = () => {
@@ -195,7 +235,7 @@ const Gallery: React.FC = () => {
 
   const getTextStyle = (target: AnimPhase) => {
     const isActivelyPopped = phase === 'all' || phase === target;
-    const isGlowVisible = isHovered;
+    const isGlowVisible = isAnimatingRef.current;
 
     return {
       opacity: isGlowVisible ? 1 : 0.7,
@@ -284,6 +324,18 @@ const Gallery: React.FC = () => {
           animation: neon-flicker-subtle 4s ease-in-out infinite;
           stroke: #ff00ff;
           stroke-width: 2.5;
+          fill: transparent;
+          transition: stroke 0.4s ease;
+        }
+        
+        @keyframes wave-move-h {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-400px); }
+        }
+
+        .white-wave {
+          fill: #ffffff;
+          animation: wave-move-h 1.8s linear infinite;
         }
 
         .gallery-depth-text {
@@ -388,8 +440,8 @@ const Gallery: React.FC = () => {
           <div 
             className="relative pointer-events-auto"
             style={{ transform: 'translateZ(0px)', transformStyle: 'preserve-3d' }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <div className="relative w-[240px] md:w-[380px] lg:w-[460px] aspect-square flex items-center justify-center shrink-0 cursor-pointer">
               <svg viewBox="0 0 240 240" className="w-full h-full drop-shadow-[0_0_60px_rgba(0,0,0,0.95)]" fill="none">
@@ -398,7 +450,19 @@ const Gallery: React.FC = () => {
                     <image href="https://img.freepik.com/premium-vector/seamless-pattern-with-cute-space-doodles-black-background_150234-147063.jpg?w=1480" width="80" height="80" preserveAspectRatio="xMidYMid slice" />
                   </pattern>
                   <clipPath id="yClipStrict"><path d={yPath} /></clipPath>
+                  
+                  {/* Dynamic mask for wave fill: Height is 180 total (30 to 210) */}
+                  <clipPath id="yFillMask">
+                    <rect 
+                      x="0" 
+                      y={210 - (fillProgress * 1.8)} 
+                      width="240" 
+                      height="240" 
+                    />
+                  </clipPath>
                 </defs>
+                
+                {/* Background Base */}
                 <g clipPath="url(#yClipStrict)">
                   <path d={yPath} fill="#050505" />
                   <g ref={parallaxRef} className="parallax-layer">
@@ -407,6 +471,31 @@ const Gallery: React.FC = () => {
                     </g>
                   </g>
                 </g>
+
+                {/* ANIMATED WHITE WAVE FILL */}
+                <g clipPath="url(#yClipStrict)">
+                  <g clipPath="url(#yFillMask)">
+                    {/* Filling the whole Y shape area with waves that move horizontally */}
+                    <g transform={`translate(0, ${210 - (fillProgress * 1.8)})`}>
+                       {/* Multiple wave paths shifting for depth */}
+                       <path 
+                         className="white-wave opacity-90 shadow-[0_0_20px_white]" 
+                         d="M 0 0 C 40 -20, 80 20, 120 0 C 160 -20, 200 20, 240 0 C 280 -20, 320 20, 360 0 C 400 -20, 440 20, 480 0 C 520 -20, 560 20, 600 0 V 300 H 0 Z" 
+                       />
+                       <path 
+                         className="white-wave opacity-50" 
+                         style={{ animationDuration: '3.0s', animationDirection: 'reverse' }}
+                         d="M 0 5 C 50 15, 100 -5, 150 5 C 200 15, 250 -5, 300 5 C 350 15, 400 -5, 450 5 C 500 15, 550 -5, 600 5 V 300 H 0 Z" 
+                       />
+                       <path 
+                         className="white-wave opacity-30" 
+                         style={{ animationDuration: '4.2s' }}
+                         d="M 0 -8 C 60 5, 120 -15, 180 -8 C 240 5, 300 -15, 360 -8 C 420 5, 480 -15, 540 -8 C 600 5, 660 -15, 720 -8 V 300 H 0 Z" 
+                       />
+                    </g>
+                  </g>
+                </g>
+
                 <path d={yPath} strokeLinejoin="round" strokeLinecap="round" className="neon-y-outline" />
               </svg>
             </div>
