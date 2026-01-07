@@ -33,9 +33,9 @@ const Gallery: React.FC = () => {
   const isAnimatingRef = useRef(false);
   const dwellTimerRef = useRef<number | null>(null);
 
-  // States for the 3D Stack / Carousel
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showSlider, setShowSlider] = useState(false);
+  // States for the 3D Stack / Carousel - Default to EXPANDED
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [showSlider, setShowSlider] = useState(true);
   const [autoRotation, setAutoRotation] = useState(0);
   const rotationRef = useRef(0);
   
@@ -218,7 +218,6 @@ const Gallery: React.FC = () => {
 
   const handleExpand = () => {
     setIsExpanded(true);
-    // Delay slider appearance until expansion transition is well underway
     setTimeout(() => {
       setShowSlider(true);
     }, 400);
@@ -227,10 +226,8 @@ const Gallery: React.FC = () => {
   const handleCollapse = () => {
     if (!isExpanded) return;
 
-    // Hide slider immediately
     setShowSlider(false);
 
-    // FIND THE FRONT-MOST IMAGE INDEX
     const count = images.length;
     const angleStep = 360 / count;
     let frontIndex = 0;
@@ -432,7 +429,7 @@ const Gallery: React.FC = () => {
       </section>
 
       {/* GALLERY SECTION */}
-      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent pt-2 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
+      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent pt-24 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <div className="flex flex-col items-center justify-center mb-0">
             <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
@@ -457,14 +454,11 @@ const Gallery: React.FC = () => {
                 
                 const radius = window.innerWidth < 768 ? 200 : 380;
                 const x = isExpanded ? Math.sin(rad) * radius : 0;
-                // Use a larger range for Z depth sorting to ensure preserve-3d works cleanly
                 const z = isExpanded ? (Math.cos(rad) * radius - radius) : -index * 30;
                 const rotateZ = isExpanded ? 0 : index * 2.5 - 5;
                 const opacity = isExpanded ? (0.2 + (Math.cos(rad) + 1) * 0.4) : 1;
                 const scale = isExpanded ? (0.75 + (Math.cos(rad) + 1) * 0.25) : 1;
                 
-                // When expanded, we rely on preserve-3d and translate3d Z position for sorting.
-                // When collapsed, we can use simple stack order.
                 const zIndex = isExpanded ? 0 : count - index;
 
                 return (
@@ -472,7 +466,6 @@ const Gallery: React.FC = () => {
                     key={img.id}
                     className="absolute inset-0 rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
                     style={{ 
-                      // Removing discrete 'transform' from transition during continuous rotation to keep it smooth
                       transitionProperty: isExpanded ? 'opacity, scale, border-color, box-shadow' : 'all',
                       transform: `translate3d(${x}px, 0, ${z}px) rotateZ(${rotateZ}deg) scale(${scale})`,
                       opacity: opacity,
@@ -515,7 +508,6 @@ const Gallery: React.FC = () => {
                  onMouseEnter={() => setIsSliderHovered(true)}
                  onMouseLeave={() => setIsSliderHovered(false)}
                >
-                 {/* CURSOR GLOW */}
                  {(isSliderHovered || isHoldingSlider.current) && (
                    <div 
                      className="slider-cursor-glow"
@@ -526,10 +518,8 @@ const Gallery: React.FC = () => {
                    />
                  )}
 
-                 {/* VISUAL TRACK */}
                  <div className="absolute left-0 right-0 h-[3px] bg-white/10 rounded-full"></div>
                  
-                 {/* ACTUAL SLIDER (Thumb hidden) */}
                  <input 
                    type="range" 
                    min="-100" 
@@ -545,7 +535,6 @@ const Gallery: React.FC = () => {
                    className="gallery-slider relative z-20"
                  />
                  
-                 {/* CUSTOM VISUAL THUMB (Optimized Light Flow) */}
                  <div 
                    className={`absolute top-1/2 -translate-y-1/2 w-[80px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
                     ${(isSliderHovered || isHoldingSlider.current) 

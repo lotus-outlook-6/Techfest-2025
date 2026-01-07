@@ -116,7 +116,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onPlayChange, hideButton = fa
       <audio
         ref={audioRef}
         loop={true}
-        src="https://www.tecnoesis.co.in/bgm.mp3"
+        //src="https://www.tecnoesis.co.in/bgm.mp3"
+        src="https://cdn.pixabay.com/audio/2026/01/05/audio_9a71f663aa.mp3"
       />
       
       {/* UI Controls: Hidden via CSS to maintain state and enable smooth fade-in */}
