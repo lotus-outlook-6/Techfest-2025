@@ -12,6 +12,7 @@ import SocialButtons from './components/SocialButtons';
 import NavbarSlider from './components/NavbarSlider';
 import RegisterButton from './components/RegisterButton';
 import Gallery from './components/Gallery';
+import Modules from './components/Modules';
 
 // Generic View for Sub-Sections
 const SectionView: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
@@ -219,7 +220,9 @@ function App() {
               <SectionView title="GALLERY">
                 <Gallery />
               </SectionView>
-              <SectionView title="MODULES" />
+              <SectionView title="MODULES">
+                <Modules />
+              </SectionView>
               <SectionView title="EVENTS" />
               <SectionView title="TEAM" />
             </div>
