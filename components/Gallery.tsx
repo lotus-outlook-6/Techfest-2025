@@ -90,14 +90,16 @@ const Gallery: React.FC = () => {
         parallaxRef.current.style.transform = `translate3d(${moveX.toFixed(4)}px, ${moveY.toFixed(4)}px, 0)`;
       }
 
-      // 1. Rotation Logic
+      // 1. Rotation Logic - Speed Increased
       if (isExpanded) {
         if (Math.abs(sliderValue) > 0.5) {
           const normalizedDisplacement = sliderValue / 100;
-          const variableSpeed = Math.sign(normalizedDisplacement) * Math.pow(Math.abs(normalizedDisplacement), 1.6) * 7.5;
+          // Increased manual speed multiplier from 7.5 to 15.0
+          const variableSpeed = Math.sign(normalizedDisplacement) * Math.pow(Math.abs(normalizedDisplacement), 1.6) * 15.0;
           rotationRef.current = (rotationRef.current + variableSpeed) % 360;
         } else if (!isManualInteraction) {
-          rotationRef.current = (rotationRef.current + 0.15) % 360;
+          // Increased base rotation speed from 0.15 to 0.5
+          rotationRef.current = (rotationRef.current + 0.5) % 360;
         }
         setAutoRotation(rotationRef.current);
       }
