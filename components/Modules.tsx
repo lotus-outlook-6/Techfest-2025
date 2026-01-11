@@ -154,23 +154,13 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
 
   return (
     <div 
-      className={`group relative h-[400px] w-full max-w-[320px] bg-[#0c0c0c]/80 backdrop-blur-xl border rounded-[2.5rem] p-6 transition-all duration-700 flex flex-col items-center justify-between overflow-hidden cursor-default ${colorStyles[module.color]}`}
+      className={`group relative h-[400px] w-full max-w-[320px] bg-[#0c0c0c]/80 backdrop-blur-xl border rounded-[2.5rem] p-6 transition-all duration-700 flex flex-col items-center justify-center overflow-hidden cursor-default ${colorStyles[module.color]}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(circle_at_center,_#ffffff_1px,_transparent_1px)] bg-[size:12px_12px]"></div>
-      <div className={`absolute top-4 left-4 w-4 h-4 border-t border-l transition-all duration-500 ${isHovered ? 'scale-110 opacity-100' : 'opacity-20'}`}></div>
-      <div className={`absolute bottom-4 right-4 w-4 h-4 border-b border-r transition-all duration-500 ${isHovered ? 'scale-110 opacity-100' : 'opacity-20'}`}></div>
 
-      <div className="w-full flex justify-between items-start mb-4">
-        <span className="text-[10px] font-mono text-gray-500 tracking-[0.3em]">{module.id}</span>
-        <div className="flex items-center gap-2">
-          <span className={`w-1.5 h-1.5 rounded-full ${module.status === 'ACTIVE' ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-yellow-500'} animate-pulse`}></span>
-          <span className="text-[8px] font-bold text-gray-400 tracking-widest uppercase">{module.status}</span>
-        </div>
-      </div>
-
-      <div className="relative flex-1 flex flex-col items-center justify-center w-full">
+      <div className="relative flex flex-col items-center justify-center w-full">
         <div className={`w-24 h-24 mb-6 transition-all duration-700 ${isHovered ? 'scale-110 rotate-[10deg]' : 'scale-100 rotate-0'}`}>
           <div className={`absolute inset-0 rounded-full blur-2xl opacity-10 transition-opacity duration-700 ${isHovered ? 'opacity-30' : 'opacity-10'} ${glowStyles[module.color]}`}></div>
           <ModuleIcon type={module.icon} color={module.color} className="w-full h-full" />
@@ -187,8 +177,6 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
           EXPLORE_MODULE
         </button>
       </div>
-      
-      <div className={`absolute left-0 right-0 h-px bg-white/20 blur-[1px] pointer-events-none transition-all duration-[4s] linear infinite ${isHovered ? 'animate-scanner' : 'opacity-0'}`}></div>
     </div>
   );
 };
@@ -243,6 +231,30 @@ const Modules: React.FC = () => {
             opacity: 1;
           }
         }
+        
+        /* Floating Animations for Background Icons */
+        @keyframes float-1 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(10px, -20px) rotate(5deg); }
+        }
+        @keyframes float-2 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-15px, -15px) rotate(-8deg); }
+        }
+        @keyframes float-3 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(12px, 18px) rotate(12deg); }
+        }
+        @keyframes float-4 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg); }
+          50% { transform: translate(-8px, 12px) rotate(-4deg); }
+        }
+
+        .animate-float-1 { animation: float-1 8s ease-in-out infinite; }
+        .animate-float-2 { animation: float-2 10s ease-in-out infinite; }
+        .animate-float-3 { animation: float-3 9s ease-in-out infinite; }
+        .animate-float-4 { animation: float-4 11s ease-in-out infinite; }
+
         .animate-text-glow {
           animation: text-glow-pulse 3s ease-in-out infinite;
         }
@@ -269,33 +281,50 @@ const Modules: React.FC = () => {
       {/* HERO SECTION */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0">
         
-        {/* DECORATIVE STATIC ELEMENTS (Icons in blank spaces) */}
+        {/* DECORATIVE BACKGROUND ELEMENTS WITH INTERACTION */}
         <div className="absolute inset-0 pointer-events-none z-0">
           <div className="relative w-full h-full max-w-7xl mx-auto">
+            
             {/* Top Left: Code Icon - Moved lower */}
-            <div className="absolute top-[8%] left-[5%] md:left-[10%] opacity-20">
-              <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+            <div className="absolute top-[8%] left-[5%] md:left-[10%] animate-float-1 pointer-events-auto">
+              <div className="group transition-all duration-700 hover:scale-125 hover:drop-shadow-[0_0_20px_rgba(34,211,238,0.6)]">
+                <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32 opacity-20 group-hover:opacity-60 transition-opacity" />
+              </div>
             </div>
+            
             {/* Mid Left: Security Icon - Moved lower */}
-            <div className="absolute top-[38%] left-[2%] md:left-[5%] opacity-20">
-              <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+            <div className="absolute top-[38%] left-[2%] md:left-[5%] animate-float-2 pointer-events-auto">
+              <div className="group transition-all duration-700 hover:scale-125 hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]">
+                <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32 opacity-20 group-hover:opacity-60 transition-opacity" />
+              </div>
             </div>
+            
             {/* Bottom Left: Leaf Icon - Moved lower */}
-            <div className="absolute bottom-[22%] left-[5%] md:left-[10%] opacity-20">
-              <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(163,230,53,0.5)]" />
+            <div className="absolute bottom-[22%] left-[5%] md:left-[10%] animate-float-3 pointer-events-auto">
+              <div className="group transition-all duration-700 hover:scale-125 hover:drop-shadow-[0_0_20px_rgba(163,230,53,0.6)]">
+                <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32 opacity-20 group-hover:opacity-60 transition-opacity" />
+              </div>
             </div>
 
             {/* Top Right: Robot Icon - Moved lower */}
-            <div className="absolute top-[8%] right-[5%] md:right-[10%] opacity-20">
-              <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]" />
+            <div className="absolute top-[8%] right-[5%] md:right-[10%] animate-float-4 pointer-events-auto">
+              <div className="group transition-all duration-700 hover:scale-125 hover:drop-shadow-[0_0_20px_rgba(217,70,239,0.6)]">
+                <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32 opacity-20 group-hover:opacity-60 transition-opacity" />
+              </div>
             </div>
+            
             {/* Mid Right: Image Icon - Moved lower */}
-            <div className="absolute top-[38%] right-[2%] md:right-[5%] opacity-20">
-              <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
+            <div className="absolute top-[38%] right-[2%] md:right-[5%] animate-float-1 pointer-events-auto" style={{ animationDelay: '-2s' }}>
+              <div className="group transition-all duration-700 hover:scale-125 hover:drop-shadow-[0_0_20px_rgba(251,146,60,0.6)]">
+                <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32 opacity-20 group-hover:opacity-60 transition-opacity" />
+              </div>
             </div>
+            
             {/* Bottom Right: Debate Icon - Moved lower */}
-            <div className="absolute bottom-[22%] right-[5%] md:right-[10%] opacity-20">
-              <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
+            <div className="absolute bottom-[22%] right-[5%] md:right-[10%] animate-float-2 pointer-events-auto" style={{ animationDelay: '-3s' }}>
+              <div className="group transition-all duration-700 hover:scale-125 hover:drop-shadow-[0_0_20px_rgba(239,68,68,0.6)]">
+                <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32 opacity-20 group-hover:opacity-60 transition-opacity" />
+              </div>
             </div>
           </div>
         </div>
