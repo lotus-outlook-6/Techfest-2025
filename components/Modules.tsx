@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 interface ModuleData {
   id: string;
@@ -198,8 +198,14 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
 };
 
 const Modules: React.FC = () => {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const scrollToContent = () => {
+    contentRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <div className="w-full h-full flex flex-col items-center py-20 px-6 md:px-12 overflow-y-auto overflow-x-hidden no-scrollbar">
+    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth">
       <style>{`
         @keyframes scanner {
           0% { top: 0; opacity: 0; }
@@ -214,29 +220,49 @@ const Modules: React.FC = () => {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
       
-      <div className="max-w-7xl w-full flex flex-col items-center">
-        <header className="text-center mb-16 md:mb-24">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="h-px w-12 bg-fuchsia-500/30"></div>
-            <span className="text-fuchsia-400 text-xs font-bold tracking-[0.5em] uppercase">Operations_Control</span>
-            <div className="h-px w-12 bg-fuchsia-500/30"></div>
+      {/* HERO SECTION */}
+      <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0">
+        <div className="text-center animate-fade-in px-6">
+          <div className="flex items-center justify-center gap-4 mb-4 opacity-60">
+            <div className="h-px w-12 bg-fuchsia-500"></div>
+            <span className="text-fuchsia-400 text-[10px] md:text-xs font-bold tracking-[0.5em] uppercase">Operations_Control</span>
+            <div className="h-px w-12 bg-fuchsia-500"></div>
           </div>
-          <h2 className="text-5xl md:text-8xl font-anton tracking-tighter text-white mb-6 uppercase">
-            YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">MODULES</span>
+          <h2 className="text-6xl md:text-9xl font-anton tracking-tighter text-white mb-6 uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            YANTRAKSH <br/> <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">MODULES</span>
           </h2>
+          <p className="text-gray-400 font-space text-sm md:text-xl max-w-2xl mx-auto opacity-70 tracking-widest uppercase">
+            Specialized domains of technical intelligence.
+          </p>
+        </div>
+
+        {/* Scroll Arrow */}
+        <div 
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity"
+          onClick={scrollToContent}
+        >
+          <svg className="w-10 h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </section>
+
+      {/* GRID CONTENT SECTION */}
+      <div id="module-grid-content" ref={contentRef} className="max-w-7xl w-full flex flex-col items-center pt-20 pb-40 px-6 md:px-12">
+        <header className="text-center mb-16 md:mb-24">
           <p className="text-gray-400 font-space text-sm md:text-lg max-w-3xl mx-auto opacity-70 tracking-wide">
             Our fest is segmented into specialized modules designed to test every facet of technical intelligence. Choose your domain and descend into the digital realm.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 w-full justify-items-center mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 w-full justify-items-center">
           {MODULES_DATA.map((module) => (
             <ModuleCard key={module.id} module={module} />
           ))}
         </div>
 
         {/* Global Footer Decoration */}
-        <div className="flex flex-col items-center gap-4 opacity-30 pb-20">
+        <div className="flex flex-col items-center gap-4 opacity-30 mt-32">
           <div className="flex gap-2">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}></div>
