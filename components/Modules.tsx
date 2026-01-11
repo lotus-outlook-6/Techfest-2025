@@ -68,7 +68,7 @@ const MODULES_DATA: ModuleData[] = [
   }
 ];
 
-const ModuleIcon: React.FC<{ type: string; color: string }> = ({ type, color }) => {
+const ModuleIcon: React.FC<{ type: string; color: string; className?: string }> = ({ type, color, className = "" }) => {
   const colorMap: Record<string, string> = {
     fuchsia: 'text-fuchsia-500',
     cyan: 'text-cyan-400',
@@ -82,7 +82,7 @@ const ModuleIcon: React.FC<{ type: string; color: string }> = ({ type, color }) 
   switch (type) {
     case 'robot':
       return (
-        <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="3" y="11" width="18" height="10" rx="2" />
           <circle cx="12" cy="5" r="2" />
           <path d="M12 7v4M8 15h.01M16 15h.01" strokeLinecap="round" />
@@ -90,7 +90,7 @@ const ModuleIcon: React.FC<{ type: string; color: string }> = ({ type, color }) 
       );
     case 'code':
       return (
-        <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <polyline points="16 18 22 12 16 6" />
           <polyline points="8 6 2 12 8 18" />
           <line x1="14" y1="4" x2="10" y2="20" />
@@ -98,7 +98,7 @@ const ModuleIcon: React.FC<{ type: string; color: string }> = ({ type, color }) 
       );
     case 'image':
       return (
-        <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
           <circle cx="8.5" cy="8.5" r="1.5" />
           <polyline points="21 15 16 10 5 21" />
@@ -106,21 +106,21 @@ const ModuleIcon: React.FC<{ type: string; color: string }> = ({ type, color }) 
       );
     case 'security':
       return (
-        <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       );
     case 'leaf':
       return (
-        <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5(5 17 4.48 19 2c1 2 2 4.18 2 8h-5a7 7 0 0 1-7 7Z" />
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8h-5a7 7 0 0 1-7 7Z" />
           <path d="M7 22c0-2.7 .67-5.13 2-7" />
         </svg>
       );
     case 'debate':
       return (
-        <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           <path d="M8 9h8" />
           <path d="M8 13h6" />
@@ -135,12 +135,12 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const colorStyles: Record<string, string> = {
-    fuchsia: 'border-fuchsia-500/30 group-hover:border-fuchsia-500 shadow-fuchsia-900/10 group-hover:shadow-fuchsia-500/20',
-    cyan: 'border-cyan-500/30 group-hover:border-cyan-500 shadow-cyan-900/10 group-hover:shadow-cyan-500/20',
-    lime: 'border-lime-500/30 group-hover:border-lime-500 shadow-lime-900/10 group-hover:shadow-lime-500/20',
-    orange: 'border-orange-500/30 group-hover:border-orange-500 shadow-orange-900/10 group-hover:shadow-orange-500/20',
-    blue: 'border-blue-500/30 group-hover:border-blue-500 shadow-blue-900/10 group-hover:shadow-blue-500/20',
-    red: 'border-red-500/30 group-hover:border-red-500 shadow-red-900/10 group-hover:shadow-red-500/20',
+    fuchsia: 'border-fuchsia-500/40 group-hover:border-fuchsia-500 shadow-[0_0_30px_rgba(217,70,239,0.1)] group-hover:shadow-[0_0_60px_rgba(217,70,239,0.3)]',
+    cyan: 'border-cyan-500/40 group-hover:border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.1)] group-hover:shadow-[0_0_60px_rgba(6,182,212,0.3)]',
+    lime: 'border-lime-500/40 group-hover:border-lime-500 shadow-[0_0_30px_rgba(163,230,53,0.1)] group-hover:shadow-[0_0_60px_rgba(163,230,53,0.3)]',
+    orange: 'border-orange-500/40 group-hover:border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.1)] group-hover:shadow-[0_0_60px_rgba(249,115,22,0.3)]',
+    blue: 'border-blue-500/40 group-hover:border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.1)] group-hover:shadow-[0_0_60px_rgba(59,130,246,0.3)]',
+    red: 'border-red-500/40 group-hover:border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.1)] group-hover:shadow-[0_0_60px_rgba(239,68,68,0.3)]',
   };
 
   const glowStyles: Record<string, string> = {
@@ -173,7 +173,7 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
       <div className="relative flex-1 flex flex-col items-center justify-center w-full">
         <div className={`w-24 h-24 mb-6 transition-all duration-700 ${isHovered ? 'scale-110 rotate-[10deg]' : 'scale-100 rotate-0'}`}>
           <div className={`absolute inset-0 rounded-full blur-2xl opacity-10 transition-opacity duration-700 ${isHovered ? 'opacity-30' : 'opacity-10'} ${glowStyles[module.color]}`}></div>
-          <ModuleIcon type={module.icon} color={module.color} />
+          <ModuleIcon type={module.icon} color={module.color} className="w-full h-full" />
         </div>
         
         <h4 className="text-2xl md:text-3xl font-anton tracking-tight text-white mb-2 uppercase group-hover:text-fuchsia-400 transition-colors text-center">{module.name}</h4>
@@ -228,6 +228,24 @@ const Modules: React.FC = () => {
           90% { opacity: 0.5; }
           100% { top: 100%; opacity: 0; }
         }
+        @keyframes text-glow-pulse {
+          0%, 100% { 
+            text-shadow: 0 0 10px rgba(217, 70, 239, 0.6), 
+                         0 0 20px rgba(217, 70, 239, 0.4), 
+                         0 0 30px rgba(217, 70, 239, 0.2); 
+            opacity: 0.9;
+          }
+          50% { 
+            text-shadow: 0 0 20px rgba(217, 70, 239, 1), 
+                         0 0 40px rgba(217, 70, 239, 0.8), 
+                         0 0 60px rgba(217, 70, 239, 0.6),
+                         0 0 80px rgba(217, 70, 239, 0.4); 
+            opacity: 1;
+          }
+        }
+        .animate-text-glow {
+          animation: text-glow-pulse 3s ease-in-out infinite;
+        }
         .animate-scanner { animation: scanner 4s linear infinite; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -250,29 +268,66 @@ const Modules: React.FC = () => {
       
       {/* HERO SECTION */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0">
-        <div className="text-center px-6 -translate-y-24 md:-translate-y-32">
-          <div className="mb-4">
-            <h2 className="text-6xl md:text-[9rem] font-anton text-white uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.05)] flex justify-center gap-[0.05em] md:gap-[0.08em] tracking-tight">
-              {letters.map((char, i) => (
-                <span 
-                  key={i} 
-                  className="letter-anim"
-                  style={{ 
-                    animationName: `slide-${directions[i]}-pro`,
-                    animationDelay: `${i * 0.08}s`
-                  }}
-                >
-                  {char}
-                </span>
-              ))}
-            </h2>
-            <span className="modules-word-anim text-3xl md:text-7xl font-anton text-fuchsia-500 tracking-[0.15em] md:tracking-[0.25em] drop-shadow-[0_0_15px_rgba(217,70,239,0.4)] mt-2">
-              MODULES
-            </span>
+        
+        {/* DECORATIVE STATIC ELEMENTS (Icons in blank spaces) */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="relative w-full h-full max-w-7xl mx-auto">
+            {/* Top Left: Code Icon - Moved slightly up */}
+            <div className="absolute top-[10%] left-[5%] md:left-[10%] opacity-20">
+              <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+            </div>
+            {/* Mid Left: Security Icon - Moved slightly up */}
+            <div className="absolute top-[40%] left-[2%] md:left-[5%] opacity-20">
+              <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+            </div>
+            {/* Bottom Left: Leaf Icon - Moved slightly up */}
+            <div className="absolute bottom-[20%] left-[5%] md:left-[10%] opacity-20">
+              <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(163,230,53,0.5)]" />
+            </div>
+
+            {/* Top Right: Robot Icon - Moved slightly up */}
+            <div className="absolute top-[10%] right-[5%] md:right-[10%] opacity-20">
+              <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]" />
+            </div>
+            {/* Mid Right: Image Icon - Moved slightly up */}
+            <div className="absolute top-[40%] right-[2%] md:right-[5%] opacity-20">
+              <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
+            </div>
+            {/* Bottom Right: Debate Icon - Moved slightly up */}
+            <div className="absolute bottom-[20%] right-[5%] md:right-[10%] opacity-20">
+              <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
+            </div>
           </div>
         </div>
 
-        {/* Scroll Arrow - Positioned higher, default grey, white on hover */}
+        <div className="relative w-full max-w-5xl flex items-center justify-center -translate-y-24 md:-translate-y-32">
+          {/* THE TEXT LAYER */}
+          <div className="relative z-10 text-center px-6">
+            <div className="mb-4">
+              <h2 className="text-5xl md:text-[8.5rem] font-anton text-white uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.05)] flex justify-center gap-[0.05em] md:gap-[0.08em] tracking-tight">
+                {letters.map((char, i) => (
+                  <span 
+                    key={i} 
+                    className="letter-anim"
+                    style={{ 
+                      animationName: `slide-${directions[i]}-pro`,
+                      animationDelay: `${i * 0.08}s`
+                    }}
+                  >
+                    {char}
+                  </span>
+                ))}
+              </h2>
+              <span className="modules-word-anim text-3xl md:text-5xl lg:text-7xl font-anton text-fuchsia-500 tracking-tighter md:tracking-tight animate-text-glow mt-4 whitespace-nowrap"
+                style={{ animationDelay: '1.2s' }}
+              >
+                TECHNICAL MODULES
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll Arrow */}
         <div 
           className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20 transition-all duration-300 group opacity-40 hover:opacity-100"
           onClick={scrollToContent}
