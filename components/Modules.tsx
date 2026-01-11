@@ -113,9 +113,9 @@ const ModuleIcon: React.FC<{ type: string; color: string; className?: string }> 
       );
     case 'leaf':
       return (
-        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8h-5a7 7 0 0 1-7 7Z" />
-          <path d="M7 22c0-2.7 .67-5.13 2-7" />
+        <svg className={`${className} ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 20c0 0 2-12 11-14c6-1 7 4 7 4c0 0-2 11-11 13c-4.5 1-7-3-7-3Z" />
+          <path d="M2 22c2-1 4-2 6-2c4-2 8-5 11-13" />
         </svg>
       );
     case 'debate':
@@ -272,35 +272,36 @@ const Modules: React.FC = () => {
         {/* DECORATIVE STATIC ELEMENTS (Icons in blank spaces) */}
         <div className="absolute inset-0 pointer-events-none z-0">
           <div className="relative w-full h-full max-w-7xl mx-auto">
-            {/* Top Left: Code Icon - Moved slightly up */}
-            <div className="absolute top-[10%] left-[5%] md:left-[10%] opacity-20">
+            {/* Top Left: Code Icon - Moved lower */}
+            <div className="absolute top-[8%] left-[5%] md:left-[10%] opacity-20">
               <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
             </div>
-            {/* Mid Left: Security Icon - Moved slightly up */}
-            <div className="absolute top-[40%] left-[2%] md:left-[5%] opacity-20">
+            {/* Mid Left: Security Icon - Moved lower */}
+            <div className="absolute top-[38%] left-[2%] md:left-[5%] opacity-20">
               <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
             </div>
-            {/* Bottom Left: Leaf Icon - Moved slightly up */}
-            <div className="absolute bottom-[20%] left-[5%] md:left-[10%] opacity-20">
+            {/* Bottom Left: Leaf Icon - Moved lower */}
+            <div className="absolute bottom-[22%] left-[5%] md:left-[10%] opacity-20">
               <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(163,230,53,0.5)]" />
             </div>
 
-            {/* Top Right: Robot Icon - Moved slightly up */}
-            <div className="absolute top-[10%] right-[5%] md:right-[10%] opacity-20">
+            {/* Top Right: Robot Icon - Moved lower */}
+            <div className="absolute top-[8%] right-[5%] md:right-[10%] opacity-20">
               <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]" />
             </div>
-            {/* Mid Right: Image Icon - Moved slightly up */}
-            <div className="absolute top-[40%] right-[2%] md:right-[5%] opacity-20">
+            {/* Mid Right: Image Icon - Moved lower */}
+            <div className="absolute top-[38%] right-[2%] md:right-[5%] opacity-20">
               <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(251,146,60,0.5)]" />
             </div>
-            {/* Bottom Right: Debate Icon - Moved slightly up */}
-            <div className="absolute bottom-[20%] right-[5%] md:right-[10%] opacity-20">
+            {/* Bottom Right: Debate Icon - Moved lower */}
+            <div className="absolute bottom-[22%] right-[5%] md:right-[10%] opacity-20">
               <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
             </div>
           </div>
         </div>
 
-        <div className="relative w-full max-w-5xl flex items-center justify-center -translate-y-24 md:-translate-y-32">
+        {/* Central Text Container - Shifted Downwards */}
+        <div className="relative w-full max-w-5xl flex items-center justify-center -translate-y-12 md:-translate-y-16">
           {/* THE TEXT LAYER */}
           <div className="relative z-10 text-center px-6">
             <div className="mb-4">
