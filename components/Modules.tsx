@@ -114,7 +114,7 @@ const ModuleIcon: React.FC<{ type: string; color: string }> = ({ type, color }) 
     case 'leaf':
       return (
         <svg className={`w-full h-full ${c}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8h-5a7 7 0 0 1-7 7Z" />
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5(5 17 4.48 19 2c1 2 2 4.18 2 8h-5a7 7 0 0 1-7 7Z" />
           <path d="M7 22c0-2.7 .67-5.13 2-7" />
         </svg>
       );
@@ -200,44 +200,96 @@ const Modules: React.FC = () => {
     contentRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const letters = "YANTRAKSH".split("");
+  const directions = ["top", "bottom", "left", "right", "top", "bottom", "left", "right", "top"];
+
   return (
     <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth">
       <style>{`
+        @keyframes slide-top-pro {
+          0% { transform: translateY(-120px) scale(0.8); opacity: 0; filter: blur(12px); }
+          100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+        }
+        @keyframes slide-bottom-pro {
+          0% { transform: translateY(120px) scale(0.8); opacity: 0; filter: blur(12px); }
+          100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+        }
+        @keyframes slide-left-pro {
+          0% { transform: translateX(-120px) scale(0.8); opacity: 0; filter: blur(12px); }
+          100% { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
+        }
+        @keyframes slide-right-pro {
+          0% { transform: translateX(120px) scale(0.8); opacity: 0; filter: blur(12px); }
+          100% { transform: translateX(0) scale(1); opacity: 1; filter: blur(0); }
+        }
         @keyframes scanner {
           0% { top: 0; opacity: 0; }
           10% { opacity: 0.5; }
           90% { opacity: 0.5; }
           100% { top: 100%; opacity: 0; }
         }
-        .animate-scanner {
-          animation: scanner 4s linear infinite;
-        }
+        .animate-scanner { animation: scanner 4s linear infinite; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .letter-anim {
+          display: inline-block;
+          animation-duration: 1.0s;
+          animation-fill-mode: forwards;
+          animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+          opacity: 0;
+        }
+
+        .modules-word-anim {
+          display: block;
+          animation: slide-top-pro 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+          animation-delay: 1.0s;
+          opacity: 0;
+        }
       `}</style>
       
-      {/* HERO SECTION - CLEAN & MINIMAL */}
+      {/* HERO SECTION */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0">
-        <div className="text-center animate-fade-in px-6 -translate-y-20 md:-translate-y-24">
-          <h2 className="text-6xl md:text-9xl font-anton tracking-tighter text-white uppercase leading-[0.85] drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-            YANTRAKSH <br/> 
-            <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]">MODULES</span>
-          </h2>
+        <div className="text-center px-6 -translate-y-24 md:-translate-y-32">
+          <div className="mb-4">
+            <h2 className="text-6xl md:text-[9rem] font-anton text-white uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.05)] flex justify-center gap-[0.05em] md:gap-[0.08em] tracking-tight">
+              {letters.map((char, i) => (
+                <span 
+                  key={i} 
+                  className="letter-anim"
+                  style={{ 
+                    animationName: `slide-${directions[i]}-pro`,
+                    animationDelay: `${i * 0.08}s`
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </h2>
+            <span className="modules-word-anim text-3xl md:text-7xl font-anton text-fuchsia-500 tracking-[0.15em] md:tracking-[0.25em] drop-shadow-[0_0_15px_rgba(217,70,239,0.4)] mt-2">
+              MODULES
+            </span>
+          </div>
         </div>
 
-        {/* Scroll Arrow - Standard size matched to other sections */}
+        {/* Scroll Arrow - Positioned higher, default grey, white on hover */}
         <div 
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity"
+          className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20 transition-all duration-300 group opacity-40 hover:opacity-100"
           onClick={scrollToContent}
         >
-          <svg className="w-10 h-10 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)] text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg 
+            className="w-10 h-10 text-gray-500 group-hover:text-white transition-colors duration-300 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
       </section>
 
       {/* GRID CONTENT SECTION */}
-      <div id="module-grid-content" ref={contentRef} className="max-w-7xl w-full flex flex-col items-center pt-20 pb-40 px-6 md:px-12">
+      <div id="module-grid-content" ref={contentRef} className="max-w-7xl w-full flex flex-col items-center pt-10 pb-40 px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 w-full justify-items-center">
           {MODULES_DATA.map((module) => (
             <ModuleCard key={module.id} module={module} />
@@ -245,13 +297,13 @@ const Modules: React.FC = () => {
         </div>
 
         {/* Global Footer Decoration */}
-        <div className="flex flex-col items-center gap-4 opacity-30 mt-32">
+        <div className="flex flex-col items-center gap-4 opacity-20 mt-32 pb-20">
           <div className="flex gap-2">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="w-1.5 h-1.5 bg-fuchsia-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}></div>
             ))}
           </div>
-          <span className="text-[9px] font-mono tracking-[1em] text-white">SYSTEM_IDLE_READY</span>
+          <span className="text-[9px] font-mono tracking-[1em] text-white uppercase">End_of_Transmission</span>
         </div>
       </div>
     </div>
