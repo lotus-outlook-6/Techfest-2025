@@ -19,8 +19,15 @@ const INITIAL_IMAGES: GalleryImage[] = [
   { id: 6, title: 'VOID_NAV', category: 'NAVIGATION', url: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000' },
 ];
 
+const SPOTLIGHT_IMAGES = [
+  { id: 's1', url: 'https://images.unsplash.com/photo-1768151088111-6cbc40bb8e8b?q=80&w=1077&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', title: 'COMPETITIVE CODING', tag: 'ENGINEERING' },
+  { id: 's2', url: 'https://images.unsplash.com/photo-1768151103408-c9d56ceb61c1?q=80&w=1077&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', title: 'ROBO RACE', tag: 'ROBOTICS' },
+  { id: 's3', url: 'https://images.unsplash.com/photo-1768151119770-b71e040a213c?q=80&w=1340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', title: 'IMAGE PROMPTING', tag: 'AI' },
+  { id: 's4', url: 'https://images.unsplash.com/photo-1768151109794-b616124234ad?q=80&w=1340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', title: 'TECH DEBATE', tag: 'DEBATE' },
+];
+
 const Gallery: React.FC = () => {
-  // Y-Path coordinates: Top is at y=30, Bottom is at y=210. Height is 180.
+  // Y-Path coordinates
   const yPath = "M 25 30 H 85 L 120 80 L 155 30 H 215 L 145 130 V 210 H 95 V 130 L 25 30 Z";
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,19 +38,17 @@ const Gallery: React.FC = () => {
   const [images, setImages] = useState<GalleryImage[]>(INITIAL_IMAGES);
   const [phase, setPhase] = useState<AnimPhase>('idle');
   const [isHovered, setIsHovered] = useState(false);
-  const [fillProgress, setFillProgress] = useState(0); // 0 to 100
+  const [fillProgress, setFillProgress] = useState(0); 
   const [isDraining, setIsDraining] = useState(false);
   const isAnimatingRef = useRef(false);
   const fillRequestRef = useRef<number | null>(null);
 
-  // States for the 3D Stack / Carousel - Default to EXPANDED
   const [isExpanded, setIsExpanded] = useState(true);
   const [showSlider, setShowSlider] = useState(true);
   const [autoRotation, setAutoRotation] = useState(0);
   const rotationRef = useRef(0);
   
-  // Spring-Loaded Slider States
-  const [sliderValue, setSliderValue] = useState(0); // -100 to 100
+  const [sliderValue, setSliderValue] = useState(0); 
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const isHoldingSlider = useRef(false);
   const [isManualInteraction, setIsManualInteraction] = useState(false);
@@ -90,28 +95,23 @@ const Gallery: React.FC = () => {
         parallaxRef.current.style.transform = `translate3d(${moveX.toFixed(4)}px, ${moveY.toFixed(4)}px, 0)`;
       }
 
-      // 1. Rotation Logic - Speed Increased
       if (isExpanded) {
         if (Math.abs(sliderValue) > 0.5) {
           const normalizedDisplacement = sliderValue / 100;
-          // Increased manual speed multiplier from 7.5 to 15.0
           const variableSpeed = Math.sign(normalizedDisplacement) * Math.pow(Math.abs(normalizedDisplacement), 1.6) * 15.0;
           rotationRef.current = (rotationRef.current + variableSpeed) % 360;
         } else if (!isManualInteraction) {
-          // Increased base rotation speed from 0.15 to 0.5
           rotationRef.current = (rotationRef.current + 0.5) % 360;
         }
         setAutoRotation(rotationRef.current);
       }
 
-      // 2. Spring Physics for Slider (Snap back when not holding)
       if (!isHoldingSlider.current && Math.abs(sliderValue) > 0.1) {
         setSliderValue(prev => prev * 0.82); 
       } else if (!isHoldingSlider.current && Math.abs(sliderValue) <= 0.1) {
         setSliderValue(0);
       }
 
-      // Background Rendering
       ctx.clearRect(0, 0, width, height);
       const spacing = 32;
       const centerX = width / 2;
@@ -155,14 +155,13 @@ const Gallery: React.FC = () => {
     };
   }, [isExpanded, isManualInteraction, sliderValue]);
 
-  // Filling Wave Logic with new sequence: Fill -> Drain -> Trigger
   useEffect(() => {
     if (isAnimatingRef.current) return;
 
     if (isDraining) {
       const drain = () => {
         setFillProgress(prev => {
-          const next = prev - 3.0; // Drain down faster
+          const next = prev - 3.0; 
           if (next <= 0) {
             setIsDraining(false);
             triggerAnimationSequence();
@@ -177,7 +176,7 @@ const Gallery: React.FC = () => {
     } else if (isHovered && fillProgress < 100) {
       const fill = () => {
         setFillProgress(prev => {
-          const next = prev + 1.2; // Fill up
+          const next = prev + 1.2; 
           if (next >= 100) {
             setIsDraining(true);
             return 100;
@@ -226,7 +225,7 @@ const Gallery: React.FC = () => {
     setTimeout(() => {
       setPhase('idle');
       isAnimatingRef.current = false;
-      setFillProgress(0); // Reset for next interaction
+      setFillProgress(0); 
       setIsDraining(false);
     }, 5400);
   };
@@ -267,14 +266,11 @@ const Gallery: React.FC = () => {
 
   const handleCollapse = () => {
     if (!isExpanded) return;
-
     setShowSlider(false);
-
     const count = images.length;
     const angleStep = 360 / count;
     let frontIndex = 0;
     let maxCos = -2;
-
     for (let i = 0; i < count; i++) {
       const itemRotation = (i * angleStep) + autoRotation;
       const rad = (itemRotation * Math.PI) / 180;
@@ -284,13 +280,11 @@ const Gallery: React.FC = () => {
         frontIndex = i;
       }
     }
-
     const newImages = [...images];
     const shifted = [];
     for (let i = 0; i < count; i++) {
       shifted.push(newImages[(frontIndex + i) % count]);
     }
-
     setImages(shifted);
     setIsExpanded(false);
     rotationRef.current = 0;
@@ -309,123 +303,40 @@ const Gallery: React.FC = () => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        @keyframes subtle-breathing {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.015); }
-        }
-        .animate-subtle-breathing {
-          animation: subtle-breathing 16s ease-in-out infinite;
-        }
+        @keyframes subtle-breathing { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
+        .animate-subtle-breathing { animation: subtle-breathing 16s ease-in-out infinite; }
 
         @keyframes neon-flicker-subtle {
           0%, 100% { filter: drop-shadow(0 0 10px #ff00ff) drop-shadow(0 0 25px rgba(255, 0, 255, 0.6)); stroke-opacity: 1; }
           50% { filter: drop-shadow(0 0 18px #ff00ff) drop-shadow(0 0 40px rgba(255, 0, 255, 0.8)); stroke-opacity: 0.9; }
         }
 
-        .neon-y-outline {
-          animation: neon-flicker-subtle 4s ease-in-out infinite;
-          stroke: #ff00ff;
-          stroke-width: 2.5;
-          fill: transparent;
-          transition: stroke 0.4s ease;
-        }
+        .neon-y-outline { animation: neon-flicker-subtle 4s ease-in-out infinite; stroke: #ff00ff; stroke-width: 2.5; fill: transparent; transition: stroke 0.4s ease; }
         
-        @keyframes wave-move-h {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-400px); }
-        }
+        @keyframes wave-move-h { 0% { transform: translateX(0); } 100% { transform: translateX(-400px); } }
+        .white-wave { fill: #ffffff; animation: wave-move-h 1.8s linear infinite; }
 
-        .white-wave {
-          fill: #ffffff;
-          animation: wave-move-h 1.8s linear infinite;
-        }
+        .gallery-depth-text { font-family: 'Anton', sans-serif; letter-spacing: 0.15em; color: white; white-space: nowrap; line-height: 1; display: block; text-align: center; will-change: transform, opacity, filter; }
 
-        .gallery-depth-text {
-          font-family: 'Anton', sans-serif;
-          letter-spacing: 0.15em;
-          color: white;
-          white-space: nowrap;
-          line-height: 1;
-          display: block;
-          text-align: center;
-          will-change: transform, opacity, filter;
-        }
-
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
+        @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
 
-        input[type=range].gallery-slider {
-          -webkit-appearance: none;
-          width: 100%;
-          height: 32px;
-          background: transparent;
-          z-index: 30;
-          cursor: pointer;
-        }
-        input[type=range].gallery-slider::-webkit-slider-runnable-track {
-          width: 100%;
-          height: 6px;
-          cursor: pointer;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-        }
-        input[type=range].gallery-slider::-webkit-slider-thumb {
-          height: 22px;
-          width: 80px;
-          background: transparent;
-          cursor: pointer;
-          -webkit-appearance: none;
-          margin-top: -8px;
-        }
+        input[type=range].gallery-slider { -webkit-appearance: none; width: 100%; height: 32px; background: transparent; z-index: 30; cursor: pointer; }
+        input[type=range].gallery-slider::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        input[type=range].gallery-slider::-webkit-slider-thumb { height: 22px; width: 80px; background: transparent; cursor: pointer; -webkit-appearance: none; margin-top: -8px; }
 
-        @keyframes flow-arrows-rtl {
-          0% { background-position: 0% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes flow-arrows-ltr {
-          0% { background-position: 0% 0; }
-          100% { background-position: -200% 0; }
-        }
+        @keyframes flow-arrows-rtl { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+        @keyframes flow-arrows-ltr { 0% { background-position: 0% 0; } 100% { background-position: -200% 0; } }
 
-        .arrow-flow-text {
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          font-weight: 900;
-          font-family: monospace;
-          font-size: 26px; 
-          letter-spacing: -3px;
-          transition: background 0.4s ease-in-out;
-        }
-        
-        .arrows-normal {
-          background-image: linear-gradient(90deg, #d946ef 0%, #ffffff 50%, #d946ef 100%);
-        }
-        .arrows-inverted {
-          background-image: linear-gradient(90deg, #ffffff 0%, #d946ef 50%, #ffffff 100%);
-        }
-
+        .arrow-flow-text { background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-family: monospace; font-size: 26px; letter-spacing: -3px; transition: background 0.4s ease-in-out; }
+        .arrows-normal { background-image: linear-gradient(90deg, #d946ef 0%, #ffffff 50%, #d946ef 100%); }
+        .arrows-inverted { background-image: linear-gradient(90deg, #ffffff 0%, #d946ef 50%, #ffffff 100%); }
         .flow-rtl { animation: flow-arrows-rtl 1.2s linear infinite; }
         .flow-ltr { animation: flow-arrows-ltr 1.2s linear infinite; }
 
-        .slider-pill-thumb {
-          transition: background-color 0.4s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
-          will-change: left, transform, background-color;
-        }
+        .slider-pill-thumb { transition: background-color 0.4s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease; will-change: left, transform, background-color; }
 
-        .slider-cursor-glow {
-          position: fixed;
-          width: 180px;
-          height: 180px;
-          background: radial-gradient(circle at center, rgba(217, 70, 239, 0.2) 0%, transparent 75%);
-          pointer-events: none;
-          z-index: 50;
-          transform: translate(-50%, -50%);
-          mix-blend-mode: screen;
-        }
+        .slider-cursor-glow { position: fixed; width: 180px; height: 180px; background: radial-gradient(circle at center, rgba(217, 70, 239, 0.2) 0%, transparent 75%); pointer-events: none; z-index: 50; transform: translate(-50%, -50%); mix-blend-mode: screen; }
       `}</style>
 
       {/* HERO SECTION */}
@@ -452,19 +363,10 @@ const Gallery: React.FC = () => {
                     <image href="https://img.freepik.com/premium-vector/seamless-pattern-with-cute-space-doodles-black-background_150234-147063.jpg?w=1480" width="80" height="80" preserveAspectRatio="xMidYMid slice" />
                   </pattern>
                   <clipPath id="yClipStrict"><path d={yPath} /></clipPath>
-                  
-                  {/* Dynamic mask for wave fill: Height is 180 total (30 to 210) */}
                   <clipPath id="yFillMask">
-                    <rect 
-                      x="0" 
-                      y={210 - (fillProgress * 1.8)} 
-                      width="240" 
-                      height="240" 
-                    />
+                    <rect x="0" y={210 - (fillProgress * 1.8)} width="240" height="240" />
                   </clipPath>
                 </defs>
-                
-                {/* Background Base */}
                 <g clipPath="url(#yClipStrict)">
                   <path d={yPath} fill="#050505" />
                   <g ref={parallaxRef} className="parallax-layer">
@@ -473,31 +375,15 @@ const Gallery: React.FC = () => {
                     </g>
                   </g>
                 </g>
-
-                {/* ANIMATED WHITE WAVE FILL */}
                 <g clipPath="url(#yClipStrict)">
                   <g clipPath="url(#yFillMask)">
-                    {/* Filling the whole Y shape area with waves that move horizontally */}
                     <g transform={`translate(0, ${210 - (fillProgress * 1.8)})`}>
-                       {/* Multiple wave paths shifting for depth */}
-                       <path 
-                         className="white-wave opacity-90 shadow-[0_0_20px_white]" 
-                         d="M 0 0 C 40 -20, 80 20, 120 0 C 160 -20, 200 20, 240 0 C 280 -20, 320 20, 360 0 C 400 -20, 440 20, 480 0 C 520 -20, 560 20, 600 0 V 300 H 0 Z" 
-                       />
-                       <path 
-                         className="white-wave opacity-50" 
-                         style={{ animationDuration: '3.0s', animationDirection: 'reverse' }}
-                         d="M 0 5 C 50 15, 100 -5, 150 5 C 200 15, 250 -5, 300 5 C 350 15, 400 -5, 450 5 C 500 15, 550 -5, 600 5 V 300 H 0 Z" 
-                       />
-                       <path 
-                         className="white-wave opacity-30" 
-                         style={{ animationDuration: '4.2s' }}
-                         d="M 0 -8 C 60 5, 120 -15, 180 -8 C 240 5, 300 -15, 360 -8 C 420 5, 480 -15, 540 -8 C 600 5, 660 -15, 720 -8 V 300 H 0 Z" 
-                       />
+                       <path className="white-wave opacity-90 shadow-[0_0_20px_white]" d="M 0 0 C 40 -20, 80 20, 120 0 C 160 -20, 200 20, 240 0 C 280 -20, 320 20, 360 0 C 400 -20, 440 20, 480 0 C 520 -20, 560 20, 600 0 V 300 H 0 Z" />
+                       <path className="white-wave opacity-50" style={{ animationDuration: '3.0s', animationDirection: 'reverse' }} d="M 0 5 C 50 15, 100 -5, 150 5 C 200 15, 250 -5, 300 5 C 350 15, 400 -5, 450 5 C 500 15, 550 -5, 600 5 V 300 H 0 Z" />
+                       <path className="white-wave opacity-30" style={{ animationDuration: '4.2s' }} d="M 0 -8 C 60 5, 120 -15, 180 -8 C 240 5, 300 -15, 360 -8 C 420 5, 480 -15, 540 -8 C 600 5, 660 -15, 720 -8 V 300 H 0 Z" />
                     </g>
                   </g>
                 </g>
-
                 <path d={yPath} strokeLinejoin="round" strokeLinecap="round" className="neon-y-outline" />
               </svg>
             </div>
@@ -508,12 +394,7 @@ const Gallery: React.FC = () => {
           onClick={scrollToGallery}
           className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 group flex flex-col items-center outline-none animate-bounce-subtle"
         >
-          <svg 
-            className="w-10 h-10 text-gray-500/80 group-hover:text-gray-300 transition-colors duration-300 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-10 h-10 text-gray-500/80 group-hover:text-gray-300 transition-colors duration-300 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </button>
@@ -542,16 +423,13 @@ const Gallery: React.FC = () => {
                 const angleStep = 360 / count;
                 const itemRotation = (index * angleStep) + autoRotation;
                 const rad = (itemRotation * Math.PI) / 180;
-                
                 const radius = window.innerWidth < 768 ? 200 : 380;
                 const x = isExpanded ? Math.sin(rad) * radius : 0;
                 const z = isExpanded ? (Math.cos(rad) * radius - radius) : -index * 30;
                 const rotateZ = isExpanded ? 0 : index * 2.5 - 5;
                 const opacity = isExpanded ? (0.2 + (Math.cos(rad) + 1) * 0.4) : 1;
                 const scale = isExpanded ? (0.75 + (Math.cos(rad) + 1) * 0.25) : 1;
-                
                 const zIndex = isExpanded ? 0 : count - index;
-
                 return (
                   <div 
                     key={img.id}
@@ -565,20 +443,10 @@ const Gallery: React.FC = () => {
                       boxShadow: isExpanded ? `0 0 30px rgba(217,70,239,${(Math.cos(rad) + 1) * 0.1})` : '0 10px 40px rgba(0,0,0,0.5)',
                       cursor: isExpanded ? 'default' : (index === 0 ? 'pointer' : 'default')
                     }}
-                    onClick={(e) => {
-                      if (!isExpanded && index === 0) {
-                        e.stopPropagation();
-                        handleExpand();
-                      }
-                    }}
+                    onClick={(e) => { if (!isExpanded && index === 0) { e.stopPropagation(); handleExpand(); } }}
                   >
-                    <img 
-                      src={img.url} 
-                      alt={img.title} 
-                      className={`w-full h-full object-cover transition-all duration-1000 ${isExpanded ? 'grayscale-0' : 'opacity-60 grayscale'}`}
-                    />
+                    <img src={img.url} alt={img.title} className={`w-full h-full object-cover transition-all duration-1000 ${isExpanded ? 'grayscale-0' : 'opacity-60 grayscale'}`} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                    
                     <div className="absolute bottom-6 left-8 right-8 flex flex-col items-start">
                       <span className="text-[10px] text-fuchsia-500 font-bold tracking-[0.3em] mb-1 uppercase">{img.category}</span>
                       <h4 className="text-xl md:text-2xl font-anton text-white tracking-wide uppercase">{img.title}</h4>
@@ -589,58 +457,59 @@ const Gallery: React.FC = () => {
             </div>
           </div>
 
-          {/* SPRING-LOADED SCROLL BAR (FADING PILL) */}
           <div className="w-full max-w-lg px-10 relative overflow-visible h-24 flex flex-col items-center">
-            <div 
-              className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-            >
-               <div 
-                 className="relative w-full h-12 flex items-center group/slider"
-                 onMouseEnter={() => setIsSliderHovered(true)}
-                 onMouseLeave={() => setIsSliderHovered(false)}
-               >
+            <div className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+               <div className="relative w-full h-12 flex items-center group/slider" onMouseEnter={() => setIsSliderHovered(true)} onMouseLeave={() => setIsSliderHovered(false)}>
                  {(isSliderHovered || isHoldingSlider.current) && (
-                   <div 
-                     className="slider-cursor-glow"
-                     style={{ 
-                       left: `calc(${(sliderValue + 100) / 2}% - 0px)`,
-                       top: '50%'
-                     }}
-                   />
+                   <div className="slider-cursor-glow" style={{ left: `calc(${(sliderValue + 100) / 2}% - 0px)`, top: '50%' }} />
                  )}
-
                  <div className="absolute left-0 right-0 h-[3px] bg-white/10 rounded-full"></div>
-                 
-                 <input 
-                   type="range" 
-                   min="-100" 
-                   max="100" 
-                   step="0.1"
-                   value={sliderValue}
-                   onChange={handleSliderChange}
-                   onMouseDown={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }}
-                   onMouseUp={() => { isHoldingSlider.current = false; }}
-                   onMouseLeave={() => { isHoldingSlider.current = false; }}
-                   onTouchStart={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }}
-                   onTouchEnd={() => { isHoldingSlider.current = false; }}
-                   className="gallery-slider relative z-20"
-                 />
-                 
-                 <div 
-                   className={`absolute top-1/2 -translate-y-1/2 w-[80px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb 
-                    ${(isSliderHovered || isHoldingSlider.current) 
-                        ? 'bg-fuchsia-500 shadow-[0_0_60px_#d946ef,0_0_30px_rgba(217,70,239,0.8),0_0_15px_rgba(255,255,255,0.4)] scale-110' 
-                        : 'bg-white shadow-[0_0_30px_rgba(255,255,255,0.7),0_0_10px_rgba(255,255,255,0.3)]'}`}
-                   style={{ 
-                     left: `calc(${(sliderValue + 100) / 2}% - 40px)`,
-                     zIndex: 25
-                   }}
-                 >
+                 <input type="range" min="-100" max="100" step="0.1" value={sliderValue} onChange={handleSliderChange} onMouseDown={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }} onMouseUp={() => { isHoldingSlider.current = false; }} onMouseLeave={() => { isHoldingSlider.current = false; }} onTouchStart={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }} onTouchEnd={() => { isHoldingSlider.current = false; }} className="gallery-slider relative z-20" />
+                 <div className={`absolute top-1/2 -translate-y-1/2 w-[80px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb ${(isSliderHovered || isHoldingSlider.current) ? 'bg-fuchsia-500 shadow-[0_0_60px_#d946ef,0_0_30px_rgba(217,70,239,0.8),0_0_15px_rgba(255,255,255,0.4)] scale-110' : 'bg-white shadow-[0_0_30px_rgba(255,255,255,0.7),0_0_10px_rgba(255,255,255,0.3)]'}`} style={{ left: `calc(${(sliderValue + 100) / 2}% - 40px)`, zIndex: 25 }}>
                    <span className={`arrow-flow-text flow-rtl ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
                    <span className={`arrow-flow-text flow-ltr ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
                  </div>
                </div>
             </div>
+          </div>
+        </div>
+
+        {/* NEW 2X2 GRID GALLERY SECTION */}
+        <div className="max-w-7xl mx-auto mt-32 px-6 flex flex-col items-center gap-16 relative z-10">
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="h-px w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent"></div>
+            <h3 className="text-4xl md:text-6xl font-anton text-white tracking-widest uppercase">
+              SPOTLIGHT <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">_REELS</span>
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl">
+            {SPOTLIGHT_IMAGES.map((img) => (
+              <div key={img.id} className="group relative aspect-[16/10] rounded-[2rem] overflow-hidden border border-white/5 bg-[#0a0a0a] shadow-2xl transition-all duration-700 hover:border-fuchsia-500/50 hover:-translate-y-2">
+                {/* Image */}
+                <img src={img.url} alt={img.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0" />
+                
+                {/* Sci-fi Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                
+                {/* Corner Accents */}
+                <div className="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-white/20 group-hover:border-fuchsia-500 transition-colors" />
+                <div className="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-white/20 group-hover:border-fuchsia-500 transition-colors" />
+                
+                {/* Data Labels */}
+                <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-1 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse" />
+                    <span className="text-[10px] font-mono text-fuchsia-400 font-bold tracking-[0.4em] uppercase">{img.tag}</span>
+                  </div>
+                  <h4 className="text-3xl font-anton text-white tracking-wider uppercase leading-none">{img.title}</h4>
+                  <div className="h-0.5 w-12 bg-white/20 mt-2" />
+                </div>
+                
+                {/* Grid Pattern Overlay */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(circle_at_center,#ffffff_1px,transparent_1px)] bg-[size:16px_16px]" />
+              </div>
+            ))}
           </div>
         </div>
       </section>
