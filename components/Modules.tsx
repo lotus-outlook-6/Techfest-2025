@@ -21,7 +21,7 @@ const MODULES_DATA: ModuleData[] = [
     status: "ACTIVE",
     color: "cyan",
     icon: "code",
-    imageUrl: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1000&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: "M_02",
@@ -31,7 +31,7 @@ const MODULES_DATA: ModuleData[] = [
     status: "ACTIVE",
     color: "fuchsia",
     icon: "robot",
-    imageUrl: "https://images.unsplash.com/photo-1531746790731-6c087fecd05a?q=80&w=1000&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: "M_03",
@@ -41,7 +41,7 @@ const MODULES_DATA: ModuleData[] = [
     status: "STABLE",
     color: "orange",
     icon: "image",
-    imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: "M_04",
@@ -51,7 +51,7 @@ const MODULES_DATA: ModuleData[] = [
     status: "INIT",
     color: "blue",
     icon: "security",
-    imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: "M_05",
@@ -105,30 +105,48 @@ const ModuleIcon: React.FC<{ type: string; color: string; className?: string }> 
 
 const Modules: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
-  // activePage: -1=Closed, 0=Spread0, ..., 6=Spread6 (End)
+  
+  // activePage states:
+  // -1: Closed (Front Cover centered)
+  // 0...6: Index of the current sheet flipped.
+  // When activePage = 6, book is closed at the back (Archive Secured).
   const [activePage, setActivePage] = useState(-1); 
 
   const scrollToContent = () => contentRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-  const handleOpenBook = () => setActivePage(0);
+  // Auto reset to front cover after 5 seconds of being at the back cover
+  useEffect(() => {
+    if (activePage === 6) {
+      const timer = setTimeout(() => {
+        setActivePage(-1);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [activePage]);
+
+  const handleOpenBook = () => {
+    setActivePage(0);
+  };
+
   const handleNextPage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (activePage < MODULES_DATA.length) setActivePage(prev => prev + 1);
+    if (activePage < 6) {
+      setActivePage(prev => prev + 1);
+    } else {
+      setActivePage(-1);
+    }
   };
+  
   const handlePrevPage = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (activePage >= 0) setActivePage(prev => prev - 1);
   };
 
-  // 3-second auto-close timer on the last spread (Spread 6)
-  useEffect(() => {
-    if (activePage === MODULES_DATA.length) {
-      const timer = setTimeout(() => {
-        setActivePage(-1); 
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [activePage]);
+  const getContainerTranslation = () => {
+    if (activePage === -1) return 'translateX(-200px)'; // Center front cover
+    if (activePage === 6) return 'translateX(200px)';   // Center back cover
+    return 'translateX(0)'; // Center spine when open
+  };
 
   const letters = "YANTRAKSH".split("");
   const directions = ["top", "bottom", "left", "right", "top", "bottom", "left", "right", "top"];
@@ -166,8 +184,6 @@ const Modules: React.FC = () => {
         .page-front, .page-back { position: absolute; width: 100%; height: 100%; top: 0; left: 0; backface-visibility: hidden; overflow: hidden; border-radius: 0 15px 15px 0; }
         .page-back { transform: rotateY(180deg); border-radius: 15px 0 0 15px; }
         .page-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.1) 0%, transparent 10%); pointer-events: none; }
-        @keyframes scan-laser { 0% { top: 20%; opacity: 0; } 50% { opacity: 1; } 100% { top: 80%; opacity: 0; } }
-        .animate-scan-laser { animation: scan-laser 2s linear infinite; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
@@ -216,79 +232,98 @@ const Modules: React.FC = () => {
       {/* DIGITAL BOOK CONTENT SECTION */}
       <div id="module-book-content" ref={contentRef} className="min-h-screen w-full flex flex-col items-center justify-center py-20 px-6 perspective-[2000px] overflow-visible">
         
-        {/* Centered logic for closed book vs spine-centered for open book */}
-        <div className={`book-container transition-transform duration-1000 ${activePage === -1 ? '-translate-x-[200px]' : 'translate-x-0'}`}>
-          
-          {/* STATIC BASE (Appears on the right behind the last sheet) */}
-          <div className="absolute right-0 w-1/2 h-full bg-[#0a1528] rounded-r-[15px] border-y border-r border-white/10 flex flex-col items-center justify-center p-10 z-0 shadow-2xl">
-             <div className="flex flex-col items-center gap-6 text-center opacity-40">
-                <span className="text-fuchsia-500 font-mono text-[10px] tracking-widest block mb-4 uppercase">Archive_Secured</span>
-                <p className="text-white font-anton text-2xl tracking-widest uppercase">Transmission End</p>
-             </div>
+        <div 
+          className="book-container"
+          style={{ transform: getContainerTranslation() }}
+        >
+          {/* SHEET 6 (Last Sheet): Front = Module 6 Details, Back = Back Cover UI */}
+          <div className={`book-page ${activePage >= 6 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 6 ? 56 : 94, pointerEvents: activePage === 5 || activePage === 6 ? 'auto' : 'none' }}>
+            {/* Front: Tech Debate (M6) Details */}
+            <div className="page-front bg-[#0d1b31] border-y border-r border-white/5 shadow-[-5px_0_15px_rgba(0,0,0,0.5)]">
+               <div className="page-shadow"></div>
+               <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-16">
+                  <div className="w-20 h-20 mb-6 bg-red-500/5 rounded-full p-4 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                     <ModuleIcon type={MODULES_DATA[5].icon} color={MODULES_DATA[5].color} className="w-full h-full" />
+                  </div>
+                  <h3 className="text-3xl font-anton text-white mb-2 tracking-widest uppercase">{MODULES_DATA[5].name}</h3>
+                  <p className="text-gray-400 text-sm font-space max-w-xs mb-4 opacity-80 leading-relaxed overflow-hidden line-clamp-4">{MODULES_DATA[5].longDesc}</p>
+                  <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full flex justify-center px-8">
+                     <button className="w-full max-w-[240px] py-5 bg-[#0a1528]/80 border-2 border-red-500/40 text-white font-anton tracking-[0.3em] text-sm rounded-[2.5rem] hover:bg-red-500 hover:border-red-500 transition-all duration-300 shadow-[0_0_30px_rgba(239,68,68,0.2)] uppercase">
+                       FILL_FORM
+                     </button>
+                  </div>
+                  <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+               </div>
+            </div>
+            {/* Back: Back Cover (Archive Secured) */}
+            <div className="page-back bg-[#0a1528] border-y border-l border-white/20 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
+               <div className="w-full h-full flex flex-col items-center justify-center p-10 relative">
+                  <div className="flex flex-col items-center gap-6 text-center">
+                     <div className="w-20 h-20 border-2 border-fuchsia-500/30 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-10 h-10 text-fuchsia-500/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg>
+                     </div>
+                     <h4 className="text-white font-anton text-4xl tracking-[0.2em] uppercase opacity-70 leading-none">ARCHIVE<br/>SECURED</h4>
+                     <div className="flex gap-1 h-12 items-end mb-4 opacity-40">
+                       {[...Array(16)].map((_, i) => (
+                         <div key={i} className="bg-white" style={{ width: `${Math.random() * 3 + 1}px`, height: `${Math.random() * 40 + 40}%` }}></div>
+                       ))}
+                     </div>
+                  </div>
+                  <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+               </div>
+            </div>
           </div>
 
-          {/* DYNAMIC CONTENT SHEETS (Reverse ordered for correct initial stacking) */}
-          {MODULES_DATA.slice().reverse().map((module, revIndex) => {
-            const index = MODULES_DATA.length - 1 - revIndex;
-            const sheetNumber = index + 1; // Content sheets 1 to 6
-            const isFlipped = activePage >= sheetNumber;
-            const zIndex = isFlipped ? (sheetNumber) : (100 - sheetNumber);
-            const canInteract = (activePage === index || activePage === index + 1);
+          {/* SHEETS 1-5: Front = Module N Details, Back = Module N+1 Image */}
+          {[1, 2, 3, 4, 5].slice().reverse().map((sheetId) => {
+            const moduleIndex = sheetId - 1; // 0..4
+            const module = MODULES_DATA[moduleIndex];
+            const nextModule = MODULES_DATA[moduleIndex + 1];
+            const isFlipped = activePage >= sheetId;
+            const zIndex = isFlipped ? (sheetId + 50) : (100 - sheetId);
+            const canInteract = (activePage === moduleIndex || activePage === sheetId);
 
             return (
               <div 
-                key={`module-sheet-${sheetNumber}`}
+                key={`sheet-${sheetId}`}
                 className={`book-page ${isFlipped ? 'flipped' : ''}`}
                 style={{ zIndex, pointerEvents: canInteract ? 'auto' : 'none' }}
               >
-                {/* Front face: Module details (Shows on Right Stack) */}
+                {/* Front face: Current Module Details */}
                 <div className="page-front bg-[#0d1b31] border-y border-r border-white/5 shadow-[-5px_0_15px_rgba(0,0,0,0.5)]">
                   <div className="page-shadow"></div>
                   <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-16">
-                     <div className="w-20 h-20 mb-6 bg-fuchsia-500/5 rounded-full p-4 flex items-center justify-center shadow-[0_0_20px_rgba(217,70,239,0.1)] shrink-0">
+                     <div className={`w-20 h-20 mb-6 bg-${module.color}-500/5 rounded-full p-4 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.1)]`}>
                         <ModuleIcon type={module.icon} color={module.color} className="w-full h-full" />
                      </div>
                      <h3 className="text-3xl font-anton text-white mb-2 tracking-widest uppercase shrink-0">{module.name}</h3>
                      <p className="text-gray-400 text-sm font-space max-w-xs mb-4 opacity-80 leading-relaxed overflow-hidden line-clamp-4">{module.longDesc}</p>
-                     
                      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full flex justify-center px-8">
-                        <button className="w-full max-w-[240px] py-5 bg-[#0a1528]/80 border-2 border-fuchsia-500/40 text-white font-anton tracking-[0.3em] text-sm rounded-[2.5rem] hover:bg-fuchsia-500 hover:border-fuchsia-500 hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(217,70,239,0.2)] uppercase">
+                        <button className="w-full max-w-[240px] py-5 bg-[#0a1528]/80 border-2 border-fuchsia-500/40 text-white font-anton tracking-[0.3em] text-sm rounded-[2.5rem] hover:bg-fuchsia-500 hover:border-fuchsia-500 transition-all duration-300 shadow-[0_0_30px_rgba(217,70,239,0.2)] uppercase">
                           FILL_FORM
                         </button>
                      </div>
-                     
-                     <button onClick={handleNextPage} className="absolute bottom-6 right-6 w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all group z-30 shadow-lg">
-                       <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+                     <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
+                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                      </button>
                   </div>
                 </div>
 
-                {/* Back face: Correct Module image (Shows on Left Stack once flipped) */}
-                <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5">
+                {/* Back face: Next Module Image */}
+                <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
                   <div className="w-full h-full flex items-center justify-center p-8 relative">
-                    {/* Sheet i Back shows the image for the NEXT module on spread i */}
-                    {index + 1 < MODULES_DATA.length ? (
-                      <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[-3deg]">
-                         <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2">
-                           <img src={MODULES_DATA[index+1].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module Visual" />
-                         </div>
-                         <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{MODULES_DATA[index+1].name}</div>
-                      </div>
-                    ) : (
-                      /* Final page content shown on left spread after last module */
-                      <div className="flex flex-col items-center justify-center p-12 text-center">
-                         <h4 className="text-white font-anton text-2xl tracking-[0.2em] uppercase mb-8 opacity-60">ARCHIVE SECURED</h4>
-                         <div className="flex gap-1 h-20 items-end mb-10 opacity-40">
-                           {[...Array(20)].map((_, i) => (
-                             <div key={i} className="bg-white/60" style={{ width: `${Math.random() * 3 + 1}px`, height: `${Math.random() * 60 + 40}%` }}></div>
-                           ))}
-                         </div>
-                         <div className="text-fuchsia-500 font-mono text-[8px] tracking-[1em] opacity-40 animate-pulse">TRANSMISSION_COMPLETE</div>
-                      </div>
-                    )}
-
-                    <button onClick={handlePrevPage} className="absolute bottom-6 left-6 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all group z-40 shadow-xl">
-                       <svg className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                    <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[-3deg]">
+                       <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2">
+                         <img src={nextModule.imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module Visual" />
+                       </div>
+                       <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{nextModule.name}</div>
+                    </div>
+                    <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group">
+                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
                     </button>
                   </div>
                 </div>
@@ -296,31 +331,35 @@ const Modules: React.FC = () => {
             );
           })}
 
-          {/* FRONT COVER (Sheet 0) */}
-          <div className={`book-page ${activePage >= 0 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 0 ? 0 : 110, pointerEvents: activePage === -1 || activePage === 0 ? 'auto' : 'none' }}>
+          {/* SHEET 0: Front = Cover UI, Back = Module 1 Image */}
+          <div className={`book-page ${activePage >= 0 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 0 ? 50 : 200, pointerEvents: activePage === -1 || activePage === 0 ? 'auto' : 'none' }}>
+            {/* Front: Technical Modules Cover */}
             <div onClick={handleOpenBook} className="page-front bg-gradient-to-br from-[#1a3a6c] to-[#0a1528] flex flex-col items-center justify-center border-y border-r border-white/20 cursor-pointer group shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
               <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-              <div className="relative z-10 flex flex-col items-center gap-6">
+              <div className="relative z-10 flex flex-col items-center gap-6 text-center">
                   <div className="w-24 h-24 border-2 border-fuchsia-500/50 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(217,70,239,0.3)] animate-pulse">
                      <svg className="w-12 h-12 text-fuchsia-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg>
                   </div>
-                  <h2 className="text-white font-anton text-4xl tracking-[0.2em] text-center px-10 leading-tight uppercase">TECHNICAL<br/><span className="text-fuchsia-500 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">MODULES</span></h2>
+                  <h2 className="text-white font-anton text-4xl tracking-[0.2em] px-10 leading-tight uppercase">TECHNICAL<br/><span className="text-fuchsia-500 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">MODULES</span></h2>
                   <div className="h-px w-20 bg-white/20 my-4"></div>
                   <p className="text-fuchsia-400 font-mono text-[10px] tracking-[0.4em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">Click to view modules</p>
               </div>
               <div className="absolute left-0 top-0 bottom-0 w-6 bg-black/40 shadow-inner"></div>
             </div>
             
-            {/* INSIDE FRONT COVER: Displays the FIRST module's image */}
-            <div className="page-back bg-[#0d1b31] border-y border-l border-white/5 flex items-center justify-center">
+            {/* Back: Module 1 Image (Visible on LEFT stack once opened) */}
+            <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
               <div className="w-full h-full flex items-center justify-center p-8 relative">
-                 <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[-4deg]">
-                    <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2">
-                      <img src={MODULES_DATA[0].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Initial Module" />
-                    </div>
-                    <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{MODULES_DATA[0].name}</div>
-                 </div>
-               </div>
+                <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[2deg]">
+                   <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2">
+                     <img src={MODULES_DATA[0].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module 1 Visual" />
+                   </div>
+                   <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{MODULES_DATA[0].name}</div>
+                </div>
+                <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group">
+                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+              </div>
             </div>
           </div>
 
