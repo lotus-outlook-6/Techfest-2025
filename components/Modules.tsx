@@ -158,10 +158,7 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Background Decor */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(circle_at_center,_#ffffff_1px,_transparent_1px)] bg-[size:12px_12px]"></div>
-      
-      {/* Corner Brackets */}
       <div className={`absolute top-4 left-4 w-4 h-4 border-t border-l transition-all duration-500 ${isHovered ? 'scale-110 opacity-100' : 'opacity-20'}`}></div>
       <div className={`absolute bottom-4 right-4 w-4 h-4 border-b border-r transition-all duration-500 ${isHovered ? 'scale-110 opacity-100' : 'opacity-20'}`}></div>
 
@@ -191,7 +188,6 @@ const ModuleCard: React.FC<{ module: ModuleData }> = ({ module }) => {
         </button>
       </div>
       
-      {/* Scan Line */}
       <div className={`absolute left-0 right-0 h-px bg-white/20 blur-[1px] pointer-events-none transition-all duration-[4s] linear infinite ${isHovered ? 'animate-scanner' : 'opacity-0'}`}></div>
     </div>
   );
@@ -220,28 +216,21 @@ const Modules: React.FC = () => {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
       
-      {/* HERO SECTION */}
+      {/* HERO SECTION - CLEAN & MINIMAL */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0">
-        <div className="text-center animate-fade-in px-6">
-          <div className="flex items-center justify-center gap-4 mb-4 opacity-60">
-            <div className="h-px w-12 bg-fuchsia-500"></div>
-            <span className="text-fuchsia-400 text-[10px] md:text-xs font-bold tracking-[0.5em] uppercase">Operations_Control</span>
-            <div className="h-px w-12 bg-fuchsia-500"></div>
-          </div>
-          <h2 className="text-6xl md:text-9xl font-anton tracking-tighter text-white mb-6 uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-            YANTRAKSH <br/> <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">MODULES</span>
+        <div className="text-center animate-fade-in px-6 -translate-y-20 md:-translate-y-24">
+          <h2 className="text-6xl md:text-9xl font-anton tracking-tighter text-white uppercase leading-[0.85] drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+            YANTRAKSH <br/> 
+            <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]">MODULES</span>
           </h2>
-          <p className="text-gray-400 font-space text-sm md:text-xl max-w-2xl mx-auto opacity-70 tracking-widest uppercase">
-            Specialized domains of technical intelligence.
-          </p>
         </div>
 
-        {/* Scroll Arrow */}
+        {/* Scroll Arrow - Standard size matched to other sections */}
         <div 
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity"
           onClick={scrollToContent}
         >
-          <svg className="w-10 h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-10 h-10 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)] text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
@@ -249,12 +238,6 @@ const Modules: React.FC = () => {
 
       {/* GRID CONTENT SECTION */}
       <div id="module-grid-content" ref={contentRef} className="max-w-7xl w-full flex flex-col items-center pt-20 pb-40 px-6 md:px-12">
-        <header className="text-center mb-16 md:mb-24">
-          <p className="text-gray-400 font-space text-sm md:text-lg max-w-3xl mx-auto opacity-70 tracking-wide">
-            Our fest is segmented into specialized modules designed to test every facet of technical intelligence. Choose your domain and descend into the digital realm.
-          </p>
-        </header>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 w-full justify-items-center">
           {MODULES_DATA.map((module) => (
             <ModuleCard key={module.id} module={module} />
