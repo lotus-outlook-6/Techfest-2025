@@ -4,9 +4,10 @@ import React, { useState, useRef, useEffect } from 'react';
 interface ModuleData {
   id: string;
   name: string;
+  tagline: string;
   shortDesc: string;
   longDesc: string;
-  status: 'ACTIVE' | 'STABLE' | 'INIT' | 'ENCRYPTED';
+  status: 'ACTIVE' | 'STABLE' | 'INIT' | 'ENCRYPTED' | 'STANDBY';
   color: string;
   icon: string;
   imageUrl: string;
@@ -15,9 +16,10 @@ interface ModuleData {
 const MODULES_DATA: ModuleData[] = [
   {
     id: "M_01",
-    name: "COMPETITIVE CODING",
-    shortDesc: "Algorithmic showdowns and logic optimization.",
-    longDesc: "The ultimate test of speed and efficiency. Solve complex algorithmic challenges under tight constraints using C++, Python, or Java.",
+    name: "Competitive Coding",
+    tagline: "Code-Combat / Algorithm Arena",
+    shortDesc: "Where Logic Meets Speed.",
+    longDesc: "Step into the ultimate battleground of bits and bytes. This module tests your problem-solving skills, algorithmic efficiency, and coding speed. Participants will face a series of grueling challenges ranging from basic logic to complex dynamic programming.",
     status: "ACTIVE",
     color: "cyan",
     icon: "code",
@@ -25,9 +27,10 @@ const MODULES_DATA: ModuleData[] = [
   },
   {
     id: "M_02",
-    name: "ROBO WAR/RACE",
-    shortDesc: "Mechanical combat and high-speed kinetics.",
-    longDesc: "Enter the arena where steel meets speed. From heavy-duty combat robots to agile racers traversing treacherous obstacle courses.",
+    name: "Robo War/Race",
+    tagline: "Metal Mayhem / Robo-Rage",
+    shortDesc: "Build. Brawl. Conquer.",
+    longDesc: "Witness the clash of steel! Whether it is maneuvering through a treacherous obstacle course in record time or battling it out in the arena to be the last bot standing, this module is for the true hardware enthusiasts. Bring your creations to life and let the motors roar.",
     status: "ACTIVE",
     color: "fuchsia",
     icon: "robot",
@@ -35,9 +38,10 @@ const MODULES_DATA: ModuleData[] = [
   },
   {
     id: "M_03",
-    name: "IMAGE PROMPTING",
-    shortDesc: "Generative AI and creative directives.",
-    longDesc: "Master the art of the prompt. Use cutting-edge generative models to synthesize visual masterpieces from textual instructions.",
+    name: "Image Prompting",
+    tagline: "Prompt-o-Graphy / AI Artistry",
+    shortDesc: "Imagine it. Type it. Create it.",
+    longDesc: "Harness the power of Generative AI. In this competition, your keyboard is your paintbrush. Participants will be given abstract themes or specific scenarios and must use prompt engineering to generate the most accurate, creative, and visually stunning AI art.",
     status: "STABLE",
     color: "orange",
     icon: "image",
@@ -45,9 +49,10 @@ const MODULES_DATA: ModuleData[] = [
   },
   {
     id: "M_04",
-    name: "CYBER ESCAPE ROOM",
-    shortDesc: "Cryptography puzzles and network infiltration.",
-    longDesc: "A race against the clock. Decrypt files, bypass firewalls, and solve digital riddles to secure your exit from a locked virtual environment.",
+    name: "Cyber Escape Room",
+    tagline: "The Firewall Breach / Net-Lock",
+    shortDesc: "Can You Hack Your Way Out?",
+    longDesc: "You are trapped in a digital fortress. This is a CTF (Capture The Flag) style event mixed with logic puzzles. Participants must decrypt codes, find hidden flags in source code, and solve cryptographic riddles to 'unlock' the next room and escape before the timer runs out.",
     status: "INIT",
     color: "blue",
     icon: "security",
@@ -56,8 +61,9 @@ const MODULES_DATA: ModuleData[] = [
   {
     id: "M_05",
     name: "SUSTAINABLE AGRI",
-    shortDesc: "Sustainable tech for the future of farming.",
-    longDesc: "Precision and Sustainable Agriculture. Explore IOT sensors, drone mapping, and automated systems designed to revolutionize modern food production.",
+    tagline: "Agro-Tech / Green Innovation",
+    shortDesc: "Cultivating the Future.",
+    longDesc: "Technology meets mother nature. This module invites innovative ideas and prototypes that solve real-world agricultural problems. From IoT-based irrigation systems to drone crop monitoring, showcase how technology can make farming more precise and sustainable.",
     status: "STABLE",
     color: "lime",
     icon: "leaf",
@@ -65,13 +71,14 @@ const MODULES_DATA: ModuleData[] = [
   },
   {
     id: "M_06",
-    name: "TECH DEBATE",
-    shortDesc: "Discourse on the ethics of innovation.",
-    longDesc: "The clash of ideas. Defend or challenge the socio-economic impacts of emerging technologies like AGI, Bio-hacking, and Space Privatization.",
+    name: "Tech Debate",
+    tagline: "Binary Banter / The Tech Forum",
+    shortDesc: "Voices of the Future.",
+    longDesc: "Not all battles are fought with code; some are won with words. Engage in heated discussions on the most controversial and cutting-edge topics in technology. Logic, articulation, and technical knowledge are your weapons.",
     status: "ENCRYPTED",
     color: "red",
     icon: "debate",
-    imageUrl: "https://images.unsplash.com/photo-1475721027785-f74dea327912?q=80&w=1000&auto=format&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1524178232363-1fb28f74b55a?q=80&w=1000&auto=format&fit=crop"
   }
 ];
 
@@ -105,16 +112,8 @@ const ModuleIcon: React.FC<{ type: string; color: string; className?: string }> 
 
 const Modules: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null);
-  
-  // activePage states:
-  // -1: Closed (Front Cover centered)
-  // 0...6: Index of the current sheet flipped.
-  // When activePage = 6, book is closed at the back (Archive Secured).
   const [activePage, setActivePage] = useState(-1); 
 
-  const scrollToContent = () => contentRef.current?.scrollIntoView({ behavior: 'smooth' });
-
-  // Auto reset to front cover after 5 seconds of being at the back cover
   useEffect(() => {
     if (activePage === 6) {
       const timer = setTimeout(() => {
@@ -123,6 +122,8 @@ const Modules: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [activePage]);
+
+  const scrollToContent = () => contentRef.current?.scrollIntoView({ behavior: 'smooth' });
 
   const handleOpenBook = () => {
     setActivePage(0);
@@ -142,17 +143,22 @@ const Modules: React.FC = () => {
     if (activePage >= 0) setActivePage(prev => prev - 1);
   };
 
+  const handleViewModuleDetails = (index: number) => {
+    scrollToContent();
+    setActivePage(index);
+  };
+
   const getContainerTranslation = () => {
-    if (activePage === -1) return 'translateX(-200px)'; // Center front cover
-    if (activePage === 6) return 'translateX(200px)';   // Center back cover
-    return 'translateX(0)'; // Center spine when open
+    if (activePage === -1) return 'translateX(-200px)';
+    if (activePage === 6) return 'translateX(200px)';
+    return 'translateX(0)';
   };
 
   const letters = "YANTRAKSH".split("");
   const directions = ["top", "bottom", "left", "right", "top", "bottom", "left", "right", "top"];
 
   return (
-    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth">
+    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth bg-transparent">
       <style>{`
         @keyframes slide-top-pro { 0% { transform: translateY(-120px) scale(0.8); opacity: 0; filter: blur(12px); } 100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } }
         @keyframes slide-bottom-pro { 0% { transform: translateY(120px) scale(0.8); opacity: 0; filter: blur(12px); } 100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } }
@@ -186,6 +192,19 @@ const Modules: React.FC = () => {
         .page-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.1) 0%, transparent 10%); pointer-events: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .card-glow-cyan { box-shadow: 0 0 30px rgba(34, 211, 238, 0.1); }
+        .card-glow-cyan:hover { box-shadow: 0 0 50px rgba(34, 211, 238, 0.3); }
+        .card-glow-fuchsia { box-shadow: 0 0 30px rgba(217, 70, 239, 0.1); }
+        .card-glow-fuchsia:hover { box-shadow: 0 0 50px rgba(217, 70, 239, 0.3); }
+        .card-glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.1); }
+        .card-glow-blue:hover { box-shadow: 0 0 50px rgba(59, 130, 246, 0.3); }
+        .card-glow-lime { box-shadow: 0 0 30px rgba(163, 230, 53, 0.1); }
+        .card-glow-lime:hover { box-shadow: 0 0 50px rgba(163, 230, 53, 0.3); }
+        .card-glow-orange { box-shadow: 0 0 30px rgba(251, 146, 60, 0.1); }
+        .card-glow-orange:hover { box-shadow: 0 0 50px rgba(251, 146, 60, 0.3); }
+        .card-glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.1); }
+        .card-glow-red:hover { box-shadow: 0 0 50px rgba(239, 68, 68, 0.3); }
       `}</style>
       
       {/* HERO SECTION */}
@@ -232,55 +251,44 @@ const Modules: React.FC = () => {
       {/* DIGITAL BOOK CONTENT SECTION */}
       <div id="module-book-content" ref={contentRef} className="min-h-screen w-full flex flex-col items-center justify-center py-20 px-6 perspective-[2000px] overflow-visible">
         
-        <div 
-          className="book-container"
-          style={{ transform: getContainerTranslation() }}
-        >
-          {/* SHEET 6 (Last Sheet): Front = Module 6 Details, Back = Back Cover UI */}
-          <div className={`book-page ${activePage >= 6 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 6 ? 56 : 94, pointerEvents: activePage === 5 || activePage === 6 ? 'auto' : 'none' }}>
-            {/* Front: Tech Debate (M6) Details */}
+        <div className="book-container" style={{ transform: getContainerTranslation() }}>
+          {/* SHEET 6: Final Module Details + Back Cover */}
+          <div className={`book-page ${activePage >= 6 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 6 ? 56 : 94, pointerEvents: (activePage === 5 || activePage === 6) ? 'auto' : 'none' }}>
             <div className="page-front bg-[#0d1b31] border-y border-r border-white/5 shadow-[-5px_0_15px_rgba(0,0,0,0.5)]">
                <div className="page-shadow"></div>
-               <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-16">
-                  <div className="w-20 h-20 mb-6 bg-red-500/5 rounded-full p-4 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+               <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-10">
+                  <div className="w-14 h-14 mb-4 bg-red-500/5 rounded-full p-3 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.1)]">
                      <ModuleIcon type={MODULES_DATA[5].icon} color={MODULES_DATA[5].color} className="w-full h-full" />
                   </div>
-                  <h3 className="text-3xl font-anton text-white mb-2 tracking-widest uppercase">{MODULES_DATA[5].name}</h3>
-                  <p className="text-gray-400 text-sm font-space max-w-xs mb-4 opacity-80 leading-relaxed overflow-hidden line-clamp-4">{MODULES_DATA[5].longDesc}</p>
-                  <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full flex justify-center px-8">
-                     <button className="w-full max-w-[240px] py-5 bg-[#0a1528]/80 border-2 border-red-500/40 text-white font-anton tracking-[0.3em] text-sm rounded-[2.5rem] hover:bg-red-500 hover:border-red-500 transition-all duration-300 shadow-[0_0_30px_rgba(239,68,68,0.2)] uppercase">
+                  <h3 className="text-2xl font-anton text-white mb-1 tracking-widest uppercase leading-tight">{MODULES_DATA[5].name}</h3>
+                  <p className="text-[10px] font-bold font-space uppercase tracking-[0.2em] mb-1 text-red-400 opacity-90">{MODULES_DATA[5].tagline}</p>
+                  <p className="text-[9px] font-medium font-mono uppercase tracking-[0.1em] mb-4 text-white opacity-40">{MODULES_DATA[5].shortDesc}</p>
+                  <p className="text-gray-300 text-sm font-space max-w-xs mb-4 opacity-90 leading-relaxed overflow-hidden line-clamp-6">{MODULES_DATA[5].longDesc}</p>
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full flex justify-center px-10">
+                     <button className="w-full max-w-[150px] py-2 bg-[#0a1528]/90 border border-red-500/40 text-white font-anton tracking-[0.2em] text-[10px] rounded-[2rem] hover:bg-red-500 hover:border-red-500 transition-all duration-300 shadow-[0_0_20px_rgba(239,68,68,0.15)] uppercase">
                        FILL_FORM
                      </button>
                   </div>
-                  <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                </div>
             </div>
-            {/* Back: Back Cover (Archive Secured) */}
             <div className="page-back bg-[#0a1528] border-y border-l border-white/20 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
                <div className="w-full h-full flex flex-col items-center justify-center p-10 relative">
                   <div className="flex flex-col items-center gap-6 text-center">
-                     <div className="w-20 h-20 border-2 border-fuchsia-500/30 rounded-full flex items-center justify-center mb-4">
-                        <svg className="w-10 h-10 text-fuchsia-500/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg>
-                     </div>
+                     <div className="w-20 h-20 border-2 border-fuchsia-500/30 rounded-full flex items-center justify-center mb-4"><svg className="w-10 h-10 text-fuchsia-500/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg></div>
                      <h4 className="text-white font-anton text-4xl tracking-[0.2em] uppercase opacity-70 leading-none">ARCHIVE<br/>SECURED</h4>
-                     <div className="flex gap-1 h-12 items-end mb-4 opacity-40">
-                       {[...Array(16)].map((_, i) => (
-                         <div key={i} className="bg-white" style={{ width: `${Math.random() * 3 + 1}px`, height: `${Math.random() * 40 + 40}%` }}></div>
-                       ))}
-                     </div>
+                     <div className="flex gap-1 h-12 items-end mb-4 opacity-40">{[...Array(16)].map((_, i) => (<div key={i} className="bg-white" style={{ width: `${Math.random() * 3 + 1}px`, height: `${Math.random() * 40 + 40}%` }}></div>))}</div>
                   </div>
-                  <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                  </button>
+                  <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
                </div>
             </div>
           </div>
 
-          {/* SHEETS 1-5: Front = Module N Details, Back = Module N+1 Image */}
+          {/* SHEETS 1-5 */}
           {[1, 2, 3, 4, 5].slice().reverse().map((sheetId) => {
-            const moduleIndex = sheetId - 1; // 0..4
+            const moduleIndex = sheetId - 1;
             const module = MODULES_DATA[moduleIndex];
             const nextModule = MODULES_DATA[moduleIndex + 1];
             const isFlipped = activePage >= sheetId;
@@ -288,91 +296,100 @@ const Modules: React.FC = () => {
             const canInteract = (activePage === moduleIndex || activePage === sheetId);
 
             return (
-              <div 
-                key={`sheet-${sheetId}`}
-                className={`book-page ${isFlipped ? 'flipped' : ''}`}
-                style={{ zIndex, pointerEvents: canInteract ? 'auto' : 'none' }}
-              >
-                {/* Front face: Current Module Details */}
+              <div key={`sheet-${sheetId}`} className={`book-page ${isFlipped ? 'flipped' : ''}`} style={{ zIndex, pointerEvents: canInteract ? 'auto' : 'none' }}>
                 <div className="page-front bg-[#0d1b31] border-y border-r border-white/5 shadow-[-5px_0_15px_rgba(0,0,0,0.5)]">
                   <div className="page-shadow"></div>
-                  <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-16">
-                     <div className={`w-20 h-20 mb-6 bg-${module.color}-500/5 rounded-full p-4 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.1)]`}>
-                        <ModuleIcon type={module.icon} color={module.color} className="w-full h-full" />
-                     </div>
-                     <h3 className="text-3xl font-anton text-white mb-2 tracking-widest uppercase shrink-0">{module.name}</h3>
-                     <p className="text-gray-400 text-sm font-space max-w-xs mb-4 opacity-80 leading-relaxed overflow-hidden line-clamp-4">{module.longDesc}</p>
-                     <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full flex justify-center px-8">
-                        <button className="w-full max-w-[240px] py-5 bg-[#0a1528]/80 border-2 border-fuchsia-500/40 text-white font-anton tracking-[0.3em] text-sm rounded-[2.5rem] hover:bg-fuchsia-500 hover:border-fuchsia-500 transition-all duration-300 shadow-[0_0_30px_rgba(217,70,239,0.2)] uppercase">
+                  <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-10">
+                     <div className={`w-14 h-14 mb-4 bg-${module.color}-500/5 rounded-full p-3 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.1)]`}><ModuleIcon type={module.icon} color={module.color} className="w-full h-full" /></div>
+                     <h3 className="text-2xl font-anton text-white mb-1 tracking-widest uppercase shrink-0 leading-tight">{module.name}</h3>
+                     <p className="text-[10px] font-bold font-space uppercase tracking-[0.2em] mb-1 text-fuchsia-400 opacity-90">{module.tagline}</p>
+                     <p className="text-[9px] font-medium font-mono uppercase tracking-[0.1em] mb-4 text-white opacity-40">{module.shortDesc}</p>
+                     <p className="text-gray-300 text-sm font-space max-w-xs mb-4 opacity-95 leading-relaxed overflow-hidden line-clamp-6">{module.longDesc}</p>
+                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full flex justify-center px-10">
+                        <button className={`w-full max-w-[150px] py-2 bg-[#0a1528]/90 border border-${module.color}-500/40 text-white font-anton tracking-[0.2em] text-[10px] rounded-[2rem] hover:bg-fuchsia-500 hover:border-fuchsia-500 transition-all duration-300 shadow-[0_0_20px_rgba(217,70,239,0.15)] uppercase`}>
                           FILL_FORM
                         </button>
                      </div>
-                     <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-12 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
-                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-                     </button>
+                     <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg></button>
                   </div>
                 </div>
-
-                {/* Back face: Next Module Image */}
                 <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
                   <div className="w-full h-full flex items-center justify-center p-8 relative">
                     <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[-3deg]">
-                       <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2">
-                         <img src={nextModule.imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module Visual" />
-                       </div>
+                       <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2"><img src={nextModule.imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module Visual" /></div>
                        <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{nextModule.name}</div>
                     </div>
-                    <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group">
-                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                    </button>
+                    <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
                   </div>
                 </div>
               </div>
             );
           })}
 
-          {/* SHEET 0: Front = Cover UI, Back = Module 1 Image */}
-          <div className={`book-page ${activePage >= 0 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 0 ? 50 : 200, pointerEvents: activePage === -1 || activePage === 0 ? 'auto' : 'none' }}>
-            {/* Front: Technical Modules Cover */}
+          {/* SHEET 0 */}
+          <div className={`book-page ${activePage >= 0 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 0 ? 50 : 200, pointerEvents: (activePage === -1 || activePage === 0) ? 'auto' : 'none' }}>
             <div onClick={handleOpenBook} className="page-front bg-gradient-to-br from-[#1a3a6c] to-[#0a1528] flex flex-col items-center justify-center border-y border-r border-white/20 cursor-pointer group shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
               <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
               <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-                  <div className="w-24 h-24 border-2 border-fuchsia-500/50 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(217,70,239,0.3)] animate-pulse">
-                     <svg className="w-12 h-12 text-fuchsia-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg>
-                  </div>
+                  <div className="w-24 h-24 border-2 border-fuchsia-500/50 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(217,70,239,0.3)] animate-pulse"><svg className="w-12 h-12 text-fuchsia-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg></div>
                   <h2 className="text-white font-anton text-4xl tracking-[0.2em] px-10 leading-tight uppercase">TECHNICAL<br/><span className="text-fuchsia-500 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">MODULES</span></h2>
                   <div className="h-px w-20 bg-white/20 my-4"></div>
                   <p className="text-fuchsia-400 font-mono text-[10px] tracking-[0.4em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">Click to view modules</p>
               </div>
               <div className="absolute left-0 top-0 bottom-0 w-6 bg-black/40 shadow-inner"></div>
             </div>
-            
-            {/* Back: Module 1 Image (Visible on LEFT stack once opened) */}
             <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
               <div className="w-full h-full flex items-center justify-center p-8 relative">
                 <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[2deg]">
-                   <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2">
-                     <img src={MODULES_DATA[0].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module 1 Visual" />
-                   </div>
+                   <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2"><img src={MODULES_DATA[0].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module 1 Visual" /></div>
                    <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{MODULES_DATA[0].name}</div>
                 </div>
-                <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group">
-                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
+                <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
               </div>
             </div>
           </div>
-
-        </div>
-
-        {/* INTERFACE DECORATION */}
-        <div className="mt-20 flex flex-col items-center gap-2 opacity-30 pointer-events-none">
-            <div className="flex gap-2">
-              {[...Array(3)].map((_, i) => <div key={i} className="w-1 h-1 bg-fuchsia-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.3}s` }}></div>)}
-            </div>
-            <span className="text-[8px] font-mono tracking-[1em] text-white uppercase">DIGITAL_BOOK_INTERFACE_v4.2</span>
         </div>
       </div>
+
+      {/* MODULE CARDS SECTION */}
+      <section className="w-full max-w-7xl mx-auto py-32 px-6 flex flex-col items-center gap-16 relative overflow-visible z-10">
+        <div className="flex flex-col items-center text-center gap-4">
+          <div className="h-px w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent"></div>
+          <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase">
+            EXPLORE <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">ALL_UNITS</span>
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full mb-32">
+          {MODULES_DATA.map((module, idx) => (
+            <div 
+              key={module.id} 
+              className={`group relative bg-[#0c0c0c]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 transition-all duration-700 flex flex-col items-center overflow-hidden hover:-translate-y-2 hover:border-white/30 card-glow-${module.color}`}
+            >
+              <div className={`absolute top-0 right-0 w-32 h-32 bg-${module.color}-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-${module.color}-500/20 transition-all duration-700`}></div>
+              
+              <div className="relative mb-8 p-6 bg-white/5 rounded-3xl group-hover:bg-white/10 transition-colors duration-500">
+                <ModuleIcon type={module.icon} color={module.color} className="w-12 h-12" />
+              </div>
+
+              <h4 className="text-2xl font-anton text-white mb-4 tracking-widest uppercase text-center group-hover:text-fuchsia-400 transition-colors duration-500 leading-tight">
+                {module.name}
+              </h4>
+
+              <p className="text-gray-400 text-sm font-space leading-relaxed text-center opacity-70 group-hover:opacity-100 transition-opacity mb-8 line-clamp-3">
+                {module.tagline}
+              </p>
+
+              <button 
+                onClick={() => handleViewModuleDetails(idx)}
+                className={`w-full py-4 bg-[#0a1528]/80 border border-white/10 text-white font-orbitron tracking-[0.3em] text-[11px] font-bold rounded-2xl hover:bg-white hover:text-black transition-all duration-500 uppercase shadow-lg group-hover:shadow-${module.color}-500/20 group-hover:scale-[1.02]`}
+              >
+                VIEW MODULE
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };
