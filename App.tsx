@@ -16,11 +16,11 @@ import Modules from './components/Modules';
 import Events from './components/Events';
 import Team from './components/Team';
 
-// Generic View for Sub-Sections
+// Generic View for Sub-Sections - Changed to justify-start for proper scroll behavior
 const SectionView: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
-  <div className="w-screen h-full flex flex-col items-center justify-center shrink-0 relative overflow-hidden select-none">
+  <div className="w-screen h-full flex flex-col items-center justify-start shrink-0 relative overflow-hidden select-none">
     {children ? children : (
-      <div className="relative z-10 flex flex-col items-center animate-fade-in">
+      <div className="relative z-10 flex flex-col items-center animate-fade-in pt-40">
         <h1 className="text-6xl md:text-9xl font-mono font-bold tracking-[0.3em] text-white uppercase drop-shadow-[0_0_40px_rgba(217,70,239,0.4)]">
           {title}
         </h1>
