@@ -10,6 +10,8 @@ interface EventItem {
   items: string[];
   color: string;
   img: string;
+  hoverTextPrefix?: string;
+  hoverTextSuffix?: string;
 }
 
 const CORE_EVENTS: EventItem[] = [
@@ -67,8 +69,10 @@ const MEGA_EVENTS: EventItem[] = [
     title: "THE FUTURE TALKS",
     desc: "High-level technical symposium featuring visionary lectures from industry veterans in CSE, ECE, and AE.",
     items: ["Cloud Architecture", "Quantum Computing", "Next-Gen Aerospace"],
-    color: "fuchsia",
-    img: "https://images.unsplash.com/photo-1475721027785-f74dea327912?q=80&w=1470&auto=format&fit=crop"
+    color: "red",
+    img: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1412&auto=format&fit=crop",
+    hoverTextPrefix: "SOT",
+    hoverTextSuffix: "X"
   },
   {
     id: "H_02",
@@ -77,7 +81,9 @@ const MEGA_EVENTS: EventItem[] = [
     desc: "An electric evening featuring open mic standup, professional artists, and live bands.",
     items: ["Standup Comedy", "Live Band Performances", "Celebrity DJ Sets"],
     color: "purple",
-    img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1470&auto=format&fit=crop"
+    img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1470&auto=format&fit=crop",
+    hoverTextPrefix: "STARLIT",
+    hoverTextSuffix: "GALA"
   },
   {
     id: "H_03",
@@ -86,7 +92,9 @@ const MEGA_EVENTS: EventItem[] = [
     desc: "A massive cultural music fest featuring unparalleled energy, light shows, and the hottest tracks.",
     items: ["EDM Festival", "Cultural Extravaganza", "Laser Light Show"],
     color: "pink",
-    img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1470&auto=format&fit=crop"
+    img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1470&auto=format&fit=crop",
+    hoverTextPrefix: "SUN",
+    hoverTextSuffix: "BURN"
   }
 ];
 
@@ -126,7 +134,7 @@ const AIAssistant: React.FC = () => {
       {isOpen && (
         <div className="w-[350px] h-[500px] bg-[#0c0c0c] border border-fuchsia-500/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-in backdrop-blur-xl">
           <div className="p-6 bg-fuchsia-600/10 border-b border-fuchsia-500/20 flex justify-between items-center">
-            <span className="font-anton tracking-widest text-white">LOGIC_PROCESSOR</span>
+            <span className="font-anton tracking-widest text-white uppercase">LOGIC PROCESSOR</span>
             <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">✕</button>
           </div>
           <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
@@ -139,7 +147,7 @@ const AIAssistant: React.FC = () => {
             ))}
             {isThinking && (
               <div className="flex justify-start">
-                <div className="bg-white/5 p-4 rounded-2xl text-xs font-mono text-fuchsia-400 animate-pulse">
+                <div className="bg-white/5 p-4 rounded-2xl text-xs font-mono text-fuchsia-400 animate-pulse uppercase">
                   THINKING...
                 </div>
               </div>
@@ -153,7 +161,7 @@ const AIAssistant: React.FC = () => {
               placeholder="Ask the Logic Processor..." 
               className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-fuchsia-500/50"
             />
-            <button onClick={handleAsk} className="p-2 bg-fuchsia-600 rounded-xl text-white">
+            <button onClick={handleAsk} className="p-2 bg-fuchsia-600 rounded-xl text-white hover:bg-fuchsia-500 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </button>
           </div>
@@ -195,155 +203,203 @@ const Events: React.FC = () => {
     <div ref={scrollRef} className="w-full h-full bg-transparent overflow-y-auto scroll-smooth no-scrollbar select-none relative">
       <style>{`
         @keyframes panel-glow {
-          0%, 100% { border-color: rgba(217, 70, 239, 0.1); box-shadow: 0 0 15px rgba(217, 70, 239, 0.1); }
-          50% { border-color: rgba(217, 70, 239, 0.5); box-shadow: 0 0 35px rgba(217, 70, 239, 0.2); }
+          0%, 100% { border-color: rgba(217, 70, 239, 0.05); box-shadow: 0 0 10px rgba(217, 70, 239, 0.05); }
+          50% { border-color: rgba(217, 70, 239, 0.3); box-shadow: 0 0 25px rgba(217, 70, 239, 0.15); }
         }
         .animate-panel-glow { animation: panel-glow 4s infinite ease-in-out; }
         .perspective-box { perspective: 2500px; transform-style: preserve-3d; }
         .blade-transition { transition: all 1.1s cubic-bezier(0.19, 1, 0.22, 1); }
-        .mega-card-glow:hover { box-shadow: 0 0 60px rgba(217, 70, 239, 0.1); }
+        .mega-card-glow:hover { box-shadow: 0 0 40px rgba(217, 70, 239, 0.08); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(217, 70, 239, 0.3); border-radius: 10px; }
+        
+        .flip-card { perspective: 1000px; cursor: pointer; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; items-center justify-center rounded-2xl overflow-hidden; }
+        .flip-card-back { transform: rotateY(180deg); }
+
+        .logo-hover-reveal { opacity: 0; transform: scale(0.9); transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+        .group:hover .logo-hover-reveal { opacity: 1; transform: scale(1.1); filter: brightness(1.2) contrast(1.1); }
       `}</style>
 
       <AIAssistant />
 
       {/* HEADER SECTION */}
-      <section className="min-h-screen w-full flex flex-col items-center justify-center relative px-6 md:px-16 pt-10">
-        <div className="text-center z-10 mb-16 transition-all duration-700">
-          <h2 className="text-6xl md:text-9xl font-anton tracking-[0.05em] text-white uppercase opacity-95">
-            YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_20px_#d946ef]">EVENTS</span>
+      <section className="min-h-screen w-full flex flex-col items-center justify-center relative px-6 md:px-16 pt-6">
+        <div className="text-center z-10 mb-8 transition-all duration-700">
+          <h2 className="text-5xl md:text-8xl font-anton tracking-[0.05em] text-white uppercase opacity-95 leading-tight">
+            YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">EVENTS</span>
           </h2>
+          <div className="h-0.5 w-32 bg-fuchsia-500/20 mx-auto mt-4"></div>
         </div>
 
-        {/* 3D CAROUSEL */}
-        <div className="relative w-full max-w-7xl h-[40vh] md:h-[50vh] flex items-center justify-center perspective-box mb-20">
-          <div className="relative w-full h-full flex items-center justify-center gap-2 md:gap-4 overflow-visible">
-            {CORE_EVENTS.map((event, idx) => {
-              const isActive = activeIndex === idx;
-              let rotateY = 0, translateZ = 0, translateX = 0, scale = 1, opacity = 0.3;
+        <div className="w-full max-w-7xl flex flex-col items-center">
+            <h3 className="text-lg md:text-2xl font-anton text-white/40 tracking-[0.6em] uppercase mb-12">CORE EVENTS</h3>
+            
+            <div className="relative w-full h-[32vh] md:h-[42vh] flex items-center justify-center perspective-box mb-12">
+              <div className="relative w-full h-full flex items-center justify-center gap-2 md:gap-3 overflow-visible">
+                {CORE_EVENTS.map((event, idx) => {
+                  const isActive = activeIndex === idx;
+                  let rotateY = 0, translateZ = 0, translateX = 0, scale = 1, opacity = 0.3;
 
-              if (isActive) {
-                translateZ = 250;
-                opacity = 1;
-                scale = 1.05;
-              } else {
-                rotateY = (idx < activeIndex ? 35 : -35);
-                translateX = (idx < activeIndex ? -60 : 60);
-                translateZ = -200;
-                opacity = 0.35;
-              }
+                  if (isActive) {
+                    translateZ = 180;
+                    opacity = 1;
+                    scale = 0.95;
+                  } else {
+                    rotateY = (idx < activeIndex ? 35 : -35);
+                    translateX = (idx < activeIndex ? -45 : 45);
+                    translateZ = -140;
+                    opacity = 0.3;
+                  }
 
-              return (
-                <div
-                  key={event.id}
-                  onClick={() => handlePanelClick(idx)}
-                  className={`blade-transition relative w-10 md:w-20 lg:w-28 h-full cursor-pointer rounded-3xl border border-white/5 overflow-hidden bg-black/50 backdrop-blur-xl ${isActive ? 'animate-panel-glow !w-64 md:!w-[450px] lg:!w-[600px]' : ''}`}
-                  style={{
-                    transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                    opacity,
-                    zIndex: isActive ? 100 : 50 - Math.abs(activeIndex - idx),
-                  }}
-                >
-                  <img src={event.img} className={`absolute inset-0 w-full h-full object-cover grayscale-[0.5] transition-all duration-[2.5s] ${isActive ? 'grayscale-0 scale-100' : 'opacity-20'}`} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-95"></div>
-                  
-                  {/* Category Side Label */}
-                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-90deg] whitespace-nowrap transition-all duration-500 ${isActive ? 'opacity-0 scale-50' : 'opacity-100'}`}>
-                    <span className="text-xl md:text-3xl font-anton tracking-[0.2em] text-white/30 uppercase">{event.category}</span>
-                  </div>
+                  return (
+                    <div
+                      key={event.id}
+                      onClick={() => handlePanelClick(idx)}
+                      className={`blade-transition relative w-8 md:w-16 lg:w-22 h-full cursor-pointer rounded-2xl border border-white/5 overflow-hidden bg-black/50 backdrop-blur-xl ${isActive ? 'animate-panel-glow !w-52 md:!w-[340px] lg:!w-[460px]' : ''}`}
+                      style={{
+                        transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                        opacity,
+                        zIndex: isActive ? 100 : 50 - Math.abs(activeIndex - idx),
+                      }}
+                    >
+                      <img src={event.img} className={`absolute inset-0 w-full h-full object-cover grayscale-[0.4] transition-all duration-[2s] ${isActive ? 'grayscale-0 scale-100' : 'opacity-10'}`} alt={event.title} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-95"></div>
+                      
+                      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-90deg] whitespace-nowrap transition-all duration-500 ${isActive ? 'opacity-0 scale-50' : 'opacity-100'}`}>
+                        <span className="text-base md:text-xl font-anton tracking-[0.2em] text-white/30 uppercase">{event.category}</span>
+                      </div>
 
-                  {/* Active Text Content */}
-                  <div className={`absolute bottom-0 left-0 w-full p-10 md:p-14 transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                    <h3 className="text-4xl md:text-7xl font-anton text-white uppercase leading-none mb-6 tracking-tight">{event.title}</h3>
-                    <p className="text-gray-300 text-sm md:text-base font-space max-w-lg opacity-80 leading-relaxed">
-                      {event.desc}
-                    </p>
-                    <div className="mt-8 flex gap-4">
-                      <button className="px-10 py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-anton tracking-widest rounded-2xl transition-all shadow-[0_0_20px_rgba(217,70,239,0.3)]">
-                        REGISTER_NOW
-                      </button>
+                      <div className={`absolute bottom-0 left-0 w-full p-6 md:p-10 transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <h3 className="text-2xl md:text-4xl font-anton text-white uppercase leading-none mb-3 tracking-tight">{event.title}</h3>
+                        <p className="text-gray-300 text-[10px] md:text-xs font-space max-w-md opacity-80 leading-relaxed">
+                          {event.desc}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+            </div>
 
-        <div className="flex gap-3 mb-20">
-          {CORE_EVENTS.map((_, i) => (
-            <div 
-              key={i} 
-              onClick={() => handlePanelClick(i)}
-              className={`h-1.5 transition-all duration-700 rounded-full cursor-pointer ${activeIndex === i ? 'w-16 bg-fuchsia-500 shadow-[0_0_15px_#d946ef]' : 'w-4 bg-white/10 hover:bg-white/20'}`}
-            ></div>
-          ))}
+            <div className="flex gap-2 mb-16">
+              {CORE_EVENTS.map((_, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => handlePanelClick(i)}
+                  className={`h-0.5 transition-all duration-700 rounded-full cursor-pointer ${activeIndex === i ? 'w-10 bg-fuchsia-500 shadow-[0_0_10px_#d946ef]' : 'w-2.5 bg-white/10 hover:bg-white/20'}`}
+                ></div>
+              ))}
+            </div>
         </div>
 
         <div className="animate-bounce cursor-pointer flex flex-col items-center opacity-30 hover:opacity-100 transition-opacity" onClick={() => megaSectionRef.current?.scrollIntoView()}>
-          <span className="text-[10px] font-mono tracking-widest uppercase mb-2">Discovery Mega Events</span>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+          <span className="text-[9px] font-mono tracking-widest uppercase mb-1.5">Discovery Mega Events</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
         </div>
       </section>
 
       {/* MEGA EVENTS SECTION */}
-      <section ref={megaSectionRef} className="min-h-screen w-full bg-[#050505] py-40 px-6 md:px-20 relative border-t border-fuchsia-500/10">
+      <section ref={megaSectionRef} className="min-h-screen w-full bg-[#050505] py-24 px-6 md:px-20 relative border-t border-fuchsia-500/10">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
-          <div className="text-center mb-32">
-            <h3 className="text-6xl md:text-[10rem] font-anton tracking-tighter text-white uppercase opacity-95">
+          <div className="text-center mb-16">
+            <h3 className="text-4xl md:text-6xl font-anton tracking-tighter text-white uppercase opacity-95">
               MEGA <span className="text-fuchsia-500">HEADLINERS</span>
             </h3>
+            <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mx-auto mt-4 opacity-40"></div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
             {MEGA_EVENTS.map((event) => (
-              <div key={event.id} className="group relative h-[650px] rounded-[3rem] overflow-hidden border border-white/5 bg-[#0a0a0a] mega-card-glow transition-all duration-1000 hover:-translate-y-6">
-                <img src={event.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[4s] group-hover:scale-110 grayscale-[0.4] group-hover:grayscale-0 opacity-60" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
+              <div key={event.id} className="group relative h-[500px] rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#0a0a0a] mega-card-glow transition-all duration-1000 hover:-translate-y-4">
+                <img src={event.img} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[4s] group-hover:scale-110 grayscale-[0.6] group-hover:grayscale-0 opacity-40 group-hover:opacity-20" alt={event.title} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
                 
-                <div className="absolute inset-0 p-14 flex flex-col justify-end">
-                   <div className="mb-8">
-                      <span className={`inline-block px-5 py-2 rounded-full border border-${event.color}-500/20 bg-black/60 backdrop-blur-xl text-[10px] font-mono text-fuchsia-400 font-bold tracking-[0.5em] uppercase mb-6`}>
-                        {event.category}
-                      </span>
-                      <h4 className="text-4xl md:text-5xl font-anton text-white uppercase leading-none group-hover:text-fuchsia-400 transition-colors tracking-tight">
+                {/* Center Hover-Only Logo Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                    <div className={`logo-hover-reveal font-anton text-center leading-none tracking-tighter uppercase
+                        ${event.id === 'H_01' ? 'text-[7.5rem] drop-shadow-[0_0_50px_rgba(220,38,38,0.7)]' : 
+                          event.id === 'H_02' ? 'text-[5.5rem] drop-shadow-[0_0_50px_rgba(168,85,247,0.7)]' : 
+                          'text-[5.5rem] drop-shadow-[0_0_50px_rgba(236,72,153,0.7)]'}
+                    `}>
+                        {event.id === 'H_01' ? (
+                          <>
+                            <span className="text-white">SOT</span>{' '}
+                            <span className="text-red-600">X</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-white opacity-40">{event.hoverTextPrefix}</span>{' '}
+                            <span className={`${event.id === 'H_02' ? 'text-purple-500' : 'text-pink-500'}`}>{event.hoverTextSuffix}</span>
+                          </>
+                        )}
+                    </div>
+                </div>
+
+                <div className="absolute inset-0 p-10 flex flex-col justify-end">
+                   <div className="mb-4">
+                      <h4 className="text-3xl md:text-4xl font-anton text-white uppercase leading-none transition-colors tracking-tight">
                         {event.title}
                       </h4>
                    </div>
                    
-                   <p className="text-gray-400 text-base font-space leading-relaxed opacity-0 group-hover:opacity-100 translate-y-6 group-hover:translate-y-0 transition-all duration-1000">
+                   {/* Description is permanent */}
+                   <p className="text-gray-400 text-xs font-space leading-relaxed opacity-100 transition-all duration-700">
                      {event.desc}
                    </p>
                 </div>
-
-                <div className="absolute top-10 right-10 w-16 h-16 border-t border-r border-white/10 group-hover:border-fuchsia-500/40 transition-colors"></div>
-                <div className="absolute bottom-10 left-10 w-16 h-16 border-b border-l border-white/10 group-hover:border-fuchsia-500/40 transition-colors"></div>
               </div>
             ))}
           </div>
 
-          <div className="mt-40 p-20 w-full rounded-[4rem] bg-gradient-to-br from-fuchsia-950/10 to-transparent border border-fuchsia-500/10 flex flex-col md:flex-row items-center justify-between gap-12 backdrop-blur-md">
-             <div className="max-w-2xl">
-                <h5 className="text-4xl md:text-6xl font-anton text-white uppercase mb-6 tracking-tight">JOIN THE <span className="text-fuchsia-500">COLLECTIVE_</span></h5>
-                <p className="text-gray-400 font-space text-xl leading-relaxed">Connect with the official Yantraksh comms for high-priority updates and event protocols.</p>
+          <div className="mt-24 p-12 md:p-14 w-full rounded-[2.5rem] bg-gradient-to-br from-emerald-950/20 to-transparent border border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-10 backdrop-blur-md relative overflow-hidden group/whatsapp shadow-[0_0_80px_rgba(16,185,129,0.05)]">
+             <div className="absolute inset-0 bg-emerald-500/[0.02] pointer-events-none"></div>
+             <div className="max-w-xl relative z-10">
+                <h5 className="text-3xl md:text-5xl font-anton text-white uppercase mb-4 tracking-tight group-hover/whatsapp:text-emerald-400 transition-colors">JOIN US ON WHATSAPP</h5>
+                <p className="text-gray-400 font-space text-lg leading-relaxed opacity-80">Connect with the official Yantraksh comms for high-priority updates and event protocols.</p>
              </div>
-             <button className="px-20 py-8 bg-transparent border-2 border-fuchsia-500 text-fuchsia-500 font-anton text-2xl tracking-[0.3em] rounded-[2rem] hover:bg-fuchsia-500 hover:text-white transition-all shadow-[0_0_40px_rgba(217,70,239,0.2)]">
-               JOIN_COMMUNITY
+             
+             {/* WhatsApp Flip Card */}
+             <div className="flip-card shrink-0 w-36 h-36 md:w-44 md:h-44 relative z-10">
+                <div className="flip-card-inner">
+                    <div className="flip-card-front bg-white p-2 shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white/10 flex items-center justify-center">
+                        <img 
+                            src="https://scontent.whatsapp.net/v/t39.8562-34/495571915_2950553458455166_4924198993047220200_n.png?ccb=1-7&_nc_sid=73b08c&_nc_ohc=NzqcShHh2_YQ7kNvwFO58-b&_nc_ohc=NzqcShHh2_YQ7kNvwFO58-b&_nc_oc=Adks2OXcuBUtk4nvCoQR4WsKYIfByIRGwmtdAum9bJNSkloGWHcoPzfXQTlSJ4ehkag&_nc_zt=3&_nc_ht=scontent.whatsapp.net&_nc_gid=G6Oo3GmRUHiWQ9eyUq2Oiw&oh=01_Q5Aa3gF1cbaP46DoHQo69ob4uAwLveYhb3S0Q0TQyRRo_zRFgw&oe=696AA80D" 
+                            className="w-[90%] h-[90%] object-contain" 
+                            alt="WhatsApp Group QR"
+                        />
+                    </div>
+                    {/* Back face updated with provided link in a white box */}
+                    <div className="flip-card-back bg-white p-2 shadow-[0_0_40px_rgba(255,255,255,0.1)] border border-white/10 flex items-center justify-center">
+                        <div className="w-[85%] h-[85%] bg-white rounded-[32%] flex items-center justify-center overflow-hidden">
+                           <img 
+                              src="https://tse2.mm.bing.net/th/id/OIP.rRLn1-_cydtipYrijT8A5gHaFQ?w=1600&h=1136&rs=1&pid=ImgDetMain&o=7&rm=3" 
+                              className="w-full h-full object-contain" 
+                              alt="WhatsApp Official Link"
+                           />
+                        </div>
+                    </div>
+                </div>
+             </div>
+
+             <button className="px-16 py-6 bg-transparent border-2 border-emerald-500 text-emerald-500 font-anton text-xl tracking-[0.2em] rounded-[1.5rem] hover:bg-emerald-500 hover:text-white transition-all shadow-[0_0_30px_rgba(16,185,129,0.15)] relative z-10">
+               JOIN GROUP
              </button>
           </div>
         </div>
       </section>
 
-      <div className="w-full py-16 text-center opacity-10">
-        <span className="text-[10px] font-mono tracking-[2em] text-white uppercase">YANTRAKSH // END_OF_TRANSMISSION</span>
+      <div className="w-full py-12 text-center opacity-10">
+        <span className="text-[9px] font-mono tracking-[1.5em] text-white uppercase">YANTRAKSH // END OF TRANSMISSION</span>
       </div>
 
       {/* AMBIENT BG */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-10">
-        <div className="absolute top-[-20%] left-[-20%] w-[1200px] h-[1200px] bg-fuchsia-900/10 blur-[200px] rounded-full"></div>
-        <div className="absolute bottom-[-20%] right-[-20%] w-[1200px] h-[1200px] bg-blue-900/10 blur-[200px] rounded-full"></div>
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-5">
+        <div className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] bg-emerald-900/10 blur-[180px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[1000px] h-[1000px] bg-fuchsia-900/10 blur-[180px] rounded-full"></div>
       </div>
     </div>
   );
