@@ -14,6 +14,7 @@ import RegisterButton from './components/RegisterButton';
 import Gallery from './components/Gallery';
 import Modules from './components/Modules';
 import Events from './components/Events';
+import Team from './components/Team';
 
 // Generic View for Sub-Sections
 const SectionView: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
@@ -64,9 +65,6 @@ function App() {
     return () => clearTimeout(loadTimer);
   }, []);
 
-  /**
-   * Only used for Landing -> Main transition
-   */
   const triggerEntryTransition = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -86,7 +84,6 @@ function App() {
 
   const handleEnter = () => triggerEntryTransition();
   const handleHomeBack = () => {
-      // Return to landing page
       setIsTransitioning(true);
       setTimeout(() => {
           setShowMainLayout(false);
@@ -149,10 +146,8 @@ function App() {
       {isAppLoading && <LoadingScreen />}
       {showTransitionLoader && <LoadingScreen isTransition={true} />}
 
-      {/* Transition Overlay for Entry */}
       <div className={`fixed inset-0 z-[400] bg-black transition-opacity duration-1000 ${isTransitioning ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}></div>
 
-      {/* LANDING PAGE CONTENT */}
       {!showMainLayout && (
         <div className={`
           fixed inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out z-[200] pointer-events-none
@@ -178,7 +173,7 @@ function App() {
           {showTerminal && (
             <div className="pointer-events-auto">
               <Terminal 
-                onEnter={handleEnter} 
+                onEnter={triggerEntryTransition} 
                 isMinimized={isMinimized}
                 onMinimize={() => setIsMinimized(true)}
                 onClose={handleTerminalClose}
@@ -188,10 +183,8 @@ function App() {
         </div>
       )}
 
-      {/* PERSISTENT MAIN LAYOUT UI */}
       {showMainLayout && (
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">
-          {/* PERSISTENT TOP NAVIGATION BAR */}
           <header className="fixed top-0 w-full h-20 md:h-24 flex items-center justify-between px-6 md:px-12 z-[350] bg-black/40 backdrop-blur-3xl border-b border-fuchsia-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
             <div className="flex items-center gap-4 md:gap-5 group select-none shrink-0 cursor-pointer" onClick={handleHomeBack}>
               <div className="w-10 h-10 md:w-12 md:h-12 bg-[#1e1e1e] border border-gray-700 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.25)] hover:border-fuchsia-500 transition-all duration-300">
@@ -209,7 +202,6 @@ function App() {
             </div>
           </header>
 
-          {/* SLIDING SECTIONS CONTAINER */}
           <div className="flex-1 w-full relative overflow-hidden mt-20 md:mt-24">
             <div 
               className="flex w-full h-full transition-transform duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)]"
@@ -227,13 +219,14 @@ function App() {
               <SectionView title="EVENTS">
                 <Events />
               </SectionView>
-              <SectionView title="TEAM" />
+              <SectionView title="TEAM">
+                <Team />
+              </SectionView>
             </div>
           </div>
         </div>
       )}
 
-      {/* GLOBAL SCANLINES */}
       <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[600] bg-[length:100%_2px,3px_100%] opacity-20"></div>
 
     </div>
