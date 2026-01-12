@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -40,7 +39,7 @@ const CORE_EVENTS: EventItem[] = [
     desc: "Where rhythm meets raw talent. A celebration of dance, music, and the creative spirit.",
     items: ["Singing Battle", "Dance Battle", "Band Battle", "Meme Craft"],
     color: "orange",
-    img: "https://images.unsplash.com/photo-1514525253348-8d9407c52025?q=80&w=1470&auto=format&fit=crop"
+    img: "https://images.unsplash.com/photo-1688820661462-a44e4b2770e8?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   },
   {
     id: "E_05",
@@ -230,23 +229,27 @@ const Events: React.FC = () => {
 
       <AIAssistant />
 
-      {/* HEADER SECTION */}
-      <section className="min-h-screen w-full flex flex-col items-center justify-center relative px-6 md:px-16 pt-6">
-        <div className="text-center z-10 mb-16 transition-all duration-700">
+      {/* HEADER SECTION - Increased spacing to provide the requested space */}
+      <section className="min-h-screen w-full flex flex-col items-center justify-start relative px-6 md:px-16 pt-12 md:pt-16">
+        <div className="text-center z-10 mb-20 md:mb-24 transition-all duration-700">
           <h2 className="text-5xl md:text-8xl font-anton tracking-[0.05em] text-white uppercase opacity-95 leading-tight">
             YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">EVENTS</span>
           </h2>
-          {/* Removed the separator line under the title */}
         </div>
 
         <div className="w-full max-w-7xl flex flex-col items-center overflow-visible">
             
             {/* Carousel Blades */}
-            <div className="relative w-full h-[32vh] md:h-[42vh] flex items-center justify-center perspective-box mb-12 overflow-visible">
+            <div className="relative w-full h-[32vh] md:h-[42vh] flex items-center justify-center perspective-box mb-8 overflow-visible">
               <div className="relative w-full h-full flex items-center justify-center gap-0 overflow-visible">
                 {CORE_EVENTS.map((event, idx) => {
                   const isActive = activeIndex === idx;
                   let rotateY = 0, translateZ = 0, translateX = 0, scale = 1, opacity = 1;
+
+                  // Expanded Card Sizes
+                  const activeWidthMobile = 256;
+                  const activeWidthTablet = 480;
+                  const activeWidthDesktop = 650;
 
                   if (isActive) {
                     translateZ = 180;
@@ -254,19 +257,28 @@ const Events: React.FC = () => {
                     scale = 0.95;
                   } else {
                     const offset = idx - activeIndex;
-                    // Adjusted baseOffset for better clickability on side strips
-                    const baseOffset = window.innerWidth < 768 ? 140 : 280;
-                    translateX = (offset < 0 ? -baseOffset : baseOffset) + (offset * (window.innerWidth < 768 ? 25 : 65));
+                    
+                    const isMobile = window.innerWidth < 768;
+                    const isTablet = window.innerWidth < 1024;
+                    
+                    const halfWidth = isMobile ? activeWidthMobile / 2 : (isTablet ? activeWidthTablet / 2 : activeWidthDesktop / 2);
+                    
+                    // generous gap between strips
+                    const initialGap = isMobile ? 45 : 85; 
+                    const baseOffset = halfWidth + initialGap;
+                    
+                    // Spacing for closed strips
+                    translateX = (offset < 0 ? -baseOffset : baseOffset) + (offset * (isMobile ? 40 : 110));
                     rotateY = (offset < 0 ? 35 : -35);
                     translateZ = -180;
-                    opacity = 1; // Full opacity for inactive cards as requested
+                    opacity = 1; 
                   }
 
                   return (
                     <div
                       key={event.id}
                       onClick={() => handlePanelClick(idx)}
-                      className={`blade-transition absolute h-full cursor-pointer rounded-2xl border border-white/5 overflow-hidden bg-black/50 backdrop-blur-xl pointer-events-auto ${isActive ? 'animate-panel-glow w-52 md:w-[340px] lg:w-[460px] z-50' : 'w-8 md:w-16 lg:w-22 z-10'}`}
+                      className={`blade-transition absolute h-full cursor-pointer rounded-2xl border border-white/5 overflow-hidden bg-black/50 backdrop-blur-xl pointer-events-auto ${isActive ? `animate-panel-glow w-64 md:w-[480px] lg:w-[650px] z-50` : 'w-10 md:w-16 lg:w-24 z-10'}`}
                       style={{
                         transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                         opacity,
@@ -276,7 +288,7 @@ const Events: React.FC = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-95"></div>
                       
                       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-90deg] whitespace-nowrap transition-all duration-500 ${isActive ? 'opacity-0 scale-50' : 'opacity-100'}`}>
-                        <span className="text-[10px] md:text-xl font-anton tracking-[0.2em] text-white/60 uppercase">{event.category}</span>
+                        <span className="text-[12px] md:text-xl font-anton tracking-[0.2em] text-white/60 uppercase">{event.category}</span>
                       </div>
 
                       <div className={`absolute bottom-0 left-0 w-full p-6 md:p-10 transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -290,19 +302,10 @@ const Events: React.FC = () => {
                 })}
               </div>
             </div>
-
-            <div className="flex gap-2 mb-16">
-              {CORE_EVENTS.map((_, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => handlePanelClick(i)}
-                  className={`h-0.5 transition-all duration-700 rounded-full cursor-pointer ${activeIndex === i ? 'w-10 bg-fuchsia-500 shadow-[0_0_10px_#d946ef]' : 'w-2.5 bg-white/10 hover:bg-white/20'}`}
-                ></div>
-              ))}
-            </div>
         </div>
 
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity" onClick={() => megaSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+        {/* Bounce arrow moved up significantly by using negative margin/reduced top margin */}
+        <div className="mt-2 md:mt-4 mb-12 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity" onClick={() => megaSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}>
           <svg className="w-10 h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
         </div>
       </section>
@@ -320,10 +323,8 @@ const Events: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
             {MEGA_EVENTS.map((event) => (
               <div key={event.id} className="group relative h-[500px] rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#0a0a0a] mega-card-glow transition-all duration-1000 hover:-translate-y-4">
-                {/* Images clear (100% opacity, no grayscale) by default, darken only on hover */}
                 <img src={event.img} className="absolute inset-0 w-full h-full object-cover transition-all duration-[1s] group-hover:scale-110 grayscale-0 group-hover:grayscale-[0.4] opacity-100 group-hover:opacity-30" alt={event.title} />
                 
-                {/* Overlay and Title reveal only on hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 
                 <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
