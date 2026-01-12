@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 
 type AnimPhase = 'idle' | 'y' | 't' | 'g' | 'waiting' | 'all';
@@ -34,6 +33,7 @@ const Gallery: React.FC = () => {
   const parallaxRef = useRef<SVGGElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gallerySectionRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
   
   const [images, setImages] = useState<GalleryImage[]>(INITIAL_IMAGES);
   const [phase, setPhase] = useState<AnimPhase>('idle');
@@ -53,6 +53,9 @@ const Gallery: React.FC = () => {
   const isHoldingSlider = useRef(false);
   const [isManualInteraction, setIsManualInteraction] = useState(false);
   const resumeTimerRef = useRef<number | null>(null);
+
+  const [isYearForward, setIsYearForward] = useState(false);
+  const yearResetTimer = useRef<number | null>(null);
 
   const mouseRef = useRef({ x: 0, y: 0 });
   const smoothedRef = useRef({ x: 0, y: 0 });
@@ -205,12 +208,34 @@ const Gallery: React.FC = () => {
     };
   }, [isHovered, isDraining]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            handleYearTrigger();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+    if (footerRef.current) observer.observe(footerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const resetManualInteractionTimer = () => {
     setIsManualInteraction(true);
     if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
     resumeTimerRef.current = window.setTimeout(() => {
       setIsManualInteraction(false);
     }, 2000); 
+  };
+
+  const handleYearTrigger = () => {
+    if (isYearForward) return;
+    setIsYearForward(true);
+    if (yearResetTimer.current) window.clearTimeout(yearResetTimer.current);
+    yearResetTimer.current = window.setTimeout(() => setIsYearForward(false), 3000);
   };
 
   const triggerAnimationSequence = () => {
@@ -337,10 +362,25 @@ const Gallery: React.FC = () => {
         .slider-pill-thumb { transition: background-color 0.4s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease; will-change: left, transform, background-color; }
 
         .slider-cursor-glow { position: fixed; width: 180px; height: 180px; background: radial-gradient(circle at center, rgba(217, 70, 239, 0.2) 0%, transparent 75%); pointer-events: none; z-index: 50; transform: translate(-50%, -50%); mix-blend-mode: screen; }
+
+        @keyframes nebula-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        @keyframes accretion-spin { from { transform: rotate(25deg) scale(1); filter: blur(40px) brightness(1); } 50% { transform: rotate(25deg) scale(1.05); filter: blur(45px) brightness(1.2); } to { transform: rotate(385deg) scale(1); filter: blur(40px) brightness(1); } }
+        @keyframes accretion-spin-reverse { from { transform: rotate(25deg) scale(1); } to { transform: rotate(-335deg) scale(1); } }
+        @keyframes lensing-pulse { 0%, 100% { transform: scale(1); opacity: 0.1; } 50% { transform: scale(1.02); opacity: 0.2; } }
+        @keyframes shuttle-drift { 0%, 100% { transform: translateY(-50%) translateX(0); } 50% { transform: translateY(-55%) translateX(15px); } }
+        @keyframes shuttle-spin { from { transform: rotateY(0deg) rotateX(0deg); } to { transform: rotateY(360deg) rotateX(10deg); } }
+        @keyframes thruster-pulse { 0%, 100% { opacity: 0; transform: translateY(-50%) scale(0.8); } 50% { opacity: 0.6; transform: translateY(-50%) scale(1.2); } }
+        .animate-nebula-pulse { animation: nebula-pulse 10s ease-in-out infinite; }
+        .animate-accretion-spin { animation: accretion-spin 15s linear infinite; }
+        .animate-accretion-spin-reverse { animation: accretion-spin-reverse 10s linear infinite; }
+        .animate-lensing-pulse { animation: lensing-pulse 4s ease-in-out infinite; }
+        .animate-shuttle-drift { animation: shuttle-drift 8s ease-in-out infinite; }
+        .animate-shuttle-spin { animation: shuttle-spin 12s linear infinite; transform-style: preserve-3d; perspective: 500px; }
+        .animate-thruster-pulse { animation: thruster-pulse 0.2s ease-in-out infinite; }
       `}</style>
 
       {/* HERO SECTION */}
-      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen w-full shrink-0 flex items-center justify-center overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
         <div className="relative w-full h-full flex items-center justify-center -translate-y-12 md:-translate-y-16" style={{ transformStyle: 'preserve-3d' }}>
@@ -401,7 +441,7 @@ const Gallery: React.FC = () => {
       </section>
 
       {/* GALLERY SECTION */}
-      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent pt-24 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
+      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent shrink-0 pt-24 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <div className="flex flex-col items-center justify-center mb-0">
             <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
@@ -486,17 +526,10 @@ const Gallery: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl">
             {SPOTLIGHT_IMAGES.map((img) => (
               <div key={img.id} className="group relative aspect-[16/10] rounded-[2rem] overflow-hidden border border-white/5 bg-[#0a0a0a] shadow-2xl transition-all duration-700 hover:border-fuchsia-500/50 hover:-translate-y-2">
-                {/* Image */}
                 <img src={img.url} alt={img.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0" />
-                
-                {/* Sci-fi Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                
-                {/* Corner Accents */}
                 <div className="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-white/20 group-hover:border-fuchsia-500 transition-colors" />
                 <div className="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-white/20 group-hover:border-fuchsia-500 transition-colors" />
-                
-                {/* Data Labels */}
                 <div className="absolute bottom-8 left-8 right-8 flex flex-col gap-1 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                   <div className="flex items-center gap-3">
                     <span className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse" />
@@ -505,11 +538,59 @@ const Gallery: React.FC = () => {
                   <h4 className="text-3xl font-anton text-white tracking-wider uppercase leading-none">{img.title}</h4>
                   <div className="h-0.5 w-12 bg-white/20 mt-2" />
                 </div>
-                
-                {/* Grid Pattern Overlay */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(circle_at_center,#ffffff_1px,transparent_1px)] bg-[size:16px_16px]" />
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* INTERACTIVE FOOTER BANNER - MOVED OUTSIDE PADDED SECTION FOR CORRECT FULL-WIDTH RENDERING */}
+      <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full shrink-0 relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100]">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-40"></div>
+          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-[40vw] h-[40vw] flex items-center justify-center">
+            <div className="absolute w-[110%] h-[110%] rounded-full border border-fuchsia-500/10 blur-xl animate-lensing-pulse"></div>
+            <div className="absolute w-[105%] h-[105%] rounded-full border border-cyan-400/5 blur-md"></div>
+            <div className="absolute w-[140%] h-[35%] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent blur-[40px] rotate-[25deg] animate-accretion-spin"></div>
+            <div className="absolute w-[130%] h-[15%] bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[15px] rotate-[25deg] animate-accretion-spin-reverse opacity-80"></div>
+            <div className="relative w-[18vw] h-[18vw] bg-black rounded-full shadow-[0_0_100px_rgba(0,0,0,1)] z-10">
+              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_30px_rgba(255,165,0,0.4)]"></div>
+            </div>
+          </div>
+          <div className="absolute left-[15%] top-1/2 -translate-y-1/2 w-48 h-32 animate-shuttle-drift">
+            <div className="relative w-full h-full animate-shuttle-spin">
+              <svg viewBox="0 0 200 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                <path d="M 20 50 L 50 30 L 140 30 L 170 50 L 140 70 L 50 70 Z" fill="#1a1a1a" stroke="#444" strokeWidth="1" />
+                <path d="M 50 30 L 70 10 L 130 10 L 140 30 Z" fill="#222" />
+                <rect x="145" y="45" width="15" height="10" rx="2" fill="rgba(34,211,238,0.6)" />
+                <path d="M 60 30 L 40 15 L 100 15 L 110 30" fill="#111" />
+                <path d="M 60 70 L 40 85 L 100 85 L 110 70" fill="#111" />
+                <rect x="15" y="42" width="10" height="16" fill="#333" />
+              </svg>
+              <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-cyan-400 blur-xl opacity-0 animate-thruster-pulse"></div>
+              <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full blur-sm opacity-0 animate-thruster-pulse delay-75"></div>
+            </div>
+          </div>
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-full w-full flex-1 group/footer overflow-hidden">
+          <div className={`absolute left-1/2 -translate-x-1/2 pointer-events-none select-none transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${isYearForward ? 'z-20 opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_80px_rgba(217,70,239,1)] scale-[1.15]' : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'} top-[40%] md:top-[38%] translate-y-0`}>
+            <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
+          </div>
+          <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[28vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
+          <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4">
+            <span className="text-white text-xs md:text-lg font-anton tracking-[0.4em] uppercase opacity-90 drop-shadow-lg">OUR SOCIAL HANDLES</span>
+            <div className="flex flex-wrap justify-center gap-5 md:gap-8 items-center">
+              <a href="#" className="text-white hover:text-fuchsia-500 transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849s-.011 3.585-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.849-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849s.012-3.584.07-4.849c.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.28.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.058-1.689-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+              <a href="#" className="text-white hover:text-blue-500 transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04c-5.5 0-10 4.5-10 10.04 0 5 3.66 9.14 8.44 9.88v-6.99h-2.54v-2.89h2.54v-2.2c0-2.5 1.52-3.89 3.77-3.89 1.08 0 2.2.19 2.2.19v2.43h-1.24c-1.24 0-1.63.77-1.63 1.56v1.91h2.74l-.44 2.89h-2.3v6.99c4.78-.74 8.44-4.88 8.44-9.88 0-5.54-4.5-10.04-10-10.04z"/></svg></a>
+              <a href="#" className="text-white hover:text-gray-400 transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+              <a href="#" className="text-white hover:text-blue-600 transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+              <a href="#" className="text-white hover:text-[#FF4500] transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M24 11.5c0-1.65-1.35-3-3-3-.4 0-.78.08-1.13.23-1.64-1.16-3.87-1.9-6.31-1.97l1.43-4.52 3.93.84c.01 1.1.91 1.98 2 1.98 1.1 0 2-.9 2-2s-.9-2-2-2c-.78 0-1.47.44-1.81 1.1l-4.47-.96c-.22-.05-.44.09-.51.3l-1.67 5.27c-2.48.04-4.77.79-6.44 1.97-.35-.15-.73-.23-1.13-.23-1.65 0-3 1.35-3 3 0 1.25.77 2.33 1.86 2.77-.04.24-.06.48-.06.73 0 3.31 3.58 6 8 6s8-2.69 8-6c0-.25-.02-.48-.06-.72 1.09-.44 1.86-1.52 1.86-2.78zM7 13.5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm9.73 4.81c-.6.6-1.55.91-2.73.91s-2.13-.31-2.73-.91c-.2-.2-.2-.51 0-.71.2-.2.51-.2.71 0 .4.4 1.14.6 2.02.6s1.62-.2 2.02-.6c.2-.2.51-.2.71 0 .2.2.2.51 0 .71zM15 15.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></a>
+              <a href="#" className="text-white hover:text-red-600 transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.612 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+              <a href="mailto:contact@yantraksh.org" className="text-white hover:text-fuchsia-500 transition-all duration-300 hover:scale-125"><svg className="w-5 h-5 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
+            </div>
+            <p className="text-gray-500 text-[8px] md:text-[9px] uppercase tracking-[0.3em] font-space opacity-50">made in collaboration of Lotus_Proton_6 & REET</p>
           </div>
         </div>
       </section>
