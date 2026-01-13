@@ -41,7 +41,7 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({ className = "", size = 
     <button 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative outline-none transition-all duration-500 flex flex-col items-center justify-center overflow-visible ${isLarge ? 'px-20 py-7' : 'px-10 py-3'} ${className}`}
+      className={`group relative outline-none transition-all duration-500 flex flex-col items-center justify-center overflow-visible ${isLarge ? 'px-12 py-5 md:px-20 md:py-7' : 'px-8 py-2.5 md:px-10 md:py-3'} ${className}`}
     >
       
       {/* 1. BACKGROUND GLOW */}
@@ -115,7 +115,7 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({ className = "", size = 
           text-white font-anton tracking-[0.05em] transition-all duration-500 leading-none
           group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_rgba(217,70,239,0.7)]
           ${isGlitching ? 'animate-[glitch-shadow_0.25s_infinite]' : ''}
-          ${isLarge ? 'text-3xl md:text-4xl' : 'text-lg md:text-xl'}
+          ${isLarge ? 'text-2xl md:text-4xl' : 'text-base md:text-xl'}
         `}>
           REGISTER
         </span>

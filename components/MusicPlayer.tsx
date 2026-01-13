@@ -116,18 +116,17 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onPlayChange, hideButton = fa
       <audio
         ref={audioRef}
         loop={true}
-        //src="https://www.tecnoesis.co.in/bgm.mp3"
         src="https://cdn.pixabay.com/audio/2026/01/05/audio_9a71f663aa.mp3"
       />
       
-      {/* UI Controls: Hidden via CSS to maintain state and enable smooth fade-in */}
+      {/* UI Controls - Completely hidden and unclickable when hideButton is true */}
       <div 
         className={`
           fixed top-8 right-8 z-[300] pointer-events-auto flex flex-col items-center
           bg-[#0c0c0c] border border-fuchsia-500/30 overflow-hidden
           transition-all duration-[1000ms] ease-[cubic-bezier(0.19,1,0.22,1)]
           shadow-[0_0_25px_rgba(217,70,239,0.2)]
-          ${hideButton ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}
+          ${hideButton ? 'hidden opacity-0 pointer-events-none' : 'flex opacity-100 pointer-events-auto'}
           ${isExtended 
             ? 'w-72 h-40 rounded-[2.5rem] border-fuchsia-500/50' 
             : (isHovered ? 'w-72 h-16 rounded-2xl border-fuchsia-500' : 'w-16 h-16 rounded-[38%]')}

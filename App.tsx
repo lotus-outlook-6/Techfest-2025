@@ -44,6 +44,7 @@ function App() {
   const [currentSection, setCurrentSection] = useState('HOME');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showTransitionLoader, setShowTransitionLoader] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [isLayoutExpanded, setIsLayoutExpanded] = useState(false);
   const [showTerminal, setShowTerminal] = useState(false);
@@ -98,6 +99,7 @@ function App() {
       if (section !== currentSection) {
           setCurrentSection(section);
       }
+      setIsMobileMenuOpen(false);
   };
 
   const handleLogoClick = () => {
@@ -120,6 +122,14 @@ function App() {
       setShowTerminal(false);
       setIsMinimized(false);
       setIsLayoutExpanded(false);
+  };
+
+  const toggleMobileMenu = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
@@ -185,20 +195,50 @@ function App() {
 
       {showMainLayout && (
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">
-          <header className="fixed top-0 w-full h-20 md:h-24 flex items-center justify-between px-6 md:px-12 z-[350] bg-black/40 backdrop-blur-3xl border-b border-fuchsia-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
-            <div className="flex items-center gap-4 md:gap-5 group select-none shrink-0 cursor-pointer" onClick={handleHomeBack}>
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-[#1e1e1e] border border-gray-700 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.25)] hover:border-fuchsia-500 transition-all duration-300">
-                <span className="text-fuchsia-500 font-bold text-xl md:text-2xl font-mono flex pointer-events-none"><span>&gt;</span><span>_</span></span>
+          
+          {/* MOBILE OVERLAY MENU */}
+          <div className={`fixed inset-0 z-[2900] bg-black/75 backdrop-blur-3xl transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}>
+             <nav className="flex flex-col items-center gap-10 md:gap-14">
+                {SECTIONS.map((section, idx) => (
+                    <button 
+                        key={section}
+                        onClick={() => handleSectionSelect(section)}
+                        className={`text-4xl md:text-7xl font-anton tracking-widest transition-all duration-500 hover:scale-110 active:scale-95 ${currentSection === section ? 'text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]' : 'text-white/40 hover:text-white'}`}
+                        style={{ transitionDelay: isMobileMenuOpen ? `${idx * 100}ms` : '0ms' }}
+                    >
+                        {section}
+                    </button>
+                ))}
+             </nav>
+          </div>
+
+          <header className="fixed top-0 left-0 w-full h-20 md:h-24 flex items-center justify-between px-4 md:px-12 z-[3000] bg-black/40 backdrop-blur-3xl border-b border-fuchsia-500/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] pointer-events-auto">
+            <div className="flex items-center gap-3 md:gap-5 group select-none shrink-0 cursor-pointer transition-transform hover:scale-[0.98]" onClick={handleHomeBack}>
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-[#1e1e1e] border border-gray-700 rounded-md flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.25)] group-hover:border-fuchsia-500 transition-all duration-300">
+                <span className="text-fuchsia-500 font-bold text-lg md:text-2xl font-mono flex pointer-events-none"><span>&gt;</span><span>_</span></span>
               </div>
-              <span className="text-xl md:text-3xl font-anton tracking-[0.08em] text-white hover:text-fuchsia-400 transition-colors uppercase">YANTRAKSH</span>
+              <span className="text-lg md:text-3xl font-anton tracking-[0.08em] text-white group-hover:text-fuchsia-400 transition-colors uppercase">YANTRAKSH</span>
             </div>
             
             <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
               <NavbarSlider initialSection={currentSection} onSelect={handleSectionSelect} />
             </div>
 
-            <div className="flex items-center shrink-0">
-                <RegisterButton size="sm" />
+            <div className="flex items-center gap-2 md:gap-6 shrink-0 relative z-[3100]">
+                <div className="scale-75 md:scale-100 origin-right transition-transform hover:scale-[0.8]">
+                    <RegisterButton size="sm" />
+                </div>
+                {/* HAMBURGER ICON - Highest Priority Hit Area */}
+                <button 
+                    onClick={toggleMobileMenu}
+                    onTouchStart={(e) => { e.stopPropagation(); }}
+                    className="lg:hidden w-14 h-14 flex flex-col items-center justify-center gap-1.5 focus:outline-none hover:bg-white/5 rounded-full transition-all active:scale-90 relative z-[3500]"
+                    aria-label="Toggle Menu"
+                >
+                    <div className={`w-7 h-1 bg-white rounded-full transition-all duration-300 transform ${isMobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''}`}></div>
+                    <div className={`w-7 h-1 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 scale-x-0' : ''}`}></div>
+                    <div className={`w-7 h-1 bg-white rounded-full transition-all duration-300 transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''}`}></div>
+                </button>
             </div>
           </header>
 
