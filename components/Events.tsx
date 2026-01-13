@@ -184,64 +184,61 @@ const Events: React.FC = () => {
         .animate-thruster-pulse { animation: thruster-pulse 0.2s ease-in-out infinite; }
       `}</style>
 
-      {/* HEADER SECTION */}
       <section className="min-h-screen w-full shrink-0 flex flex-col items-center justify-start relative px-6 md:px-16 pt-12 md:pt-16 overflow-x-hidden">
-        <div className="text-center z-10 mb-20 md:mb-24 transition-all duration-700">
+        <div className="text-center z-10 mb-16 md:mb-24 transition-all duration-700">
           <h2 className="text-5xl md:text-8xl font-anton tracking-[0.05em] text-white uppercase opacity-95 leading-tight">
             YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">EVENTS</span>
           </h2>
         </div>
 
         <div className="w-full max-w-7xl flex flex-col items-center overflow-visible">
-            
-            {/* Carousel Blades - Constrained to prevent horizontal overflow */}
-            <div className="relative w-full h-[32vh] md:h-[42vh] flex items-center justify-center perspective-box mb-8 overflow-visible">
+            {/* Height optimized for mobile to prevent text clipping */}
+            <div className="relative w-full h-[48vh] md:h-[42vh] flex items-center justify-center perspective-box mb-12 overflow-visible">
               <div className="relative w-full h-full flex items-center justify-center gap-0 overflow-visible max-w-[100vw]">
                 {CORE_EVENTS.map((event, idx) => {
                   const isActive = activeIndex === idx;
+                  const isMobile = window.innerWidth < 768;
+                  const isTablet = window.innerWidth < 1024;
+                  
                   let rotateY = 0, translateZ = 0, translateX = 0, scale = 1, opacity = 1;
-
-                  const activeWidthMobile = 256;
+                  const activeWidthMobile = 290; // Increased from 256 for better mobile fit
                   const activeWidthTablet = 480;
                   const activeWidthDesktop = 650;
-
+                  
                   if (isActive) {
-                    translateZ = 180;
+                    translateZ = isMobile ? 120 : 180;
                     opacity = 1;
-                    scale = 0.95;
+                    scale = 0.98;
                   } else {
                     const offset = idx - activeIndex;
-                    const isMobile = window.innerWidth < 768;
-                    const isTablet = window.innerWidth < 1024;
                     const halfWidth = isMobile ? activeWidthMobile / 2 : (isTablet ? activeWidthTablet / 2 : activeWidthDesktop / 2);
-                    
-                    const initialGap = isMobile ? 45 : 85; 
+                    const initialGap = isMobile ? 35 : 85; 
                     const baseOffset = halfWidth + initialGap;
-                    translateX = (offset < 0 ? -baseOffset : baseOffset) + (offset * (isMobile ? 40 : 110));
-                    
-                    rotateY = (offset < 0 ? 35 : -35);
-                    translateZ = -180;
-                    opacity = 1; 
+                    translateX = (offset < 0 ? -baseOffset : baseOffset) + (offset * (isMobile ? 25 : 110));
+                    rotateY = (offset < 0 ? (isMobile ? 45 : 35) : (isMobile ? -45 : -35));
+                    translateZ = isMobile ? -120 : -180;
+                    opacity = isMobile ? 0.6 : 1; 
                   }
-
+                  
                   return (
                     <div
                       key={event.id}
                       onClick={() => handlePanelClick(idx)}
-                      className={`blade-transition absolute h-full cursor-pointer rounded-2xl border border-white/5 overflow-hidden bg-black/50 backdrop-blur-xl pointer-events-auto ${isActive ? `animate-panel-glow w-64 md:w-[480px] lg:w-[650px] z-50` : 'w-10 md:w-16 lg:w-24 z-10'}`}
-                      style={{
-                        transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                        opacity,
-                      }}
+                      className={`blade-transition absolute h-full cursor-pointer rounded-2xl border border-white/5 overflow-hidden bg-black/50 backdrop-blur-xl pointer-events-auto ${isActive ? `animate-panel-glow w-[290px] md:w-[480px] lg:w-[650px] z-50` : 'w-12 md:w-16 lg:w-24 z-10'}`}
+                      style={{ transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`, opacity }}
                     >
                       <img src={event.img} className={`absolute inset-0 w-full h-full object-cover transition-all duration-[2s] ${isActive ? 'grayscale-0 scale-100 opacity-100' : 'opacity-40 hover:opacity-100 grayscale-0'}`} alt={event.title} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-95"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-95"></div>
+                      
+                      {/* Vertical Side Category Tag */}
                       <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-90deg] whitespace-nowrap transition-all duration-500 ${isActive ? 'opacity-0 scale-50' : 'opacity-100'}`}>
-                        <span className="text-[12px] md:text-xl font-anton tracking-[0.2em] text-white/60 uppercase">{event.category}</span>
+                        <span className="text-[14px] md:text-xl font-anton tracking-[0.2em] text-white/60 uppercase">{event.category}</span>
                       </div>
-                      <div className={`absolute bottom-0 left-0 w-full p-6 md:p-10 transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                        <h3 className="text-2xl md:text-4xl font-anton text-white uppercase leading-none mb-3 tracking-tight">{event.title}</h3>
-                        <p className="text-gray-300 text-[10px] md:text-xs font-space max-w-md opacity-80 leading-relaxed">
+
+                      {/* Content Container - Optimized for mobile padding and scale */}
+                      <div className={`absolute bottom-0 left-0 w-full p-8 md:p-10 transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+                        <h3 className="text-3xl md:text-4xl font-anton text-white uppercase leading-none mb-3 tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">{event.title}</h3>
+                        <p className="text-gray-300 text-xs md:text-sm font-space max-w-md opacity-90 leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
                           {event.desc}
                         </p>
                       </div>
@@ -251,13 +248,11 @@ const Events: React.FC = () => {
               </div>
             </div>
         </div>
-
-        <div className="mt-2 md:mt-4 mb-12 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity" onClick={() => megaSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}>
+        <div className="mt-4 mb-12 animate-bounce opacity-40 cursor-pointer z-20 hover:opacity-100 transition-opacity" onClick={() => megaSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}>
           <svg className="w-10 h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
         </div>
       </section>
 
-      {/* MEGA EVENTS SECTION */}
       <section ref={megaSectionRef} className="min-h-screen w-full shrink-0 bg-[#050505] py-24 px-6 md:px-20 relative border-t border-fuchsia-500/10 overflow-x-hidden">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <div className="text-center mb-16">
@@ -266,7 +261,6 @@ const Events: React.FC = () => {
             </h3>
             <div className="h-0.5 w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mx-auto mt-4 opacity-40"></div>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
             {MEGA_EVENTS.map((event) => (
               <div key={event.id} className="group relative h-[500px] rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#0a0a0a] mega-card-glow transition-all duration-1000 hover:-translate-y-4">
@@ -278,68 +272,30 @@ const Events: React.FC = () => {
                           event.id === 'H_02' ? 'text-[5.5rem] drop-shadow-[0_0_50px_rgba(168,85,247,0.7)]' : 
                           'text-[5.5rem] drop-shadow-[0_0_50px_rgba(236,72,153,0.7)]'}
                     `}>
-                        {event.id === 'H_01' ? (
-                          <>
-                            <span className="text-white">SOT</span>{' '}
-                            <span className="text-red-600">X</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-white opacity-40">{event.hoverTextPrefix}</span>{' '}
-                            <span className={`${event.id === 'H_02' ? 'text-purple-500' : 'text-pink-500'}`}>{event.hoverTextSuffix}</span>
-                          </>
-                        )}
+                        {event.id === 'H_01' ? (<><span className="text-white">SOT</span>{' '}<span className="text-red-600">X</span></>) : (<><span className="text-white opacity-40">{event.hoverTextPrefix}</span>{' '}<span className={`${event.id === 'H_02' ? 'text-purple-500' : 'text-pink-500'}`}>{event.hoverTextSuffix}</span></>)}
                     </div>
                 </div>
                 <div className="absolute inset-0 p-10 flex flex-col justify-end">
-                   <div className="mb-4">
-                      <h4 className="text-3xl md:text-4xl font-anton text-white uppercase leading-none transition-colors tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
-                        {event.title}
-                      </h4>
-                   </div>
-                   <p className="text-gray-200 text-xs font-space leading-relaxed opacity-100 transition-all duration-700 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-                     {event.desc}
-                   </p>
+                   <div className="mb-4"><h4 className="text-3xl md:text-4xl font-anton text-white uppercase leading-none transition-colors tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">{event.title}</h4></div>
+                   <p className="text-gray-200 text-xs font-space leading-relaxed opacity-100 transition-all duration-700 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">{event.desc}</p>
                 </div>
               </div>
             ))}
           </div>
-
           <div className="mt-24 p-12 md:p-14 w-full rounded-[2.5rem] bg-gradient-to-br from-emerald-950/20 to-transparent border border-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-10 backdrop-blur-md relative overflow-hidden group/whatsapp shadow-[0_0_80px_rgba(16,185,129,0.05)]">
              <div className="absolute inset-0 bg-emerald-500/[0.02] pointer-events-none"></div>
              <div className="max-w-xl relative z-10">
                 <h5 className="text-3xl md:text-5xl font-anton text-white uppercase mb-4 tracking-tight group-hover/whatsapp:text-emerald-400 transition-colors">JOIN US ON WHATSAPP</h5>
-                <p className="text-gray-400 font-space text-lg leading-relaxed opacity-80">Connect with the official Yantraksh comms for high-priority updates and event protocols.</p>
+                <p className="text-gray-300 text-sm md:text-lg font-space opacity-80 leading-relaxed mb-8">Stay updated with real-time announcements, schedule changes, and exclusive insights from the core team.</p>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500 rounded-2xl text-white font-anton text-xl tracking-widest hover:bg-emerald-400 transition-all hover:scale-105 active:scale-95 shadow-[0_10px_30px_rgba(16,185,129,0.3)]">JOIN COMMUNITY<svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.413-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.654zm6.59-4.819c1.415.84 2.82 1.315 4.509 1.317 5.236 0 9.497-4.258 9.5-9.501 0-2.54-1.04-4.85-2.73-6.54-1.785-1.785-4.13-2.65-6.74-2.65-5.24 0-9.51 4.25-9.51 9.5 0 1.76.51 3.47 1.48 4.95l-.99 3.61 3.73-.98zm11.381-11.62c-.299-.15-1.762-.869-2.035-.968-.273-.099-.472-.148-.671.15-.199.299-.77 1.238-.944 1.437-.174.199-.348.223-.647.074-.3-.15-1.265-.467-2.41-1.485-.89-.795-1.492-1.777-1.666-2.076-.174-.3-.019-.462.13-.611.135-.133.3-.348.45-.522.148-.174.199-.298.299-.497.099-.198.05-.372-.025-.521-.075-.149-.672-1.62-.922-2.224-.243-.584-.492-.505-.672-.514-.174-.009-.373-.01-.572-.01-.199 0-.521.074-.795.372-.273.299-1.044 1.018-1.044 2.483 0 1.464 1.069 2.879 1.218 3.078.149.199 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.762-.719 2.011-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg></a>
              </div>
-             <div className="flip-card shrink-0 w-36 h-36 md:w-44 md:h-44 relative z-10">
-                <div className="flip-card-inner">
-                    <div className="flip-card-front bg-white p-2 shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white/10 flex items-center justify-center rounded-2xl">
-                        <img 
-                            src="https://scontent.whatsapp.net/v/t39.8562-34/495571915_2950553458455166_4924198993047220200_n.png?ccb=1-7&_nc_sid=73b08c&_nc_ohc=NzqcShHh2_YQ7kNvwFO58-b&_nc_ohc=NzqcShHh2_YQ7kNvwFO58-b&_nc_oc=Adks2OXcuBUtk4nvCoQR4WsKYIfByIRGwmtdAum9bJNSkloGWHcoPzfXQTlSJ4ehkag&_nc_zt=3&_nc_ht=scontent.whatsapp.net&_nc_gid=G6Oo3GmRUHiWQ9eyUq2Oiw&oh=01_Q5Aa3gF1cbaP46DoHQo69ob4uAwLveYhb3S0Q0TQyRRo_zRFgw&oe=696AA80D" 
-                            className="w-[90%] h-[90%] object-contain" 
-                            alt="WhatsApp Group QR"
-                        />
-                    </div>
-                    <div className="flip-card-back bg-white p-2 shadow-[0_0_40px_rgba(255,255,255,0.1)] border border-white/10 flex items-center justify-center rounded-2xl">
-                        <div className="w-[85%] h-[85%] bg-white rounded-[32%] flex items-center justify-center overflow-hidden">
-                           <img 
-                              src="https://tse2.mm.bing.net/th/id/OIP.rRLn1-_cydtipYrijT8A5gHaFQ?w=1600&h=1136&rs=1&pid=ImgDetMain&o=7&rm=3" 
-                              className="w-full h-full object-contain" 
-                              alt="WhatsApp Official Link"
-                           />
-                        </div>
-                    </div>
-                </div>
-             </div>
-             <button className="px-16 py-6 bg-transparent border-2 border-emerald-500 text-emerald-500 font-anton text-xl tracking-[0.2em] rounded-[1.5rem] hover:bg-emerald-500 hover:text-white transition-all shadow-[0_0_30px_rgba(16,185,129,0.15)] relative z-10">
-               JOIN GROUP
-             </button>
+             <div className="hidden md:flex flex-1 items-center justify-center opacity-40 group-hover/whatsapp:opacity-100 transition-opacity duration-700 group-hover/whatsapp:scale-110">
+                <svg className="w-32 h-32 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.964 9.964 0 001.333 4.993L2 22l5.233-1.373a9.921 9.921 0 004.779 1.217h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.669-1.037-5.176-2.922-7.062A9.925 9.925 0 0012.012 2zM12.011 20.29h-.003a8.253 8.253 0 01-4.21-1.156l-.303-.18-3.122.819.833-3.042-.196-.314a8.2 8.2 0 01-1.258-4.431c.001-4.558 3.713-8.27 8.271-8.27 2.209 0 4.286.86 5.848 2.42a8.214 8.214 0 012.42 5.852c-.002 4.558-3.714 8.272-8.272 8.272zm4.536-6.205c-.249-.124-1.472-.726-1.7-.808-.227-.083-.393-.124-.558.124-.165.248-.641.808-.785.972-.144.166-.29.185-.538.061-.248-.124-1.049-.387-1.998-1.234-.738-.658-1.236-1.471-1.381-1.72-.145-.248-.016-.382.109-.507.112-.112.248-.29.373-.435.124-.145.165-.248.248-.414.083-.165.042-.31-.02-.435-.063-.124-.558-1.345-.764-1.842-.2-.486-.404-.42-.558-.428-.145-.008-.31-.01-.476-.01-.165 0-.434.062-.661.31-.228.248-.869.849-.869 2.07 0 1.221.89 2.401 1.013 2.567.124.165 1.751 2.674 4.242 3.744.592.255 1.055.408 1.416.523.595.19 1.136.162 1.564.101.477-.067 1.472-.602 1.679-1.18.207-.579.207-1.076.144-1.181-.062-.103-.228-.165-.477-.289z"/></svg></div>
           </div>
         </div>
       </section>
 
-      {/* INTERACTIVE FOOTER BANNER */}
-      <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full shrink-0 relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100]">
+      <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full shrink-0 relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100] border-t border-fuchsia-500/10">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-40"></div>
@@ -347,31 +303,13 @@ const Events: React.FC = () => {
             <div className="absolute w-[110%] h-[110%] rounded-full border border-fuchsia-500/10 blur-xl animate-lensing-pulse"></div>
             <div className="absolute w-[105%] h-[105%] rounded-full border border-cyan-400/5 blur-md"></div>
             <div className="absolute w-[140%] h-[35%] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent blur-[40px] rotate-[25deg] animate-accretion-spin"></div>
-            <div className="absolute w-[130%] h-[15%] bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[15px] rotate-[25deg] animate-accretion-spin-reverse opacity-80"></div>
-            <div className="relative w-[18vw] h-[18vw] bg-black rounded-full shadow-[0_0_100px_rgba(0,0,0,1)] z-10">
-              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_30px_rgba(255,165,0,0.4)]"></div>
-            </div>
-          </div>
-          <div className="absolute left-[15%] top-1/2 -translate-y-1/2 w-48 h-32 animate-shuttle-drift">
-            <div className="relative w-full h-full animate-shuttle-spin">
-              <svg viewBox="0 0 200 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">
-                <path d="M 20 50 L 50 30 L 140 30 L 170 50 L 140 70 L 50 70 Z" fill="#1a1a1a" stroke="#444" strokeWidth="1" />
-                <path d="M 50 30 L 70 10 L 130 10 L 140 30 Z" fill="#222" />
-                <rect x="145" y="45" width="15" height="10" rx="2" fill="rgba(34,211,238,0.6)" />
-                <path d="M 60 30 L 40 15 L 100 15 L 110 30" fill="#111" />
-                <path d="M 60 70 L 40 85 L 100 85 L 110 70" fill="#111" />
-                <rect x="15" y="42" width="10" height="16" fill="#333" />
-              </svg>
-              <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-10 h-10 bg-cyan-400 blur-xl opacity-0 animate-thruster-pulse"></div>
-              <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full blur-sm opacity-0 animate-thruster-pulse delay-75"></div>
-            </div>
+            <div className="absolute w-[130%] h-[15%] bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[15px] rotate-[25deg] animate-accretion-spin opacity-80"></div>
+            <div className="relative w-[18vw] h-[18vw] bg-black rounded-full shadow-[0_0_100px_rgba(0,0,0,1)] z-10"><div className="absolute inset-0 rounded-full shadow-[inset_0_0_30px_rgba(255,165,0,0.4)]"></div></div>
           </div>
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-full w-full flex-1 group/footer overflow-hidden">
-          <div className={`absolute left-1/2 -translate-x-1/2 pointer-events-none select-none transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${isYearForward ? 'z-20 opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_80px_rgba(217,70,239,1)] scale-[1.15]' : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'} top-[40%] md:top-[38%] translate-y-0`}>
-            <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
-          </div>
-          <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[28vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
+          <div className={`absolute left-1/2 -translate-x-1/2 pointer-events-none select-none transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${isYearForward ? 'z-20 opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_80px_rgba(217,70,239,1)] scale-[1.15]' : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'} top-[40%] md:top-[38%] translate-y-0`}><span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span></div>
+          <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[22vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
           <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4">
             <span className="text-white text-xs md:text-lg font-anton tracking-[0.4em] uppercase opacity-90 drop-shadow-lg">OUR SOCIAL HANDLES</span>
             <div className="flex flex-wrap justify-center gap-5 md:gap-8 items-center">
@@ -387,12 +325,6 @@ const Events: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* AMBIENT BG */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-5">
-        <div className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] bg-emerald-900/10 blur-[180px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[1000px] h-[1000px] bg-fuchsia-900/10 blur-[180px] rounded-full"></div>
-      </div>
     </div>
   );
 };

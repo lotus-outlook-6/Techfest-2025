@@ -222,9 +222,9 @@ const Team: React.FC = () => {
       <div ref={contentWrapperRef} className="relative z-10 w-full flex flex-col items-center">
         
         <section className="pt-24 pb-12 px-6 md:px-12 flex flex-col items-center w-full max-w-7xl">
-          <div className="text-center mb-16 transition-all duration-700">
-            <h2 className="text-5xl md:text-8xl font-anton tracking-[0.05em] text-white uppercase opacity-95 leading-tight">
-              YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">ARCHITECTS</span>
+          <div className="text-center mb-16 transition-all duration-700 w-full px-4">
+            <h2 className="text-4xl sm:text-5xl md:text-8xl font-anton tracking-tight sm:tracking-[0.05em] text-white uppercase opacity-95 leading-none sm:leading-tight">
+              YANTRAKSH <br className="sm:hidden" /> <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">ARCHITECTS</span>
             </h2>
             <div className="h-0.5 w-48 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mx-auto mt-6"></div>
           </div>
@@ -258,7 +258,7 @@ const Team: React.FC = () => {
           </div>
         </section>
 
-        {/* Removed min-h-screen and reduced padding to prevent large gaps below footer */}
+        {/* Team Grid */}
         <section className="w-full max-w-7xl px-6 md:px-12 pb-12 flex flex-col gap-12">
           {activeTeamType === 'TECH' ? (
             <>
@@ -293,7 +293,7 @@ const Team: React.FC = () => {
           )}
         </section>
 
-        {/* Footer Banner is the absolute last item in the vertical flow */}
+        {/* Footer Banner */}
         <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full shrink-0 relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100] border-t border-fuchsia-500/10">
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>
@@ -312,7 +312,8 @@ const Team: React.FC = () => {
             <div className={`absolute left-1/2 -translate-x-1/2 pointer-events-none select-none transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${isYearForward ? 'z-20 opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_80px_rgba(217,70,239,1)] scale-[1.15]' : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'} top-[40%] md:top-[38%] translate-y-0`}>
               <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
             </div>
-            <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[28vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
+            {/* Reduced mobile font size to 22vw from 28vw to match modules and prevent clipping */}
+            <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[22vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
             <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4">
               <span className="text-white text-xs md:text-lg font-anton tracking-[0.4em] uppercase opacity-90 drop-shadow-lg">OUR SOCIAL HANDLES</span>
               <div className="flex flex-wrap justify-center gap-5 md:gap-8 items-center">

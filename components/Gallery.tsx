@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 
 type AnimPhase = 'idle' | 'y' | 't' | 'g' | 'waiting' | 'all';
@@ -27,7 +26,6 @@ const SPOTLIGHT_IMAGES = [
 ];
 
 const Gallery: React.FC = () => {
-  // Y-Path coordinates
   const yPath = "M 25 30 H 85 L 120 80 L 155 30 H 215 L 145 130 V 210 H 95 V 130 L 25 30 Z";
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -270,7 +268,7 @@ const Gallery: React.FC = () => {
         ? `drop-shadow(0 0 30px rgba(255,255,255,${isActivelyPopped ? 0.8 : 0.2}))` 
         : 'none',
       transform: isActivelyPopped 
-        ? 'scale(1.15) translateZ(150px)' 
+        ? 'scale(1.1) translateZ(150px)' 
         : 'scale(1) translateZ(-80px)',
       transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
     };
@@ -322,7 +320,7 @@ const Gallery: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className="relative block w-full h-full bg-transparent select-none overflow-y-auto scroll-smooth"
+      className="relative block w-full h-full bg-transparent select-none overflow-y-auto overflow-x-hidden scroll-smooth"
       style={{ WebkitFontSmoothing: 'antialiased', perspective: '1200px' }}
     >
       <style>{`
@@ -365,16 +363,6 @@ const Gallery: React.FC = () => {
         @keyframes accretion-spin { from { transform: rotate(25deg) scale(1); filter: blur(40px) brightness(1); } 50% { transform: rotate(25deg) scale(1.05); filter: blur(45px) brightness(1.2); } to { transform: rotate(385deg) scale(1); filter: blur(40px) brightness(1); } }
         @keyframes accretion-spin-reverse { from { transform: rotate(25deg) scale(1); } to { transform: rotate(-335deg) scale(1); } }
         @keyframes lensing-pulse { 0%, 100% { transform: scale(1); opacity: 0.1; } 50% { transform: scale(1.02); opacity: 0.2; } }
-        @keyframes shuttle-drift { 0%, 100% { transform: translateY(-50%) translateX(0); } 50% { transform: translateY(-55%) translateX(15px); } }
-        @keyframes shuttle-spin { from { transform: rotateY(0deg) rotateX(0deg); } to { transform: rotateY(360deg) rotateX(10deg); } }
-        @keyframes thruster-pulse { 0%, 100% { opacity: 0; transform: translateY(-50%) scale(0.8); } 50% { opacity: 0.6; transform: translateY(-50%) scale(1.2); } }
-        .animate-nebula-pulse { animation: nebula-pulse 10s ease-in-out infinite; }
-        .animate-accretion-spin { animation: accretion-spin 15s linear infinite; }
-        .animate-accretion-spin-reverse { animation: accretion-spin-reverse 10s linear infinite; }
-        .animate-lensing-pulse { animation: lensing-pulse 4s ease-in-out infinite; }
-        .animate-shuttle-drift { animation: shuttle-drift 8s ease-in-out infinite; }
-        .animate-shuttle-spin { animation: shuttle-spin 12s linear infinite; transform-style: preserve-3d; perspective: 500px; }
-        .animate-thruster-pulse { animation: thruster-pulse 0.2s ease-in-out infinite; }
       `}</style>
 
       {/* HERO SECTION */}
@@ -382,10 +370,10 @@ const Gallery: React.FC = () => {
         <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
         <div className="relative w-full h-full flex items-center justify-center -translate-y-12 md:-translate-y-16" style={{ transformStyle: 'preserve-3d' }}>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-16 md:gap-20 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
-            <span className="gallery-depth-text text-[4rem] md:text-[6rem] lg:text-[8rem]" style={getTextStyle('y')}>YANTRAKSH</span>
-            <span className="gallery-depth-text text-[5rem] md:text-[7.5rem] lg:text-[10rem]" style={getTextStyle('t')}>TECHNICAL</span>
-            <span className="gallery-depth-text text-[4rem] md:text-[6rem] lg:text-[8rem]" style={getTextStyle('g')}>GALLERY</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 md:gap-20 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
+            <span className="gallery-depth-text text-[3rem] md:text-[6rem] lg:text-[8rem]" style={getTextStyle('y')}>YANTRAKSH</span>
+            <span className="gallery-depth-text text-[4rem] md:text-[7.5rem] lg:text-[10rem]" style={getTextStyle('t')}>TECHNICAL</span>
+            <span className="gallery-depth-text text-[3rem] md:text-[6rem] lg:text-[8rem]" style={getTextStyle('g')}>GALLERY</span>
           </div>
 
           <div 
@@ -394,7 +382,7 @@ const Gallery: React.FC = () => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            <div className="relative w-[240px] md:w-[380px] lg:w-[460px] aspect-square flex items-center justify-center shrink-0 cursor-pointer">
+            <div className="relative w-[180px] md:w-[380px] lg:w-[460px] aspect-square flex items-center justify-center shrink-0 cursor-pointer">
               <svg viewBox="0 0 240 240" className="w-full h-full drop-shadow-[0_0_60px_rgba(0,0,0,0.95)]" fill="none">
                 <defs>
                   <pattern id="spacePattern" patternUnits="userSpaceOnUse" width="80" height="80">
@@ -439,21 +427,21 @@ const Gallery: React.FC = () => {
       </section>
 
       {/* GALLERY SECTION */}
-      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent shrink-0 pt-24 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
+      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent shrink-0 pt-20 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
         <div className="max-w-7xl auto flex flex-col items-center">
           <div className="flex flex-col items-center justify-center mb-0">
-            <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
+            <h3 className="text-3xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
               <span>YANTRAKSH</span>
               <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">TECHNICAL GALLERY</span>
             </h3>
           </div>
 
           <div 
-            className="relative w-full min-h-[420px] md:min-h-[460px] flex items-center justify-center perspective-[1500px] overflow-visible cursor-default"
+            className="relative w-full min-h-[300px] md:min-h-[460px] flex items-center justify-center perspective-[1500px] overflow-visible cursor-default"
             onClick={() => { if(isExpanded) handleCollapse(); }}
           >
             <div 
-              className="relative w-[320px] md:w-[480px] aspect-[16/10] flex items-center justify-center"
+              className="relative w-[160px] md:w-[480px] aspect-[16/10] flex items-center justify-center"
               style={{ transformStyle: 'preserve-3d' }}
             >
               {images.map((img, index) => {
@@ -461,17 +449,18 @@ const Gallery: React.FC = () => {
                 const angleStep = 360 / count;
                 const itemRotation = (index * angleStep) + autoRotation;
                 const rad = (itemRotation * Math.PI) / 180;
-                const radius = window.innerWidth < 768 ? 200 : 380;
+                // Significant optimization for mobile radius to fit the screen width
+                const radius = window.innerWidth < 768 ? 110 : 380;
                 const x = isExpanded ? Math.sin(rad) * radius : 0;
-                const z = isExpanded ? (Math.cos(rad) * radius - radius) : -index * 30;
+                const z = isExpanded ? (Math.cos(rad) * radius - radius) : -index * 20;
                 const rotateZ = isExpanded ? 0 : index * 2.5 - 5;
                 const opacity = isExpanded ? (0.2 + (Math.cos(rad) + 1) * 0.4) : 1;
-                const scale = isExpanded ? (0.75 + (Math.cos(rad) + 1) * 0.25) : 1;
+                const scale = isExpanded ? (0.7 + (Math.cos(rad) + 1) * 0.3) : 1;
                 const zIndex = isExpanded ? 0 : count - index;
                 return (
                   <div 
                     key={img.id}
-                    className="absolute inset-0 rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
+                    className="absolute inset-0 rounded-2xl md:rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
                     style={{ 
                       transitionProperty: isExpanded ? 'opacity, scale, border-color, box-shadow' : 'all',
                       transform: `translate3d(${x}px, 0, ${z}px) rotateZ(${rotateZ}deg) scale(${scale})`,
@@ -485,9 +474,9 @@ const Gallery: React.FC = () => {
                   >
                     <img src={img.url} alt={img.title} className={`w-full h-full object-cover transition-all duration-1000 ${isExpanded ? 'grayscale-0' : 'opacity-60 grayscale'}`} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                    <div className="absolute bottom-6 left-8 right-8 flex flex-col items-start">
-                      <span className="text-[10px] text-fuchsia-500 font-bold tracking-[0.3em] mb-1 uppercase">{img.category}</span>
-                      <h4 className="text-xl md:text-2xl font-anton text-white tracking-wide uppercase">{img.title}</h4>
+                    <div className="absolute bottom-4 md:bottom-6 left-4 md:left-8 right-4 md:right-8 flex flex-col items-start">
+                      <span className="text-[7px] md:text-[10px] text-fuchsia-500 font-bold tracking-[0.3em] mb-1 uppercase">{img.category}</span>
+                      <h4 className="text-xs md:text-2xl font-anton text-white tracking-wide uppercase leading-tight">{img.title}</h4>
                     </div>
                   </div>
                 );
@@ -495,33 +484,34 @@ const Gallery: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full max-w-lg px-10 relative overflow-visible h-24 flex flex-col items-center">
+          {/* Slider remains hidden on mobile as requested (no horizontal scroll bar feel) */}
+          <div className="hidden md:flex w-full max-w-lg px-10 relative overflow-visible h-20 flex-col items-center">
             <div className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-               <div className="relative w-full h-12 flex items-center group/slider" onMouseEnter={() => setIsSliderHovered(true)} onMouseLeave={() => setIsSliderHovered(false)}>
+               <div className="relative w-full h-10 flex items-center group/slider" onMouseEnter={() => setIsSliderHovered(true)} onMouseLeave={() => setIsSliderHovered(false)}>
                  {(isSliderHovered || isHoldingSlider.current) && (
                    <div className="slider-cursor-glow" style={{ left: `calc(${(sliderValue + 100) / 2}% - 0px)`, top: '50%' }} />
                  )}
                  <div className="absolute left-0 right-0 h-[3px] bg-white/10 rounded-full"></div>
                  <input type="range" min="-100" max="100" step="0.1" value={sliderValue} onChange={handleSliderChange} onMouseDown={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }} onMouseUp={() => { isHoldingSlider.current = false; }} onMouseLeave={() => { isHoldingSlider.current = false; }} onTouchStart={() => { isHoldingSlider.current = true; resetManualInteractionTimer(); }} onTouchEnd={() => { isHoldingSlider.current = false; }} className="gallery-slider relative z-20" />
                  <div className={`absolute top-1/2 -translate-y-1/2 w-[80px] h-[22px] rounded-full flex items-center justify-between px-3 pointer-events-none slider-pill-thumb ${(isSliderHovered || isHoldingSlider.current) ? 'bg-fuchsia-500 shadow-[0_0_60px_#d946ef,0_0_30px_rgba(217,70,239,0.8),0_0_15px_rgba(255,255,255,0.4)] scale-110' : 'bg-white shadow-[0_0_30px_rgba(255,255,255,0.7),0_0_10px_rgba(255,255,255,0.3)]'}`} style={{ left: `calc(${(sliderValue + 100) / 2}% - 40px)`, zIndex: 25 }}>
-                   <span className={`arrow-flow-text flow-rtl ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
-                   <span className={`arrow-flow-text flow-ltr ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
+                   <span className={`arrow-flow-text flow-rtl text-[26px] ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>«</span>
+                   <span className={`arrow-flow-text flow-ltr text-[26px] ${(isSliderHovered || isHoldingSlider.current) ? 'arrows-inverted' : 'arrows-normal'}`}>»</span>
                  </div>
                </div>
             </div>
           </div>
         </div>
 
-        {/* NEW 2X2 GRID GALLERY SECTION */}
-        <div className="max-w-7xl mx-auto mt-32 px-6 flex flex-col items-center gap-16 relative z-10">
+        {/* SPOTLIGHT SECTION */}
+        <div className="max-w-7xl mx-auto mt-24 md:mt-32 px-6 flex flex-col items-center gap-12 md:gap-16 relative z-10">
           <div className="flex flex-col items-center text-center gap-4">
             <div className="h-px w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent"></div>
-            <h3 className="text-4xl md:text-6xl font-anton text-white tracking-widest uppercase">
+            <h3 className="text-3xl md:text-6xl font-anton text-white tracking-widest uppercase">
               SPOTLIGHT <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">_REELS</span>
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full max-w-6xl">
             {SPOTLIGHT_IMAGES.map((img) => (
               <div key={img.id} className="group relative aspect-[16/10] rounded-[2rem] overflow-hidden border border-white/5 bg-[#0a0a0a] shadow-2xl transition-all duration-700 hover:border-fuchsia-500/50 hover:-translate-y-2">
                 <img src={img.url} alt={img.title} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0" />
@@ -533,7 +523,7 @@ const Gallery: React.FC = () => {
                     <span className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse" />
                     <span className="text-[10px] font-mono text-fuchsia-400 font-bold tracking-[0.4em] uppercase">{img.tag}</span>
                   </div>
-                  <h4 className="text-3xl font-anton text-white tracking-wider uppercase leading-none">{img.title}</h4>
+                  <h4 className="text-2xl md:text-3xl font-anton text-white tracking-wider uppercase leading-none">{img.title}</h4>
                   <div className="h-0.5 w-12 bg-white/20 mt-2" />
                 </div>
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(circle_at_center,#ffffff_1px,transparent_1px)] bg-[size:16px_16px]" />
@@ -543,7 +533,7 @@ const Gallery: React.FC = () => {
         </div>
       </section>
 
-      {/* INTERACTIVE FOOTER BANNER */}
+      {/* FOOTER */}
       <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full shrink-0 relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100]">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>
@@ -576,7 +566,7 @@ const Gallery: React.FC = () => {
           <div className={`absolute left-1/2 -translate-x-1/2 pointer-events-none select-none transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${isYearForward ? 'z-20 opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_80px_rgba(217,70,239,1)] scale-[1.15]' : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'} top-[40%] md:top-[38%] translate-y-0`}>
             <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
           </div>
-          <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[28vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
+          <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[22vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
           <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-4">
             <span className="text-white text-xs md:text-lg font-anton tracking-[0.4em] uppercase opacity-90 drop-shadow-lg">OUR SOCIAL HANDLES</span>
             <div className="flex flex-wrap justify-center gap-5 md:gap-8 items-center">

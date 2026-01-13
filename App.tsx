@@ -196,15 +196,20 @@ function App() {
       {showMainLayout && (
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">
           
-          {/* MOBILE OVERLAY MENU */}
-          <div className={`fixed inset-0 z-[2900] bg-black/75 backdrop-blur-3xl transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}>
-             <nav className="flex flex-col items-center gap-10 md:gap-14">
+          {/* MOBILE OVERLAY MENU - Darkened and blurred for maximum readability */}
+          <div className={`fixed inset-0 z-[2900] bg-[#050505]/95 backdrop-blur-[60px] transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}>
+             <nav className="flex flex-col items-center gap-8 md:gap-14">
+                {/* REGISTER BUTTON - Switched to size="sm" to avoid being too big on mobile */}
+                <div className={`transition-all duration-700 ${isMobileMenuOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`} style={{ transitionDelay: '50ms' }}>
+                   <RegisterButton size="sm" className="mb-6 scale-110" />
+                </div>
+                
                 {SECTIONS.map((section, idx) => (
                     <button 
                         key={section}
                         onClick={() => handleSectionSelect(section)}
-                        className={`text-4xl md:text-7xl font-anton tracking-widest transition-all duration-500 hover:scale-110 active:scale-95 ${currentSection === section ? 'text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]' : 'text-white/40 hover:text-white'}`}
-                        style={{ transitionDelay: isMobileMenuOpen ? `${idx * 100}ms` : '0ms' }}
+                        className={`text-4xl md:text-7xl font-anton tracking-widest transition-all duration-500 hover:scale-110 active:scale-95 ${currentSection === section ? 'text-fuchsia-500 drop-shadow-[0_0_20px_rgba(217,70,239,0.6)]' : 'text-white/60 hover:text-white'}`}
+                        style={{ transitionDelay: isMobileMenuOpen ? `${(idx + 2) * 100}ms` : '0ms' }}
                     >
                         {section}
                     </button>
@@ -225,7 +230,8 @@ function App() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-6 shrink-0 relative z-[3100]">
-                <div className="scale-75 md:scale-100 origin-right transition-transform hover:scale-[0.8]">
+                {/* Fixed: Register Button is now hidden on mobile/tablet (hidden lg:block) */}
+                <div className="hidden lg:block transition-transform">
                     <RegisterButton size="sm" />
                 </div>
                 {/* HAMBURGER ICON - Highest Priority Hit Area */}
