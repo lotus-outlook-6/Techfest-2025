@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 
 type AnimPhase = 'idle' | 'y' | 't' | 'g' | 'waiting' | 'all';
@@ -484,8 +485,8 @@ const Gallery: React.FC = () => {
             </div>
           </div>
 
-          {/* Slider remains hidden on mobile as requested (no horizontal scroll bar feel) */}
-          <div className="hidden md:flex w-full max-w-lg px-10 relative overflow-visible h-20 flex-col items-center">
+          {/* Slider for Gallery Navigation - Now visible on both Mobile and Desktop */}
+          <div className="flex w-full max-w-lg px-6 md:px-10 relative overflow-visible h-20 flex-col items-center">
             <div className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <div className="relative w-full h-10 flex items-center group/slider" onMouseEnter={() => setIsSliderHovered(true)} onMouseLeave={() => setIsSliderHovered(false)}>
                  {(isSliderHovered || isHoldingSlider.current) && (
