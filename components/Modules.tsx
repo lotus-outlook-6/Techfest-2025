@@ -1,4 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
+import { GoogleGenAI } from "@google/genai";
 
 interface ModuleData {
   id: string;
@@ -80,6 +82,87 @@ const MODULES_DATA: ModuleData[] = [
     imageUrl: "https://plus.unsplash.com/premium_photo-1744976431332-a8057b153e9e?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   }
 ];
+
+const AIAssistant: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<{role: 'user' | 'ai', content: string}[]>([]);
+  const [isThinking, setIsThinking] = useState(false);
+
+  const handleAsk = async () => {
+    if (!input.trim() || isThinking) return;
+    const userMsg = input;
+    setInput('');
+    setMessages(prev => [...prev, {role: 'user', content: userMsg}]);
+    setIsThinking(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-pro-preview",
+        contents: userMsg,
+        config: {
+          thinkingConfig: { thinkingBudget: 32768 },
+          systemInstruction: "You are the Yantraksh Logic Processor. Answer complex technical queries about the techfest, robotics, and coding events professionally and concisely."
+        }
+      });
+      setMessages(prev => [...prev, {role: 'ai', content: response.text || "I'm having trouble processing that right now."}]);
+    } catch (err) {
+      setMessages(prev => [...prev, {role: 'ai', content: "Connection uplink failed. Please try again later."}]);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  return (
+    <div className={`fixed bottom-10 right-10 z-[1000] flex flex-col items-end gap-4`}>
+      {isOpen && (
+        <div className="w-[350px] h-[500px] bg-[#0c0c0c] border border-fuchsia-500/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-in backdrop-blur-xl">
+          <div className="p-6 bg-fuchsia-600/10 border-b border-fuchsia-500/20 flex justify-between items-center">
+            <span className="font-anton tracking-widest text-white uppercase">LOGIC PROCESSOR</span>
+            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">✕</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-space ${m.role === 'user' ? 'bg-fuchsia-600 text-white' : 'bg-white/5 text-gray-300 border border-white/10'}`}>
+                  {m.content}
+                </div>
+              </div>
+            ))}
+            {isThinking && (
+              <div className="flex justify-start">
+                <div className="bg-white/5 p-4 rounded-2xl text-xs font-mono text-fuchsia-400 animate-pulse uppercase">
+                  THINKING...
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="p-4 border-t border-white/5 bg-black/40 flex gap-2">
+            <input 
+              value={input} 
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAsk()}
+              placeholder="Ask the Logic Processor..." 
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-fuchsia-500/50"
+            />
+            <button onClick={handleAsk} className="p-2 bg-fuchsia-600 rounded-xl text-white hover:bg-fuchsia-500 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-16 h-16 bg-fuchsia-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(217,70,239,0.5)] hover:scale-110 transition-transform group"
+      >
+        <svg className="w-8 h-8 text-white group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      </button>
+    </div>
+  );
+};
 
 const ModuleIcon: React.FC<{ type: string; color: string; className?: string }> = ({ type, color, className = "" }) => {
   const colorMap: Record<string, string> = {
@@ -244,8 +327,13 @@ const Modules: React.FC = () => {
         .animate-shuttle-drift { animation: shuttle-drift 8s ease-in-out infinite; }
         .animate-shuttle-spin { animation: shuttle-spin 12s linear infinite; transform-style: preserve-3d; perspective: 500px; }
         .animate-thruster-pulse { animation: thruster-pulse 0.2s ease-in-out infinite; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(217, 70, 239, 0.3); border-radius: 10px; }
       `}</style>
       
+      <AIAssistant />
+
       {/* HERO SECTION */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0 overflow-visible">
         <div className="absolute inset-0 pointer-events-none z-0">
@@ -430,7 +518,7 @@ const Modules: React.FC = () => {
         </div>
       </section>
 
-      {/* INTERACTIVE FOOTER BANNER - ENSURED CORRECT STACKING AND VISIBILITY */}
+      {/* INTERACTIVE FOOTER BANNER */}
       <section ref={footerRef} id="footer-banner" className="h-[75vh] shrink-0 w-full relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100]">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>
