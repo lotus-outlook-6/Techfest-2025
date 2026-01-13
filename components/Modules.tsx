@@ -265,7 +265,7 @@ const Modules: React.FC = () => {
   const directions = ["top", "bottom", "left", "right", "top", "bottom", "left", "right", "top"];
 
   return (
-    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth bg-transparent">
+    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden scroll-smooth bg-transparent">
       <style>{`
         @keyframes slide-top-pro { 0% { transform: translateY(-120px) scale(0.8); opacity: 0; filter: blur(12px); } 100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } }
         @keyframes slide-bottom-pro { 0% { transform: translateY(120px) scale(0.8); opacity: 0; filter: blur(12px); } 100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } }
@@ -297,8 +297,6 @@ const Modules: React.FC = () => {
         .page-front, .page-back { position: absolute; width: 100%; height: 100%; top: 0; left: 0; backface-visibility: hidden; overflow: hidden; border-radius: 0 15px 15px 0; }
         .page-back { transform: rotateY(180deg); border-radius: 15px 0 0 15px; }
         .page-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.1) 0%, transparent 10%); pointer-events: none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .card-glow-cyan { box-shadow: 0 0 30px rgba(34, 211, 238, 0.1); }
         .card-glow-cyan:hover { box-shadow: 0 0 50px rgba(34, 211, 238, 0.3); }
@@ -312,6 +310,14 @@ const Modules: React.FC = () => {
         .card-glow-orange:hover { box-shadow: 0 0 50px rgba(251, 146, 60, 0.3); }
         .card-glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.1); }
         .card-glow-red:hover { box-shadow: 0 0 50px rgba(239, 68, 68, 0.3); }
+
+        /* Heavy Glow Hover Filters */
+        .heavy-glow-cyan { filter: drop-shadow(0 0 10px #22d3ee) drop-shadow(0 0 30px #22d3ee) drop-shadow(0 0 50px #22d3ee); }
+        .heavy-glow-fuchsia { filter: drop-shadow(0 0 10px #d946ef) drop-shadow(0 0 30px #d946ef) drop-shadow(0 0 50px #d946ef); }
+        .heavy-glow-lime { filter: drop-shadow(0 0 10px #a3e635) drop-shadow(0 0 30px #a3e635) drop-shadow(0 0 50px #a3e635); }
+        .heavy-glow-orange { filter: drop-shadow(0 0 10px #fb923c) drop-shadow(0 0 30px #fb923c) drop-shadow(0 0 50px #fb923c); }
+        .heavy-glow-blue { filter: drop-shadow(0 0 10px #3b82f6) drop-shadow(0 0 30px #3b82f6) drop-shadow(0 0 50px #3b82f6); }
+        .heavy-glow-red { filter: drop-shadow(0 0 10px #ef4444) drop-shadow(0 0 30px #ef4444) drop-shadow(0 0 50px #ef4444); }
 
         @keyframes nebula-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
         @keyframes accretion-spin { from { transform: rotate(25deg) scale(1); filter: blur(40px) brightness(1); } 50% { transform: rotate(25deg) scale(1.05); filter: blur(45px) brightness(1.2); } to { transform: rotate(385deg) scale(1); filter: blur(40px) brightness(1); } }
@@ -336,30 +342,56 @@ const Modules: React.FC = () => {
 
       {/* HERO SECTION */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0 overflow-visible">
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="relative w-full h-full max-w-7xl mx-auto">
-            <div className="absolute top-[8%] left-[5%] md:left-[10%] animate-float-hero">
-              <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32 opacity-20" />
+        {/* Floating Icons Layer with increased hit area and higher priority z-index */}
+        <div className="absolute inset-0 pointer-events-none z-[100]">
+          <div className="relative w-full h-full max-w-7xl mx-auto overflow-visible">
+            
+            {/* HERO ICON 1 - TOP LEFT */}
+            <div className="absolute top-[8%] left-[5%] md:left-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4">
+              <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-cyan">
+                <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32" />
+              </div>
             </div>
-            <div className="absolute top-[38%] left-[2%] md:left-[5%] animate-float-hero" style={{ animationDelay: '-2s' }}>
-              <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32 opacity-20" />
+
+            {/* HERO ICON 2 - CENTER LEFT */}
+            <div className="absolute top-[38%] left-[2%] md:left-[5%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-2s' }}>
+              <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-blue">
+                <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32" />
+              </div>
             </div>
-            <div className="absolute bottom-[22%] left-[5%] md:left-[10%] animate-float-hero" style={{ animationDelay: '-4s' }}>
-              <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32 opacity-20" />
+
+            {/* HERO ICON 3 - BOTTOM LEFT */}
+            <div className="absolute bottom-[22%] left-[5%] md:left-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-4s' }}>
+              <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-lime">
+                <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32" />
+              </div>
             </div>
-            <div className="absolute top-[8%] right-[5%] md:right-[10%] animate-float-hero" style={{ animationDelay: '-6s' }}>
-              <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32 opacity-20" />
+
+            {/* HERO ICON 4 - TOP RIGHT */}
+            <div className="absolute top-[8%] right-[5%] md:right-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-6s' }}>
+              <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-fuchsia">
+                <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32" />
+              </div>
             </div>
-            <div className="absolute top-[38%] right-[2%] md:right-[5%] animate-float-hero" style={{ animationDelay: '-8s' }}>
-              <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32 opacity-20" />
+
+            {/* HERO ICON 5 - CENTER RIGHT */}
+            <div className="absolute top-[38%] right-[2%] md:right-[5%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-8s' }}>
+              <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-orange">
+                <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32" />
+              </div>
             </div>
-            <div className="absolute bottom-[22%] right-[5%] md:right-[10%] animate-float-hero" style={{ animationDelay: '-10s' }}>
-              <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32 opacity-20" />
+
+            {/* HERO ICON 6 - BOTTOM RIGHT */}
+            <div className="absolute bottom-[22%] right-[5%] md:right-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-10s' }}>
+              <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-red">
+                <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32" />
+              </div>
             </div>
+
           </div>
         </div>
 
-        <div className="relative w-full max-w-5xl flex items-center justify-center z-10">
+        <div className="relative w-full max-w-5xl flex items-center justify-center z-10 pointer-events-none">
           <div className="relative text-center px-6">
             <h2 className="text-5xl md:text-[8.5rem] font-anton text-white uppercase leading-none flex justify-center gap-[0.05em] md:gap-[0.08em] tracking-tight">
               {letters.map((char, i) => (
@@ -491,11 +523,11 @@ const Modules: React.FC = () => {
           {MODULES_DATA.map((module, idx) => (
             <div 
               key={module.id} 
-              className={`group relative bg-[#0c0c0c]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 transition-all duration-700 flex flex-col items-center overflow-hidden hover:-translate-y-2 hover:border-white/30 card-glow-${module.color}`}
+              className={`group relative bg-[#0c0c0c]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 transition-all duration-700 flex flex-col items-center overflow-hidden hover:border-white/30 card-glow-${module.color}`}
             >
               <div className={`absolute top-0 right-0 w-32 h-32 bg-${module.color}-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-${module.color}-500/20 transition-all duration-700`}></div>
               
-              <div className="relative mb-8 p-6 bg-white/5 rounded-3xl group-hover:bg-white/10 transition-colors duration-500">
+              <div className={`relative mb-8 p-6 bg-white/5 rounded-3xl group-hover:bg-white/10 transition-all duration-500`}>
                 <ModuleIcon type={module.icon} color={module.color} className="w-12 h-12" />
               </div>
 

@@ -148,7 +148,7 @@ const Events: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full bg-transparent overflow-y-auto scroll-smooth no-scrollbar select-none relative">
+    <div className="w-full h-full bg-transparent overflow-y-auto overflow-x-hidden scroll-smooth select-none relative">
       <style>{`
         @keyframes panel-glow {
           0%, 100% { border-color: rgba(217, 70, 239, 0.05); box-shadow: 0 0 10px rgba(217, 70, 239, 0.05); }
@@ -158,9 +158,6 @@ const Events: React.FC = () => {
         .perspective-box { perspective: 2500px; transform-style: preserve-3d; }
         .blade-transition { transition: all 1.1s cubic-bezier(0.19, 1, 0.22, 1); }
         .mega-card-glow:hover { box-shadow: 0 0 40px rgba(217, 70, 239, 0.08); }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(217, 70, 239, 0.3); border-radius: 10px; }
         
         .flip-card { perspective: 1000px; cursor: pointer; }
         .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
@@ -188,7 +185,7 @@ const Events: React.FC = () => {
       `}</style>
 
       {/* HEADER SECTION */}
-      <section className="min-h-screen w-full shrink-0 flex flex-col items-center justify-start relative px-6 md:px-16 pt-12 md:pt-16">
+      <section className="min-h-screen w-full shrink-0 flex flex-col items-center justify-start relative px-6 md:px-16 pt-12 md:pt-16 overflow-x-hidden">
         <div className="text-center z-10 mb-20 md:mb-24 transition-all duration-700">
           <h2 className="text-5xl md:text-8xl font-anton tracking-[0.05em] text-white uppercase opacity-95 leading-tight">
             YANTRAKSH <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">EVENTS</span>
@@ -197,9 +194,9 @@ const Events: React.FC = () => {
 
         <div className="w-full max-w-7xl flex flex-col items-center overflow-visible">
             
-            {/* Carousel Blades */}
+            {/* Carousel Blades - Constrained to prevent horizontal overflow */}
             <div className="relative w-full h-[32vh] md:h-[42vh] flex items-center justify-center perspective-box mb-8 overflow-visible">
-              <div className="relative w-full h-full flex items-center justify-center gap-0 overflow-visible">
+              <div className="relative w-full h-full flex items-center justify-center gap-0 overflow-visible max-w-[100vw]">
                 {CORE_EVENTS.map((event, idx) => {
                   const isActive = activeIndex === idx;
                   let rotateY = 0, translateZ = 0, translateX = 0, scale = 1, opacity = 1;
@@ -261,7 +258,7 @@ const Events: React.FC = () => {
       </section>
 
       {/* MEGA EVENTS SECTION */}
-      <section ref={megaSectionRef} className="min-h-screen w-full shrink-0 bg-[#050505] py-24 px-6 md:px-20 relative border-t border-fuchsia-500/10">
+      <section ref={megaSectionRef} className="min-h-screen w-full shrink-0 bg-[#050505] py-24 px-6 md:px-20 relative border-t border-fuchsia-500/10 overflow-x-hidden">
         <div className="max-w-7xl mx-auto flex flex-col items-center">
           <div className="text-center mb-16">
             <h3 className="text-4xl md:text-6xl font-anton tracking-tighter text-white uppercase opacity-95">

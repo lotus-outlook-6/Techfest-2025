@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 
 type AnimPhase = 'idle' | 'y' | 't' | 'g' | 'waiting' | 'all';
@@ -321,13 +322,10 @@ const Gallery: React.FC = () => {
   return (
     <div 
       ref={containerRef}
-      className="relative block w-full h-full bg-transparent select-none overflow-y-auto scroll-smooth no-scrollbar"
+      className="relative block w-full h-full bg-transparent select-none overflow-y-auto scroll-smooth"
       style={{ WebkitFontSmoothing: 'antialiased', perspective: '1200px' }}
     >
       <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
         @keyframes subtle-breathing { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
         .animate-subtle-breathing { animation: subtle-breathing 16s ease-in-out infinite; }
 
@@ -442,7 +440,7 @@ const Gallery: React.FC = () => {
 
       {/* GALLERY SECTION */}
       <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent shrink-0 pt-24 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
-        <div className="max-w-7xl mx-auto flex flex-col items-center">
+        <div className="max-w-7xl auto flex flex-col items-center">
           <div className="flex flex-col items-center justify-center mb-0">
             <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
               <span>YANTRAKSH</span>
@@ -545,7 +543,7 @@ const Gallery: React.FC = () => {
         </div>
       </section>
 
-      {/* INTERACTIVE FOOTER BANNER - MOVED OUTSIDE PADDED SECTION FOR CORRECT FULL-WIDTH RENDERING */}
+      {/* INTERACTIVE FOOTER BANNER */}
       <section ref={footerRef} id="footer-banner" className="h-[75vh] w-full shrink-0 relative overflow-hidden flex flex-col items-center justify-center py-4 px-4 transition-all duration-500 bg-black z-[100]">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_40%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(circle_at_80%_60%,rgba(34,211,238,0.15)_0%,transparent_50%)] opacity-80 animate-nebula-pulse"></div>

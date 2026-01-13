@@ -206,12 +206,10 @@ const Team: React.FC = () => {
   });
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-transparent overflow-y-auto no-scrollbar scroll-smooth relative select-none">
+    <div ref={containerRef} className="w-full h-full bg-transparent overflow-y-auto relative select-none">
       <style>{`
         @keyframes float-slow { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
         .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes shimmer-fast { 100% { transform: translateX(100%); } }
         @keyframes nebula-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
         @keyframes accretion-spin { from { transform: rotate(25deg) scale(1); } to { transform: rotate(385deg) scale(1); } }
