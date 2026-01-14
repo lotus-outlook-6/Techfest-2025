@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 
 type AnimPhase = 'idle' | 'y' | 't' | 'g' | 'waiting' | 'all';
@@ -427,10 +426,10 @@ const Gallery: React.FC = () => {
         </button>
       </section>
 
-      {/* GALLERY SECTION */}
-      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent shrink-0 pt-20 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10">
-        <div className="max-w-7xl auto flex flex-col items-center">
-          <div className="flex flex-col items-center justify-center mb-0">
+      {/* GALLERY SECTION - Corrected Centering */}
+      <section ref={gallerySectionRef} className="min-h-screen w-full bg-transparent shrink-0 pt-20 md:pt-32 pb-20 px-6 md:px-20 relative border-t border-fuchsia-500/10 flex flex-col items-center">
+        <div className="max-w-7xl mx-auto flex flex-col items-center w-full">
+          <div className="flex flex-col items-center justify-center mb-0 w-full">
             <h3 className="text-3xl md:text-7xl font-anton text-white tracking-widest uppercase text-center flex flex-col">
               <span>YANTRAKSH</span>
               <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">TECHNICAL GALLERY</span>
@@ -450,8 +449,8 @@ const Gallery: React.FC = () => {
                 const angleStep = 360 / count;
                 const itemRotation = (index * angleStep) + autoRotation;
                 const rad = (itemRotation * Math.PI) / 180;
-                // Significant optimization for mobile radius to fit the screen width
-                const radius = window.innerWidth < 768 ? 110 : 380;
+                // Optimized mobile radius for better fit and standard centering
+                const radius = window.innerWidth < 768 ? 140 : 380;
                 const x = isExpanded ? Math.sin(rad) * radius : 0;
                 const z = isExpanded ? (Math.cos(rad) * radius - radius) : -index * 20;
                 const rotateZ = isExpanded ? 0 : index * 2.5 - 5;
@@ -464,7 +463,7 @@ const Gallery: React.FC = () => {
                     className="absolute inset-0 rounded-2xl md:rounded-3xl border border-white/10 overflow-hidden bg-[#0c0c0c] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
                     style={{ 
                       transitionProperty: isExpanded ? 'opacity, scale, border-color, box-shadow' : 'all',
-                      transform: `translate3d(${x}px, 0, ${z}px) rotateZ(${rotateZ}deg) scale(${scale})`,
+                      transform: `translate3d(${x.toFixed(2)}px, 0, ${z.toFixed(2)}px) rotateZ(${rotateZ}deg) scale(${scale.toFixed(2)})`,
                       opacity: opacity,
                       zIndex: zIndex,
                       pointerEvents: isExpanded ? 'none' : (index === 0 ? 'auto' : 'none'),
@@ -485,8 +484,8 @@ const Gallery: React.FC = () => {
             </div>
           </div>
 
-          {/* Slider for Gallery Navigation - Now visible on both Mobile and Desktop */}
-          <div className="flex w-full max-w-lg px-6 md:px-10 relative overflow-visible h-20 flex-col items-center">
+          {/* Slider for Gallery Navigation */}
+          <div className="flex w-full max-w-lg px-6 md:px-10 relative overflow-visible h-20 flex-col items-center mt-12 md:mt-16">
             <div className={`w-full flex flex-col items-center transition-opacity duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${showSlider ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                <div className="relative w-full h-10 flex items-center group/slider" onMouseEnter={() => setIsSliderHovered(true)} onMouseLeave={() => setIsSliderHovered(false)}>
                  {(isSliderHovered || isHoldingSlider.current) && (
@@ -504,7 +503,7 @@ const Gallery: React.FC = () => {
         </div>
 
         {/* SPOTLIGHT SECTION */}
-        <div className="max-w-7xl mx-auto mt-24 md:mt-32 px-6 flex flex-col items-center gap-12 md:gap-16 relative z-10">
+        <div className="max-w-7xl mx-auto mt-24 md:mt-32 px-6 flex flex-col items-center gap-12 md:gap-16 relative z-10 w-full">
           <div className="flex flex-col items-center text-center gap-4">
             <div className="h-px w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent"></div>
             <h3 className="text-3xl md:text-6xl font-anton text-white tracking-widest uppercase">
@@ -583,10 +582,6 @@ const Gallery: React.FC = () => {
           </div>
         </div>
       </section>
-
-      <div className="fixed bottom-10 left-10 text-white/5 font-mono text-[8px] tracking-[2.5em] uppercase pointer-events-none z-0">
-        AXIS_PATTERN_UPLINK
-      </div>
     </div>
   );
 };

@@ -197,11 +197,17 @@ function App() {
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">
           
           {/* MOBILE OVERLAY MENU - Darkened and blurred for maximum readability */}
-          <div className={`fixed inset-0 z-[2900] bg-[#050505]/95 backdrop-blur-[60px] transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}>
-             <nav className="flex flex-col items-center gap-8 md:gap-14">
-                {/* REGISTER BUTTON - Switched to size="sm" to avoid being too big on mobile */}
+          <div 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`fixed inset-0 z-[2900] bg-[#050505]/95 backdrop-blur-[60px] transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}
+          >
+             <nav 
+               onClick={(e) => e.stopPropagation()}
+               className="flex flex-col items-center gap-10 md:gap-14"
+             >
+                {/* REGISTER BUTTON - Set to size="lg" to be bigger and more prominent */}
                 <div className={`transition-all duration-700 ${isMobileMenuOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`} style={{ transitionDelay: '50ms' }}>
-                   <RegisterButton size="sm" className="mb-6 scale-110" />
+                   <RegisterButton size="lg" className="mb-10" />
                 </div>
                 
                 {SECTIONS.map((section, idx) => (

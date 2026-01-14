@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -115,7 +114,7 @@ const AIAssistant: React.FC = () => {
   };
 
   return (
-    <div className={`fixed bottom-10 right-10 z-[1000] flex flex-col items-end gap-4`}>
+    <div className={`absolute bottom-10 right-10 z-[1000] flex flex-col items-end gap-4`}>
       {isOpen && (
         <div className="w-[350px] h-[500px] bg-[#0c0c0c] border border-fuchsia-500/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-in backdrop-blur-xl">
           <div className="p-6 bg-fuchsia-600/10 border-b border-fuchsia-500/20 flex justify-between items-center">
@@ -256,8 +255,11 @@ const Modules: React.FC = () => {
   };
 
   const getContainerTranslation = () => {
-    if (activePage === -1) return 'translateX(-200px)';
-    if (activePage === 6) return 'translateX(200px)';
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (isMobile) return 'translateX(0)'; // Force centering on mobile
+    
+    if (activePage === -1) return 'translateX(-120px)';
+    if (activePage === 6) return 'translateX(120px)';
     return 'translateX(0)';
   };
 
@@ -265,7 +267,7 @@ const Modules: React.FC = () => {
   const directions = ["top", "bottom", "left", "right", "top", "bottom", "left", "right", "top"];
 
   return (
-    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden scroll-smooth bg-transparent">
+    <div className="w-full h-full flex flex-col items-center overflow-y-auto overflow-x-hidden scroll-smooth bg-transparent relative">
       <style>{`
         @keyframes slide-top-pro { 0% { transform: translateY(-120px) scale(0.8); opacity: 0; filter: blur(12px); } 100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } }
         @keyframes slide-bottom-pro { 0% { transform: translateY(120px) scale(0.8); opacity: 0; filter: blur(12px); } 100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } }
@@ -278,11 +280,22 @@ const Modules: React.FC = () => {
 
         .book-container {
           position: relative;
-          width: 800px;
-          height: 550px;
+          width: 320px;
+          height: 480px; /* ELONGATED FOR MOBILE */
           transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
           transform-style: preserve-3d;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
+
+        @media (min-width: 768px) {
+          .book-container {
+            width: 850px;
+            height: 580px; /* ORIGINAL DESKTOP VIEW */
+          }
+        }
+
         .book-page {
           position: absolute;
           width: 50%;
@@ -294,8 +307,8 @@ const Modules: React.FC = () => {
           transform-style: preserve-3d;
         }
         .book-page.flipped { transform: rotateY(-180deg); }
-        .page-front, .page-back { position: absolute; width: 100%; height: 100%; top: 0; left: 0; backface-visibility: hidden; overflow: hidden; border-radius: 0 15px 15px 0; }
-        .page-back { transform: rotateY(180deg); border-radius: 15px 0 0 15px; }
+        .page-front, .page-back { position: absolute; width: 100%; height: 100%; top: 0; left: 0; backface-visibility: hidden; overflow: hidden; border-radius: 0 10px 10px 0; }
+        .page-back { transform: rotateY(180deg); border-radius: 10px 0 0 10px; }
         .page-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.1) 0%, transparent 10%); pointer-events: none; }
 
         .card-glow-cyan { box-shadow: 0 0 30px rgba(34, 211, 238, 0.1); }
@@ -342,55 +355,40 @@ const Modules: React.FC = () => {
 
       {/* HERO SECTION */}
       <section className="min-h-screen w-full flex flex-col items-center justify-center relative shrink-0 overflow-visible">
-        {/* Floating Icons Layer with increased hit area and higher priority z-index */}
         <div className="absolute inset-0 pointer-events-none z-[100]">
           <div className="relative w-full h-full max-w-7xl mx-auto overflow-visible">
-            
-            {/* HERO ICON 1 - TOP LEFT */}
             <div className="absolute top-[8%] left-[5%] md:left-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4">
               <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-cyan">
                 <ModuleIcon type="code" color="cyan" className="w-20 h-20 md:w-32 md:h-32" />
               </div>
             </div>
-
-            {/* HERO ICON 2 - CENTER LEFT */}
             <div className="absolute top-[38%] left-[2%] md:left-[5%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-2s' }}>
               <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-blue">
                 <ModuleIcon type="security" color="blue" className="w-20 h-20 md:w-32 md:h-32" />
               </div>
             </div>
-
-            {/* HERO ICON 3 - BOTTOM LEFT */}
             <div className="absolute bottom-[22%] left-[5%] md:left-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-4s' }}>
               <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-lime">
                 <ModuleIcon type="leaf" color="lime" className="w-20 h-20 md:w-32 md:h-32" />
               </div>
             </div>
-
-            {/* HERO ICON 4 - TOP RIGHT */}
             <div className="absolute top-[8%] right-[5%] md:right-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-6s' }}>
               <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-fuchsia">
                 <ModuleIcon type="robot" color="fuchsia" className="w-20 h-20 md:w-32 md:h-32" />
               </div>
             </div>
-
-            {/* HERO ICON 5 - CENTER RIGHT */}
             <div className="absolute top-[38%] right-[2%] md:right-[5%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-8s' }}>
               <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-orange">
                 <ModuleIcon type="image" color="orange" className="w-20 h-20 md:w-32 md:h-32" />
               </div>
             </div>
-
-            {/* HERO ICON 6 - BOTTOM RIGHT */}
             <div className="absolute bottom-[22%] right-[5%] md:right-[10%] animate-float-hero group/hero cursor-pointer pointer-events-auto p-4" style={{ animationDelay: '-10s' }}>
               <div className="transition-all duration-700 opacity-40 group-hover/hero:opacity-100 group-hover/hero:-translate-y-3 group-hover/hero:scale-[1.12] group-hover/hero:heavy-glow-red">
                 <ModuleIcon type="debate" color="red" className="w-20 h-20 md:w-32 md:h-32" />
               </div>
             </div>
-
           </div>
         </div>
-
         <div className="relative w-full max-w-5xl flex items-center justify-center z-10 pointer-events-none">
           <div className="relative text-center px-6">
             <h2 className="text-5xl md:text-[8.5rem] font-anton text-white uppercase leading-none flex justify-center gap-[0.05em] md:gap-[0.08em] tracking-tight">
@@ -401,46 +399,46 @@ const Modules: React.FC = () => {
             <span className="modules-word-anim text-3xl md:text-5xl lg:text-7xl font-anton text-fuchsia-500 tracking-tighter md:tracking-tight animate-text-glow mt-4" style={{ animationDelay: '1.2s' }}>TECHNICAL MODULES</span>
           </div>
         </div>
-
         <div className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" onClick={scrollToContent}>
           <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
         </div>
       </section>
 
-      {/* DIGITAL BOOK CONTENT SECTION */}
-      <div id="module-book-content" ref={contentRef} className="min-h-screen w-full shrink-0 flex flex-col items-center justify-center py-20 px-6 perspective-[2000px] overflow-visible">
+      {/* DIGITAL BOOK CONTENT SECTION - Centered and Stage-like */}
+      <div id="module-book-content" ref={contentRef} className="min-h-screen w-full shrink-0 flex items-center justify-center bg-black perspective-[3000px] overflow-visible relative">
+        <div className="absolute inset-0 bg-fuchsia-500/[0.03] blur-3xl pointer-events-none"></div>
         
         <div className="book-container" style={{ transform: getContainerTranslation() }}>
           {/* SHEET 6: Final Module Details + Back Cover */}
           <div className={`book-page ${activePage >= 6 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 6 ? 56 : 94, pointerEvents: (activePage === 5 || activePage === 6) ? 'auto' : 'none' }}>
             <div className="page-front bg-[#0d1b31] border-y border-r border-white/5 shadow-[-5px_0_15px_rgba(0,0,0,0.5)]">
                <div className="page-shadow"></div>
-               <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-10">
-                  <div className="w-14 h-14 mb-4 bg-red-500/5 rounded-full p-3 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+               <div className="w-full h-full flex flex-col items-center p-5 md:p-12 text-center relative pt-8 md:pt-16">
+                  <div className="w-12 h-12 md:w-20 md:h-20 mb-3 md:mb-6 bg-red-500/5 rounded-full p-2.5 md:p-5 flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.15)]">
                      <ModuleIcon type={MODULES_DATA[5].icon} color={MODULES_DATA[5].color} className="w-full h-full" />
                   </div>
-                  <h3 className="text-2xl font-anton text-white mb-1 tracking-widest uppercase leading-tight">{MODULES_DATA[5].name}</h3>
-                  <p className="text-[10px] font-bold font-space uppercase tracking-[0.2em] mb-1 text-red-400 opacity-90">{MODULES_DATA[5].tagline}</p>
-                  <p className="text-[9px] font-medium font-mono uppercase tracking-[0.1em] mb-4 text-white opacity-40">{MODULES_DATA[5].shortDesc}</p>
-                  <p className="text-gray-300 text-sm font-space max-w-xs mb-4 opacity-90 leading-relaxed overflow-hidden line-clamp-6">{MODULES_DATA[5].longDesc}</p>
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full flex justify-center px-10">
-                     <button className="w-full max-w-[150px] py-2 bg-[#0a1528]/90 border border-red-500/40 text-white font-anton tracking-[0.2em] text-[10px] rounded-[2rem] hover:bg-red-500 hover:border-red-500 transition-all duration-300 shadow-[0_0_20px_rgba(239,68,68,0.15)] uppercase">
-                       FILL_FORM
+                  <h3 className="text-lg md:text-4xl font-anton text-white mb-1 md:mb-3 tracking-widest uppercase leading-tight">{MODULES_DATA[5].name}</h3>
+                  <p className="text-[8px] md:text-sm font-bold font-space uppercase tracking-[0.2em] mb-1 md:mb-4 text-red-400 opacity-90">{MODULES_DATA[5].tagline}</p>
+                  <p className="text-[7px] md:text-xs font-medium font-mono uppercase tracking-[0.1em] mb-2 md:mb-6 text-white opacity-40">{MODULES_DATA[5].shortDesc}</p>
+                  <p className="text-gray-300 text-[10px] md:text-base font-space max-w-[140px] md:max-w-md mb-3 md:mb-8 opacity-90 leading-relaxed overflow-hidden line-clamp-4 md:line-clamp-6">{MODULES_DATA[5].longDesc}</p>
+                  <div className="absolute bottom-12 md:bottom-12 left-1/2 -translate-x-1/2 w-full flex justify-center px-4 md:px-16">
+                     <button className="w-full max-w-[100px] md:max-w-[200px] py-1.5 md:py-3.5 bg-[#0a1528]/90 border border-red-500/40 text-white font-anton tracking-[0.2em] text-[8px] md:text-sm rounded-[2rem] hover:bg-red-500 hover:border-red-500 transition-all duration-300 shadow-[0_0_20px_rgba(239,68,68,0.15)] uppercase">
+                       JOIN
                      </button>
                   </div>
-                  <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                  <button onClick={handleNextPage} className="absolute bottom-4 right-4 md:bottom-10 md:right-10 w-8 h-8 md:w-14 md:h-14 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group">
+                    <svg className="w-4 h-4 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                </div>
             </div>
             <div className="page-back bg-[#0a1528] border-y border-l border-white/20 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
-               <div className="w-full h-full flex flex-col items-center justify-center p-10 relative">
-                  <div className="flex flex-col items-center gap-6 text-center">
-                     <div className="w-20 h-20 border-2 border-fuchsia-500/30 rounded-full flex items-center justify-center mb-4"><svg className="w-10 h-10 text-fuchsia-500/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg></div>
-                     <h4 className="text-white font-anton text-4xl tracking-[0.2em] uppercase opacity-70 leading-none">ARCHIVE<br/>SECURED</h4>
-                     <div className="flex gap-1 h-12 items-end mb-4 opacity-40">{[...Array(16)].map((_, i) => (<div key={i} className="bg-white" style={{ width: `${Math.random() * 3 + 1}px`, height: `${Math.random() * 40 + 40}%` }}></div>))}</div>
+               <div className="w-full h-full flex flex-col items-center justify-center p-8 md:p-16 relative">
+                  <div className="flex flex-col items-center gap-4 md:gap-8 text-center">
+                     <div className="w-16 h-16 md:w-28 md:h-28 border-2 border-fuchsia-500/30 rounded-full flex items-center justify-center mb-2 shadow-[0_0_40px_rgba(217,70,239,0.2)]"><svg className="w-8 h-8 md:w-16 md:h-16 text-fuchsia-500/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg></div>
+                     <h4 className="text-white font-anton text-xl md:text-5xl tracking-[0.2em] uppercase opacity-70 leading-none">ARCHIVE<br/>SECURED</h4>
+                     <div className="flex gap-1.5 h-6 md:h-16 items-end mb-2 opacity-40">{[...Array(12)].map((_, i) => (<div key={i} className="bg-white" style={{ width: `${Math.random() * 1.5 + 1.5}px`, height: `${Math.random() * 30 + 30}%` }}></div>))}</div>
                   </div>
-                  <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
+                  <button onClick={handlePrevPage} className="absolute bottom-4 left-4 md:bottom-10 md:left-10 w-10 h-10 md:w-16 md:h-16 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-5 h-5 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
                </div>
             </div>
           </div>
@@ -458,27 +456,27 @@ const Modules: React.FC = () => {
               <div key={`sheet-${sheetId}`} className={`book-page ${isFlipped ? 'flipped' : ''}`} style={{ zIndex, pointerEvents: canInteract ? 'auto' : 'none' }}>
                 <div className="page-front bg-[#0d1b31] border-y border-r border-white/5 shadow-[-5px_0_15px_rgba(0,0,0,0.5)]">
                   <div className="page-shadow"></div>
-                  <div className="w-full h-full flex flex-col items-center p-8 text-center relative pt-10">
-                     <div className={`w-14 h-14 mb-4 bg-${module.color}-500/5 rounded-full p-3 flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.1)]`}><ModuleIcon type={module.icon} color={module.color} className="w-full h-full" /></div>
-                     <h3 className="text-2xl font-anton text-white mb-1 tracking-widest uppercase shrink-0 leading-tight">{module.name}</h3>
-                     <p className="text-[10px] font-bold font-space uppercase tracking-[0.2em] mb-1 text-fuchsia-400 opacity-90">{module.tagline}</p>
-                     <p className="text-[9px] font-medium font-mono uppercase tracking-[0.1em] mb-4 text-white opacity-40">{module.shortDesc}</p>
-                     <p className="text-gray-300 text-sm font-space max-w-xs mb-4 opacity-95 leading-relaxed overflow-hidden line-clamp-6">{module.longDesc}</p>
-                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full flex justify-center px-10">
-                        <button className={`w-full max-w-[150px] py-2 bg-[#0a1528]/90 border border-${module.color}-500/40 text-white font-anton tracking-[0.2em] text-[10px] rounded-[2rem] hover:bg-fuchsia-500 hover:border-fuchsia-500 transition-all duration-300 shadow-[0_0_20px_rgba(217,70,239,0.15)] uppercase`}>
-                          FILL_FORM
+                  <div className="w-full h-full flex flex-col items-center p-5 md:p-12 text-center relative pt-8 md:pt-16">
+                     <div className={`w-12 h-12 md:w-20 md:h-20 mb-3 md:mb-6 bg-${module.color}-500/5 rounded-full p-2.5 md:p-5 flex items-center justify-center shadow-[0_0_30px_rgba(0,0,0,0.15)]`}><ModuleIcon type={module.icon} color={module.color} className="w-full h-full" /></div>
+                     <h3 className="text-lg md:text-4xl font-anton text-white mb-1 md:mb-3 tracking-widest uppercase shrink-0 leading-tight">{module.name}</h3>
+                     <p className="text-[8px] md:text-sm font-bold font-space uppercase tracking-[0.2em] mb-1 md:mb-4 text-fuchsia-400 opacity-90">{module.tagline}</p>
+                     <p className="text-[7px] md:text-xs font-medium font-mono uppercase tracking-[0.1em] mb-2 md:mb-6 text-white opacity-40">{module.shortDesc}</p>
+                     <p className="text-gray-300 text-[10px] md:text-base font-space max-w-[140px] md:max-w-md mb-3 md:mb-8 opacity-95 leading-relaxed overflow-hidden line-clamp-4 md:line-clamp-6">{module.longDesc}</p>
+                     <div className="absolute bottom-12 md:bottom-12 left-1/2 -translate-x-1/2 w-full flex justify-center px-4 md:px-16">
+                        <button className={`w-full max-w-[100px] md:max-w-[200px] py-1.5 md:py-3.5 bg-[#0a1528]/90 border border-${module.color}-500/40 text-white font-anton tracking-[0.2em] text-[8px] md:text-sm rounded-[2rem] hover:bg-fuchsia-500 hover:border-fuchsia-500 transition-all duration-300 shadow-[0_0_25px_rgba(217,70,239,0.2)] uppercase`}>
+                          JOIN
                         </button>
                      </div>
-                     <button onClick={handleNextPage} className="absolute bottom-4 right-4 w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg></button>
+                     <button onClick={handleNextPage} className="absolute bottom-4 right-4 md:bottom-10 md:right-10 w-8 h-8 md:w-14 md:h-14 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-fuchsia-500 hover:text-white transition-all shadow-lg group"><svg className="w-4 h-4 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg></button>
                   </div>
                 </div>
                 <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
-                  <div className="w-full h-full flex items-center justify-center p-8 relative">
-                    <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[-3deg]">
-                       <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2"><img src={nextModule.imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module Visual" /></div>
-                       <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{nextModule.name}</div>
+                  <div className="w-full h-full flex items-center justify-center p-4 md:p-16 relative">
+                    <div className="relative w-full aspect-[4/5] md:aspect-square bg-white p-2 md:p-8 shadow-2xl transform rotate-[-3deg]">
+                       <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2 md:mb-6"><img src={nextModule.imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module Visual" /></div>
+                       <div className="font-space text-black text-[8px] md:text-base font-bold text-center opacity-70 uppercase tracking-widest leading-none">{nextModule.name}</div>
                     </div>
-                    <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
+                    <button onClick={handlePrevPage} className="absolute bottom-4 left-4 md:bottom-10 md:left-10 w-10 h-10 md:w-16 md:h-16 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-5 h-5 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
                   </div>
                 </div>
               </div>
@@ -489,59 +487,59 @@ const Modules: React.FC = () => {
           <div className={`book-page ${activePage >= 0 ? 'flipped' : ''}`} style={{ zIndex: activePage >= 0 ? 50 : 200, pointerEvents: (activePage === -1 || activePage === 0) ? 'auto' : 'none' }}>
             <div onClick={handleOpenBook} className="page-front bg-gradient-to-br from-[#1a3a6c] to-[#0a1528] flex flex-col items-center justify-center border-y border-r border-white/20 cursor-pointer group shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
               <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-              <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-                  <div className="w-24 h-24 border-2 border-fuchsia-500/50 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(217,70,239,0.3)] animate-pulse"><svg className="w-12 h-12 text-fuchsia-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg></div>
-                  <h2 className="text-white font-anton text-4xl tracking-[0.2em] px-10 leading-tight uppercase">TECHNICAL<br/><span className="text-fuchsia-500 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">MODULES</span></h2>
-                  <div className="h-px w-20 bg-white/20 my-4"></div>
-                  <p className="text-fuchsia-400 font-mono text-[10px] tracking-[0.4em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">Click to view modules</p>
+              <div className="relative z-10 flex flex-col items-center gap-4 md:gap-10 text-center">
+                  <div className="w-12 h-12 md:w-28 md:h-28 border-2 border-fuchsia-500/50 rounded-full flex items-center justify-center mb-2 shadow-[0_0_40px_rgba(217,70,239,0.3)] animate-pulse"><svg className="w-6 h-6 md:w-16 md:h-16 text-fuchsia-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2L2 7L12 12L22 7L12 2Z" /><path d="M2 17L12 22L22 17" /><path d="M2 12L17L22 12" /></svg></div>
+                  <h2 className="text-white font-anton text-xl md:text-5xl tracking-[0.2em] px-4 md:px-8 leading-tight uppercase">TECHNICAL<br/><span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.6)]">MODULES</span></h2>
+                  <div className="h-px w-10 md:w-24 bg-white/20 my-2 md:my-3"></div>
+                  <p className="text-fuchsia-400 font-mono text-[7px] md:text-sm tracking-[0.4em] uppercase opacity-70 group-hover:opacity-100 transition-opacity">CLICK TO VIEW</p>
               </div>
-              <div className="absolute left-0 top-0 bottom-0 w-6 bg-black/40 shadow-inner"></div>
+              <div className="absolute left-0 top-0 bottom-0 w-3 md:w-8 bg-black/40 shadow-inner"></div>
             </div>
             <div className="page-back bg-[#0a1e3d] border-y border-l border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.5)]">
-              <div className="w-full h-full flex items-center justify-center p-8 relative">
-                <div className="relative w-full aspect-square bg-white p-4 shadow-2xl transform rotate-[2deg]">
-                   <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2"><img src={MODULES_DATA[0].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module 1 Visual" /></div>
-                   <div className="font-space text-black text-[10px] font-bold text-center opacity-70 uppercase tracking-widest">{MODULES_DATA[0].name}</div>
+              <div className="w-full h-full flex items-center justify-center p-4 md:p-16 relative">
+                <div className="relative w-full aspect-[4/5] md:aspect-square bg-white p-2 md:p-8 shadow-2xl transform rotate-[2deg]">
+                   <div className="w-full h-[85%] bg-gray-200 overflow-hidden mb-2 md:mb-6"><img src={MODULES_DATA[0].imageUrl} className="w-full h-full object-cover grayscale-[0.2]" alt="Module 1 Visual" /></div>
+                   <div className="font-space text-black text-[8px] md:text-base font-bold text-center opacity-70 uppercase tracking-widest leading-none">{MODULES_DATA[0].name}</div>
                 </div>
-                <button onClick={handlePrevPage} className="absolute bottom-4 left-4 w-12 h-12 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
+                <button onClick={handlePrevPage} className="absolute bottom-4 left-4 md:bottom-10 md:left-10 w-10 h-10 md:w-16 md:h-16 flex items-center justify-center bg-white/10 border border-white/20 rounded-full hover:bg-cyan-500 hover:text-white transition-all shadow-xl group"><svg className="w-5 h-5 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg></button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* MODULE CARDS SECTION */}
-      <section className="w-full shrink-0 max-w-7xl mx-auto py-32 px-6 flex flex-col items-center gap-16 relative overflow-visible z-10">
+      {/* MODULE CARDS SECTION - 2 in a row for mobile (2,2,2) */}
+      <section className="w-full shrink-0 max-w-7xl mx-auto py-24 md:py-32 px-4 md:px-6 flex flex-col items-center gap-12 md:gap-16 relative overflow-visible z-10">
         <div className="flex flex-col items-center text-center gap-4">
           <div className="h-px w-24 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent"></div>
-          <h3 className="text-4xl md:text-7xl font-anton text-white tracking-widest uppercase">
+          <h3 className="text-3xl md:text-7xl font-anton text-white tracking-widest uppercase">
             EXPLORE <span className="text-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]">ALL_UNITS</span>
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full mb-32">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10 w-full mb-32">
           {MODULES_DATA.map((module, idx) => (
             <div 
               key={module.id} 
-              className={`group relative bg-[#0c0c0c]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 transition-all duration-700 flex flex-col items-center overflow-hidden hover:border-white/30 card-glow-${module.color}`}
+              className={`group relative bg-[#0c0c0c]/60 backdrop-blur-3xl border border-white/10 rounded-2xl md:rounded-[2.5rem] p-4 md:p-8 transition-all duration-700 flex flex-col items-center overflow-hidden hover:border-white/30 card-glow-${module.color}`}
             >
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-${module.color}-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-${module.color}-500/20 transition-all duration-700`}></div>
+              <div className={`absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-${module.color}-500/10 blur-[40px] md:blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-${module.color}-500/20 transition-all duration-700`}></div>
               
-              <div className={`relative mb-8 p-6 bg-white/5 rounded-3xl group-hover:bg-white/10 transition-all duration-500`}>
-                <ModuleIcon type={module.icon} color={module.color} className="w-12 h-12" />
+              <div className={`relative mb-4 md:mb-8 p-4 md:p-6 bg-white/5 rounded-2xl md:rounded-3xl group-hover:bg-white/10 transition-all duration-500`}>
+                <ModuleIcon type={module.icon} color={module.color} className="w-8 h-8 md:w-12 md:h-12" />
               </div>
 
-              <h4 className="text-2xl font-anton text-white mb-4 tracking-widest uppercase text-center group-hover:text-fuchsia-400 transition-colors duration-500 leading-tight">
+              <h4 className="text-sm md:text-2xl font-anton text-white mb-2 md:mb-4 tracking-widest uppercase text-center group-hover:text-fuchsia-400 transition-colors duration-500 leading-tight">
                 {module.name}
               </h4>
 
-              <p className="text-gray-400 text-sm font-space leading-relaxed text-center opacity-70 group-hover:opacity-100 transition-opacity mb-8 line-clamp-3">
+              <p className="text-gray-400 text-[8px] md:text-sm font-space leading-relaxed text-center opacity-70 group-hover:opacity-100 transition-opacity mb-4 md:mb-8 line-clamp-2 md:line-clamp-3">
                 {module.tagline}
               </p>
 
               <button 
                 onClick={() => handleViewModuleDetails(idx)}
-                className={`w-full py-4 bg-[#0a1528]/80 border border-white/10 text-white font-orbitron tracking-[0.3em] text-[11px] font-bold rounded-2xl hover:bg-white hover:text-black transition-all duration-500 uppercase shadow-lg group-hover:shadow-${module.color}-500/20 group-hover:scale-[1.02]`}
+                className={`w-full py-2 md:py-4 bg-[#0a1528]/80 border border-white/10 text-white font-orbitron tracking-[0.2em] md:tracking-[0.3em] text-[8px] md:text-[11px] font-bold rounded-xl md:rounded-2xl hover:bg-white hover:text-black transition-all duration-500 uppercase shadow-lg group-hover:shadow-${module.color}-500/20 group-hover:scale-[1.02]`}
               >
                 VIEW MODULE
               </button>
@@ -600,11 +598,6 @@ const Modules: React.FC = () => {
         </div>
       </section>
 
-      <div className="w-full pb-0 shrink-0 text-center opacity-10">
-        <span className="text-[9px] font-mono tracking-[1.5em] text-white uppercase">YANTRAKSH // END OF TRANSMISSION</span>
-      </div>
-
-      {/* AMBIENT BG */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-5">
         <div className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] bg-emerald-900/10 blur-[180px] rounded-full"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[1000px] h-[1000px] bg-fuchsia-900/10 blur-[180px] rounded-full"></div>

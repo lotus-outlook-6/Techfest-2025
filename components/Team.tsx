@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 
 interface TeamMember {
@@ -12,64 +11,77 @@ interface TeamMember {
 
 const TEAM_MEMBERS: TeamMember[] = [
   // TECH TEAM (7 members for 1-3-3 layout)
-  { id: 't1', name: 'Marcus Thorne', role: 'CHIEF TECHNOLOGY OFFICER', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop', color: 'cyan' },
-  { id: 't2', name: 'Elena Vance', role: 'SECURITY ARCHITECT', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop', color: 'fuchsia' },
-  { id: 't3', name: 'David Kim', role: 'AI SPECIALIST', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop', color: 'orange' },
-  { id: 't4', name: 'Julia Moss', role: 'DATABASE ADMIN', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop', color: 'red' },
+  { id: 't1', name: 'Lotus Proton', role: 'WEB DEVELOPER', category: 'TECHNICAL', img: 'https://cdn.pixabay.com/photo/2026/01/14/10/56/10-56-53-133_640.jpg', color: 'cyan' },
+  { id: 't2', name: 'Elena Vance', role: 'SECURITY ARCHITECT', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1529232356377-57971f020a94?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: 'fuchsia' },
+  { id: 't3', name: 'Samantha Ray', role: 'AI SPECIALIST', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop', color: 'orange' },
+  { id: 't4', name: 'Julia Moss', role: 'DATABASE ADMIN', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1684966610091-f6beda2d025a?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: 'red' },
   { id: 't5', name: 'Victor Hugo', role: 'FRONTEND LEAD', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=600&auto=format&fit=crop', color: 'blue' },
-  { id: 't6', name: 'Samantha Ray', role: 'BACKEND DEV', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1531123897727-8f129e16fd3c?q=80&w=600&auto=format&fit=crop', color: 'lime' },
+  { id: 't6', name: 'David Kim', role: 'BACKEND DEV', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1648218943004-5ec604ef627a?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: 'lime' },
   { id: 't7', name: 'Leo Spark', role: 'SYSTEMS OPS', category: 'TECHNICAL', img: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=600&auto=format&fit=crop', color: 'fuchsia' },
 
   // CORE TEAM
-  { id: 'c1', name: 'Alex Rivera', role: 'CHIEF COORDINATOR', category: 'CORE', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop', color: 'fuchsia' },
-  { id: 'c2', name: 'Sarah Chen', role: 'LOGISTICS LEAD', category: 'CORE', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop', color: 'cyan' },
-  { id: 'c3', name: 'Jordan Hayes', role: 'ADMINISTRATIVE HEAD', category: 'CORE', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop', color: 'lime' },
+  { id: 'c1', name: 'Alex Rivera', role: 'CHIEF COORDINATOR', category: 'CORE', img: 'https://plus.unsplash.com/premium_photo-1661574646679-4794853d6729?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: 'fuchsia' },
+  { id: 'c2', name: 'Jordan Hayes', role: 'LOGISTICS LEAD', category: 'CORE', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop', color: 'cyan' },
+  { id: 'c3', name: 'Brian Johnson', role: 'ADMINISTRATIVE HEAD', category: 'CORE', img: 'https://images.unsplash.com/photo-1707971625687-a023eb07580e?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', color: 'lime' },
 ];
 
-const MemberCard: React.FC<{ member: TeamMember }> = ({ member }) => (
-  <div className="group relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#0a0a0a]/60 backdrop-blur-xl transition-all duration-1000 hover:-translate-y-4 hover:border-fuchsia-500/30 hover:shadow-[0_0_50px_rgba(217,70,239,0.15)] animate-fade-in w-full">
-    <img 
-      src={member.img} 
-      className="absolute inset-0 w-full h-full object-cover transition-all duration-[2s] grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 group-hover:scale-110" 
-      alt={member.name} 
-    />
-    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent opacity-90 group-hover:opacity-70 transition-opacity"></div>
-    
-    <div className="absolute top-6 left-6 flex items-center gap-2">
-       <div className={`w-2 h-2 rounded-full animate-pulse ${member.color === 'fuchsia' ? 'bg-fuchsia-500' : member.color === 'cyan' ? 'bg-cyan-400' : member.color === 'lime' ? 'bg-lime-400' : 'bg-orange-400'}`}></div>
-       <span className="text-[10px] font-bold tracking-[0.3em] text-white/60 uppercase">{member.category}</span>
-    </div>
+const MemberCard: React.FC<{ member: TeamMember }> = ({ member }) => {
+  const isLotus = member.name === 'Lotus Proton';
+  const defaultBaseLink = 'https://yantrakshisloading.vercel.app/';
+  
+  const linkedinLink = isLotus ? 'https://www.linkedin.com/in/kunalproton6/' : defaultBaseLink;
+  const githubLink = isLotus ? 'https://github.com/kunal-proton-6' : defaultBaseLink;
+  const instagramLink = isLotus ? null : defaultBaseLink;
 
-    <div className="absolute bottom-0 left-0 w-full p-10 translate-y-16 group-hover:translate-y-0 transition-transform duration-700">
-      <h3 className="text-3xl font-anton text-white uppercase mb-2 tracking-tight">{member.name}</h3>
-      <p className={`text-sm font-space font-bold uppercase tracking-widest ${member.color === 'fuchsia' ? 'text-fuchsia-400' : 'text-cyan-300'}`}>
-        {member.role}
-      </p>
+  return (
+    <div className="group relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-white/5 bg-[#0a0a0a]/60 backdrop-blur-xl transition-all duration-1000 hover:-translate-y-4 hover:border-fuchsia-500/30 hover:shadow-[0_0_50px_rgba(217,70,239,0.15)] animate-fade-in w-full">
+      <img 
+        src={member.img} 
+        className="absolute inset-0 w-full h-full object-cover transition-all duration-[2s] grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 group-hover:scale-110" 
+        alt={member.name} 
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent opacity-90 group-hover:opacity-70 transition-opacity"></div>
       
-      <div className="h-px w-0 group-hover:w-full bg-white/20 mt-6 transition-all duration-1000"></div>
-      
-      <div className="flex gap-4 mt-6">
-        <a href="#" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-[#0077b5]/20 hover:border-[#0077b5]/40 transition-all duration-500 opacity-0 blur-lg translate-y-12 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 delay-[100ms]">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-          </svg>
-        </a>
-        <a href="#" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-500 opacity-0 blur-lg translate-y-12 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 delay-[200ms]">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-          </svg>
-        </a>
-        <a href="#" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-500 opacity-0 blur-lg translate-y-12 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 delay-[300ms]">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-          </svg>
-        </a>
+      <div className="absolute top-6 left-6 flex items-center gap-2">
+         <div className={`w-2 h-2 rounded-full animate-pulse ${member.color === 'fuchsia' ? 'bg-fuchsia-500' : member.color === 'cyan' ? 'bg-cyan-400' : member.color === 'lime' ? 'bg-lime-400' : 'bg-orange-400'}`}></div>
+         <span className="text-[10px] font-bold tracking-[0.3em] text-white/60 uppercase">{member.category}</span>
+      </div>
+
+      <div className="absolute bottom-0 left-0 w-full p-10 translate-y-16 group-hover:translate-y-0 transition-transform duration-700">
+        <h3 className="text-3xl font-anton text-white uppercase mb-2 tracking-tight">{member.name}</h3>
+        <p className={`text-sm font-space font-bold uppercase tracking-widest ${member.color === 'fuchsia' ? 'text-fuchsia-400' : 'text-cyan-300'}`}>
+          {member.role}
+        </p>
+        
+        <div className="h-px w-0 group-hover:w-full bg-white/20 mt-6 transition-all duration-1000"></div>
+        
+        <div className="flex gap-4 mt-6">
+          <a href={linkedinLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-[#0077b5]/20 hover:border-[#0077b5]/40 transition-all duration-500 opacity-0 blur-lg translate-y-12 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 delay-[100ms]">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            </svg>
+          </a>
+          
+          {instagramLink && (
+            <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-fuchsia-500/20 hover:border-fuchsia-500/40 transition-all duration-500 opacity-0 blur-lg translate-y-12 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 delay-[200ms]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+            </a>
+          )}
+
+          <a href={githubLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-500 opacity-0 blur-lg translate-y-12 group-hover:opacity-100 group-hover:blur-0 group-hover:translate-y-0 delay-[300ms]">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Team: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -223,10 +235,9 @@ const Team: React.FC = () => {
         
         <section className="pt-24 pb-12 px-6 md:px-12 flex flex-col items-center w-full max-w-7xl">
           <div className="text-center mb-16 transition-all duration-700 w-full px-4">
-            <h2 className="text-4xl sm:text-5xl md:text-8xl font-anton tracking-tight sm:tracking-[0.05em] text-white uppercase opacity-95 leading-none sm:leading-tight">
+            <h2 className="text-5xl md:text-8xl font-anton tracking-[0.05em] text-white uppercase opacity-95 leading-tight">
               YANTRAKSH <br className="sm:hidden" /> <span className="text-fuchsia-500 drop-shadow-[0_0_15px_#d946ef]">ARCHITECTS</span>
             </h2>
-            <div className="h-0.5 w-48 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mx-auto mt-6"></div>
           </div>
 
           <div className="mb-24 flex flex-col items-center w-full">
@@ -310,7 +321,7 @@ const Team: React.FC = () => {
           </div>
           <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-full w-full flex-1 group/footer overflow-hidden">
             <div className={`absolute left-1/2 -translate-x-1/2 pointer-events-none select-none transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] ${isYearForward ? 'z-20 opacity-100 blur-0 text-fuchsia-400 drop-shadow-[0_0_80px_rgba(217,70,239,1)] scale-[1.15]' : 'z-0 opacity-70 blur-[3px] text-fuchsia-500/70 drop-shadow-[0_0_20px_rgba(217,70,239,0.3)] scale-100'} top-[40%] md:top-[38%] translate-y-0`}>
-              <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
+              <span className="text-[12vw] md:text-[10rem] font-anton tracking-[0.05em] font-anton leading-none inline-block scale-x-[1.3] scale-y-[1.8] transform origin-center">2026</span>
             </div>
             {/* Reduced mobile font size to 22vw from 28vw to match modules and prevent clipping */}
             <h2 onMouseEnter={handleYearTrigger} className="relative z-10 text-[22vw] md:text-[23vw] font-anton text-white leading-none tracking-[-0.04em] drop-shadow-[0_10px_80px_rgba(0,0,0,0.8)] transition-all duration-1000 hover:scale-[1.03] cursor-default px-6 md:px-12 w-full text-center -translate-y-10 md:-translate-y-20">YANTRAKSH</h2>
