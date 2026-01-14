@@ -62,12 +62,10 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
         const speed = Math.sqrt(vx*vx + vy*vy);
 
         // READ PHASE: Get positions of all letters first to avoid layout thrashing
-        // We need to calculate the 'original' center, so we subtract current transform
         const metrics = letterStates.current.map((state, i) => {
             const span = lettersRef.current[i];
             if (!span) return null;
             const rect = span.getBoundingClientRect();
-            // Recover the layout position by subtracting the current animation offset
             const originX = rect.left - state.x;
             const originY = rect.top - state.y;
             return {
@@ -83,12 +81,10 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
 
             const { centerX, centerY } = metric;
 
-            // Distance from smoothed mouse to letter center
             const distDx = mouse.current.x - centerX;
             const distDy = mouse.current.y - centerY;
             const dist = Math.sqrt(distDx * distDx + distDy * distDy);
 
-            // Sphere of influence radius
             const radius = 120; 
             
             let targetBlur = 0;
@@ -97,30 +93,18 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
 
             if (dist < radius) {
                 const influence = Math.pow(1 - dist / radius, 2); 
-
-                // Blur Logic:
-                // Base blur when hovering (influence * 4) + Motion blur (speed based)
-                // This ensures effect persists even when mouse is stationary.
                 targetBlur = (influence * 4) + (influence * speed * 0.8); 
-
-                // Displacement Logic:
-                // 1. Drag: Move with mouse velocity (vx, vy)
                 const dragFactor = 0.8; 
-                // 2. Repulsion: Move away from mouse slightly when stationary/hovering
                 const repulsionFactor = 0.15;
-
                 targetX = (vx * influence * dragFactor) - (distDx * influence * repulsionFactor);
                 targetY = (vy * influence * dragFactor) - (distDy * influence * repulsionFactor);
             }
 
-            // Interpolate letter state towards target (Spring/Ease)
             const returnSpeed = 0.1;
-            
             state.x += (targetX - state.x) * returnSpeed;
             state.y += (targetY - state.y) * returnSpeed;
             state.blur += (targetBlur - state.blur) * returnSpeed;
 
-            // Apply to DOM
             const span = lettersRef.current[i];
             if (span) {
                 if (Math.abs(state.x) > 0.05 || Math.abs(state.y) > 0.05 || state.blur > 0.05) {
@@ -145,7 +129,6 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
   }, []);
 
   const handleClick = () => {
-      // Mechanical Key Press Sound
       const audio = new Audio('https://cdn.pixabay.com/audio/2025/01/25/audio_33947eea08.mp3');
       audio.volume = 0.5;
       audio.play().catch(() => {});
@@ -156,52 +139,36 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
   };
 
   const playSwooshSound = () => {
-    // Restored Swoosh Effect for main text hover
     const audio = new Audio('https://cdn.pixabay.com/audio/2025/08/02/audio_6f4893deae.mp3');
     audio.volume = 0.5;
     audio.play().catch(() => {});
   };
 
   const playBlinkSound = () => {
-    // Specific Glitch Blip
     const audio = new Audio('https://cdn.pixabay.com/audio/2025/04/30/audio_c81de40176.mp3');
     audio.volume = 0.3;
     audio.play().catch(() => {});
   };
 
   const handleKMouseEnter = (e: React.MouseEvent) => {
-    // Prevent this from triggering other handlers if nested
-    
-    // Stop any current sequence and reset state
     if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current);
-    
-    // Clear any pending individual blink sounds
     blinkTimeoutsRef.current.forEach(id => clearTimeout(id));
     blinkTimeoutsRef.current = [];
-    
-    // Reset to restart animation
     setIsGlitching(false);
     
     setTimeout(() => {
         setIsGlitching(true);
-
-        // Schedule "Blink" sounds to match the CSS animation keyframes
-        // Times: 50ms, 150ms, 250ms, 350ms
         const blinkTimings = [50, 150, 250, 350];
-        
         blinkTimings.forEach(time => {
             const id = window.setTimeout(playBlinkSound, time);
             blinkTimeoutsRef.current.push(id);
         });
-        
-        // Stop glitching after 1 second
         glitchTimeoutRef.current = window.setTimeout(() => {
             setIsGlitching(false);
         }, 1000);
     }, 10);
   };
 
-  // Render Helpers
   const renderChar = (char: string, index: number, className: string = "") => (
       <span 
         key={index} 
@@ -216,7 +183,7 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
   );
 
   return (
-    <div className="relative z-20 flex items-center justify-center">
+    <div className="relative z-20 flex items-center justify-center max-w-[95vw] md:max-w-none">
        <style>{`
         @keyframes glitch-border-blink {
             0% { text-shadow: none; transform: skewX(0deg); }
@@ -238,38 +205,32 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
       {/* Terminal Icon Button */}
       <button 
         onClick={handleClick}
-        className={`w-10 h-10 md:w-16 md:h-16 relative mr-3 md:mr-5 shrink-0 flex items-center justify-center bg-[#1e1e1e] rounded-lg border border-gray-700 shadow-[0_0_15px_rgba(217,70,239,0.3)] cursor-pointer select-none transition-all duration-200 outline-none focus:ring-2 focus:ring-fuchsia-500/50 z-30
+        className={`w-14 h-14 md:w-16 md:h-16 relative mr-4 md:mr-5 shrink-0 flex items-center justify-center bg-[#1e1e1e] rounded-lg border border-gray-700 shadow-[0_0_15px_rgba(217,70,239,0.3)] cursor-pointer select-none transition-all duration-200 outline-none focus:ring-2 focus:ring-fuchsia-500/50 z-30
             ${isClicked ? 'scale-90 border-fuchsia-500 bg-[#2a2a2a]' : 'hover:scale-105 hover:border-fuchsia-500 hover:shadow-[0_0_25px_rgba(217,70,239,0.6)]'}
         `}
         aria-label="Terminal Button"
       >
-        <span className="text-fuchsia-500 font-bold text-xl md:text-3xl font-mono flex">
+        <span className="text-fuchsia-500 font-bold text-2xl md:text-3xl font-mono flex">
           <span>&gt;</span>
           <span className={`${showCursor ? 'opacity-100' : 'opacity-0'}`}>_</span>
         </span>
       </button>
 
-      {/* The Text Container - Plays Swoosh on Hover */}
+      {/* The Text Container */}
       <h1 
-        className="text-5xl md:text-7xl font-black tracking-wider uppercase flex items-center cursor-default"
+        className="text-5xl sm:text-7xl md:text-7xl font-black tracking-tight sm:tracking-wider uppercase flex items-center cursor-default shrink-0"
         onMouseEnter={playSwooshSound}
       >
-         {/* YANTRA - Indices 0-5 */}
          {'YANTRA'.split('').map((c, i) => renderChar(c, i, "text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]"))}
-         
-         {/* K - Index 6 - Special Structure with Glitch Trigger */}
          <span 
             ref={el => { lettersRef.current[6] = el; }}
-            className="inline-block relative mx-1 select-none"
+            className="inline-block relative mx-0.5 sm:mx-1 select-none"
             style={{ willChange: 'transform, filter' }}
             onMouseEnter={handleKMouseEnter}
          >
-            {/* Main K - Applies glitch class only when triggered */}
             <span className={`relative z-10 text-transparent bg-clip-text bg-[radial-gradient(circle_at_center,_#ffffff_60%,_#f0abfc_100%)] drop-shadow-[0_0_3px_rgba(217,70,239,0.5)] ${isGlitching ? 'glitch-mode' : ''}`}>K</span>
             <span className="absolute -top-1 right-0 text-fuchsia-500 opacity-50 blur-sm z-0">K</span>
          </span>
-
-         {/* SH - Indices 7-8 */}
          {'SH'.split('').map((c, i) => renderChar(c, i + 7, "text-white"))}
       </h1>
     </div>

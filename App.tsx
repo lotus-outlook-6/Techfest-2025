@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
@@ -16,7 +15,7 @@ import Modules from './components/Modules';
 import Events from './components/Events';
 import Team from './components/Team';
 
-// Generic View for Sub-Sections - Changed to justify-start for proper scroll behavior
+// Generic View for Sub-Sections
 const SectionView: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
   <div className="w-screen h-full flex flex-col items-center justify-start shrink-0 relative overflow-hidden select-none">
     {children ? children : (
@@ -83,12 +82,13 @@ function App() {
     }, 6500);
   };
 
-  const handleEnter = () => triggerEntryTransition();
   const handleHomeBack = () => {
       setIsTransitioning(true);
       setTimeout(() => {
           setShowMainLayout(false);
           setCurrentSection('HOME');
+          setIsLayoutExpanded(false);
+          setShowTerminal(false);
       }, 500);
       setTimeout(() => {
           setIsTransitioning(false);
@@ -103,18 +103,18 @@ function App() {
   };
 
   const handleLogoClick = () => {
-    if (isLayoutExpanded) {
-        if (isMinimized) {
-            setIsMinimized(false);
-        } else {
-            setBgBurst(prev => prev + 1);
-        }
+    if (!showTerminal) {
+      setIsLayoutExpanded(true);
+      setTimeout(() => {
+          setIsMinimized(false);
+          setShowTerminal(true);
+      }, 500);
     } else {
-        setIsLayoutExpanded(true);
-        setTimeout(() => {
-            setIsMinimized(false);
-            setShowTerminal(true);
-        }, 800);
+      if (isMinimized) {
+          setIsMinimized(false);
+      } else {
+          setBgBurst(prev => prev + 1);
+      }
     }
   };
 
@@ -166,37 +166,44 @@ function App() {
         `}>
           <SocialButtons />
           
-          <div className="relative z-20 flex flex-col items-center justify-center w-full max-w-5xl px-4 pointer-events-none">
+          {/* Main Landing View Layout */}
+          <div className="relative z-20 flex flex-col items-center justify-between w-full h-[85vh] max-w-5xl px-4 pointer-events-none">
             {staggerState.header && (
-              <div className={`relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center ${isLayoutExpanded ? '-translate-y-[35vh]' : 'translate-y-0'}`}>
+              <div className="relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center translate-y-16 md:translate-y-4">
                 <div className="flex items-center justify-center pointer-events-auto">
                    <InteractiveText onLogoClick={handleLogoClick} />
                 </div>
                 <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mt-4 opacity-70 animate-line"></div>
-                <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-12 transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-top ${staggerState.timer ? 'opacity-100' : 'opacity-0'} ${isLayoutExpanded ? 'translate-y-[56vh] scale-110 blur-0' : 'translate-y-0 heavy-blur'}`}>
-                   <Countdown />
+              </div>
+            )}
+
+            {/* Terminal Container - Positioned in the middle when open */}
+            <div className="relative flex-1 w-full flex items-center justify-center">
+              {showTerminal && (
+                <div className="pointer-events-auto">
+                  <Terminal 
+                    onEnter={triggerEntryTransition} 
+                    isMinimized={isMinimized}
+                    onMinimize={() => setIsMinimized(true)}
+                    onClose={handleTerminalClose}
+                  />
                 </div>
+              )}
+            </div>
+
+            {staggerState.timer && (
+              <div className="relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-bottom pb-16 md:pb-8 translate-y-0 opacity-100 blur-0 scale-100">
+                 <Countdown />
               </div>
             )}
           </div>
-
-          {showTerminal && (
-            <div className="pointer-events-auto">
-              <Terminal 
-                onEnter={triggerEntryTransition} 
-                isMinimized={isMinimized}
-                onMinimize={() => setIsMinimized(true)}
-                onClose={handleTerminalClose}
-              />
-            </div>
-          )}
         </div>
       )}
 
       {showMainLayout && (
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">
           
-          {/* MOBILE OVERLAY MENU - Darkened and blurred for maximum readability */}
+          {/* MOBILE OVERLAY MENU */}
           <div 
             onClick={() => setIsMobileMenuOpen(false)}
             className={`fixed inset-0 z-[2900] bg-[#050505]/95 backdrop-blur-[60px] transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}
@@ -205,7 +212,6 @@ function App() {
                onClick={(e) => e.stopPropagation()}
                className="flex flex-col items-center gap-10 md:gap-14"
              >
-                {/* REGISTER BUTTON - Set to size="lg" to be bigger and more prominent */}
                 <div className={`transition-all duration-700 ${isMobileMenuOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`} style={{ transitionDelay: '50ms' }}>
                    <RegisterButton size="lg" className="mb-10" />
                 </div>
@@ -236,14 +242,11 @@ function App() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-6 shrink-0 relative z-[3100]">
-                {/* Fixed: Register Button is now hidden on mobile/tablet (hidden lg:block) */}
                 <div className="hidden lg:block transition-transform">
                     <RegisterButton size="sm" />
                 </div>
-                {/* HAMBURGER ICON - Highest Priority Hit Area */}
                 <button 
                     onClick={toggleMobileMenu}
-                    onTouchStart={(e) => { e.stopPropagation(); }}
                     className="lg:hidden w-14 h-14 flex flex-col items-center justify-center gap-1.5 focus:outline-none hover:bg-white/5 rounded-full transition-all active:scale-90 relative z-[3500]"
                     aria-label="Toggle Menu"
                 >

@@ -2,25 +2,20 @@ import React, { useState, useEffect } from 'react';
 
 const Countdown: React.FC = () => {
   const [time, setTime] = useState({
-    days: 30,
-    hours: 18,
-    minutes: 10,
-    seconds: 39,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
     milliseconds: 0
   });
 
   useEffect(() => {
-    // Set a fixed target date for consistency with the clone request
-    // or just simulate the countdown loop from the video
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 30);
-    targetDate.setHours(targetDate.getHours() + 18);
-    targetDate.setMinutes(targetDate.getMinutes() + 10);
-    targetDate.setSeconds(targetDate.getSeconds() + 39);
+    // Set target date to March 25, 2026
+    const targetDate = new Date('March 25, 2026 00:00:00').getTime();
 
     const interval = setInterval(() => {
-      const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
+      const now = new Date().getTime();
+      const difference = targetDate - now;
 
       if (difference > 0) {
         setTime({
@@ -30,6 +25,16 @@ const Countdown: React.FC = () => {
           seconds: Math.floor((difference / 1000) % 60),
           milliseconds: Math.floor((difference % 1000) / 10)
         });
+      } else {
+        // Stop at zero
+        setTime({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0
+        });
+        clearInterval(interval);
       }
     }, 50);
 
@@ -40,34 +45,34 @@ const Countdown: React.FC = () => {
 
   // Reusable Separator Component
   const Separator = () => (
-    <div className="text-3xl md:text-5xl font-bold tracking-widest opacity-60 text-white/80 pb-1">:</div>
+    <div className="text-4xl md:text-5xl font-bold tracking-widest opacity-60 text-white/80 pb-1">:</div>
   );
 
   return (
-    <div className="flex gap-3 md:gap-6 items-start justify-center text-white select-none drop-shadow-[0_0_5px_rgba(217,70,239,0.5)]">
+    <div className="flex gap-4 md:gap-6 items-start justify-center text-white select-none drop-shadow-[0_0_5px_rgba(217,70,239,0.5)]">
       <div className="flex flex-col items-center">
-        <span className="text-3xl md:text-5xl font-bold tracking-widest">{format(time.days)}</span>
+        <span className="text-4xl md:text-5xl font-bold tracking-widest">{format(time.days)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Days</span>
       </div>
       
       <Separator />
 
       <div className="flex flex-col items-center">
-        <span className="text-3xl md:text-5xl font-bold tracking-widest">{format(time.hours)}</span>
+        <span className="text-4xl md:text-5xl font-bold tracking-widest">{format(time.hours)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Hrs</span>
       </div>
 
       <Separator />
 
       <div className="flex flex-col items-center">
-        <span className="text-3xl md:text-5xl font-bold tracking-widest">{format(time.minutes)}</span>
+        <span className="text-4xl md:text-5xl font-bold tracking-widest">{format(time.minutes)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Min</span>
       </div>
 
       <Separator />
 
       <div className="flex flex-col items-center">
-        <span className="text-3xl md:text-5xl font-bold tracking-widest w-16 text-center">{format(time.seconds)}</span>
+        <span className="text-4xl md:text-5xl font-bold tracking-widest w-16 text-center">{format(time.seconds)}</span>
         <span className="text-[10px] md:text-xs text-fuchsia-400 mt-1 uppercase tracking-widest">Sec</span>
       </div>
     </div>

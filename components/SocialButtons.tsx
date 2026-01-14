@@ -4,9 +4,9 @@ import React from 'react';
 const SocialButtons: React.FC = () => {
   return (
     <>
-      <div className="fixed bottom-12 left-[64px] md:left-[192px] z-50 pointer-events-auto">
+      <div className="fixed bottom-12 left-8 md:left-[192px] z-50 pointer-events-auto">
         <a 
-          href="https://instagram.com" 
+          href="https://www.instagram.com/_yantraksh_" 
           target="_blank" 
           rel="noopener noreferrer"
           className="group relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 transition-all duration-300 hover:scale-110 active:scale-95"
@@ -31,9 +31,9 @@ const SocialButtons: React.FC = () => {
         </a>
       </div>
 
-      <div className="fixed bottom-12 right-[64px] md:right-[192px] z-50 pointer-events-auto">
+      <div className="fixed bottom-12 right-8 md:right-[192px] z-50 pointer-events-auto">
         <a 
-          href="https://facebook.com" 
+          href="https://www.facebook.com/share/17egUW6dfC/" 
           target="_blank" 
           rel="noopener noreferrer"
           className="group relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 transition-all duration-300 hover:scale-110 active:scale-95"
