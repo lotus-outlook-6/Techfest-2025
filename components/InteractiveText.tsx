@@ -183,7 +183,7 @@ const InteractiveText: React.FC<InteractiveTextProps> = ({ onLogoClick }) => {
   );
 
   return (
-    <div className="relative z-20 flex items-center justify-center max-w-[95vw] md:max-w-none">
+    <div className="relative z-[100] flex items-center justify-center max-w-[95vw] md:max-w-none">
        <style>{`
         @keyframes glitch-border-blink {
             0% { text-shadow: none; transform: skewX(0deg); }

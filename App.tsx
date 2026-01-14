@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
 import Background from './components/Background';
@@ -50,11 +50,20 @@ function App() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [bgBurst, setBgBurst] = useState(0);
 
+  // Easter Egg & Persistence Logic
+  const [isTerminalUnlocked, setIsTerminalUnlocked] = useState(false);
+  const [easterEggTarget, setEasterEggTarget] = useState(3);
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimerRef = useRef<number | null>(null);
+
   const SECTIONS = ['HOME', 'GALLERY', 'MODULES', 'EVENTS', 'TEAM'];
   const activeSectionIndex = SECTIONS.indexOf(currentSection);
 
   // Initial Boot Sequence
   useEffect(() => {
+    const targets = [3, 5, 7];
+    setEasterEggTarget(targets[Math.floor(Math.random() * targets.length)]);
+
     const loadTimer = setTimeout(() => {
       setIsAppLoading(false);
       setShowMain(true);
@@ -74,6 +83,7 @@ function App() {
     setTimeout(() => {
         setShowMainLayout(true);
         setCurrentSection('HOME');
+        setClickCount(0);
     }, 5500);
 
     setTimeout(() => {
@@ -103,18 +113,33 @@ function App() {
   };
 
   const handleLogoClick = () => {
-    if (!showTerminal) {
-      setIsLayoutExpanded(true);
-      setTimeout(() => {
-          setIsMinimized(false);
-          setShowTerminal(true);
-      }, 500);
-    } else {
+    // If already unlocked once in this session, immediate open
+    if (isTerminalUnlocked) {
       if (isMinimized) {
-          setIsMinimized(false);
-      } else {
-          setBgBurst(prev => prev + 1);
+        setIsMinimized(false);
       }
+      setShowTerminal(true);
+      setIsLayoutExpanded(true);
+      return;
+    }
+
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = window.setTimeout(() => setClickCount(0), 2000);
+
+    if (newCount >= easterEggTarget) {
+      setIsTerminalUnlocked(true); // Permanent unlock for the session
+      if (!showTerminal) {
+        setIsLayoutExpanded(true);
+        setTimeout(() => {
+            setIsMinimized(false);
+            setShowTerminal(true);
+        }, 500);
+      }
+      setClickCount(0);
+    } else {
+      setBgBurst(prev => prev + 1);
     }
   };
 
@@ -131,6 +156,9 @@ function App() {
     }
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  // REQUESTED SEQUENCE: Yellow, Orange, Red, Pink, Fuchsia, Blue, Navy
+  const vibrantRingGradient = `conic-gradient(from 0deg, #facc15, #f97316, #ef4444, #ec4899, #d946ef, #3b82f6, #1e3a8a, #facc15)`;
 
   return (
     <div className="min-h-screen w-full text-white flex flex-col items-center justify-center relative overflow-hidden font-sans bg-[#050505]">
@@ -166,10 +194,9 @@ function App() {
         `}>
           <SocialButtons />
           
-          {/* Main Landing View Layout */}
           <div className="relative z-20 flex flex-col items-center justify-between w-full h-[85vh] max-w-5xl px-4 pointer-events-none">
             {staggerState.header && (
-              <div className="relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center translate-y-16 md:translate-y-4">
+              <div className="relative z-[150] transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center translate-y-16 md:translate-y-4">
                 <div className="flex items-center justify-center pointer-events-auto">
                    <InteractiveText onLogoClick={handleLogoClick} />
                 </div>
@@ -177,10 +204,9 @@ function App() {
               </div>
             )}
 
-            {/* Terminal Container - Positioned in the middle when open */}
-            <div className="relative flex-1 w-full flex items-center justify-center">
+            <div className="relative flex-1 w-full flex items-center justify-center z-10">
               {showTerminal && (
-                <div className="pointer-events-auto">
+                <div className="pointer-events-auto z-[200]">
                   <Terminal 
                     onEnter={triggerEntryTransition} 
                     isMinimized={isMinimized}
@@ -189,10 +215,53 @@ function App() {
                   />
                 </div>
               )}
+
+              {/* Main "ENTER" Button Area */}
+              {!showTerminal && staggerState.timer && (
+                <div className="pointer-events-auto group relative animate-fade-in z-0">
+                  
+                  {/* --- REFINED SYNCHRONIZED GRADIENT GLOW BEHIND --- */}
+                  {/* Large Outer Rotating Glow - Opacity reduced on mobile to prevent "whiteness" */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280%] h-[280%] rounded-full opacity-15 md:opacity-30 blur-[110px] pointer-events-none overflow-hidden">
+                      <div className="absolute inset-[-50%]">
+                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                      </div>
+                  </div>
+
+                  {/* Mid-range Soft Glow - Opacity reduced on mobile */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-[180%] rounded-full opacity-20 md:opacity-40 blur-[60px] pointer-events-none overflow-hidden">
+                      <div className="absolute inset-[-50%]">
+                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                      </div>
+                  </div>
+                  {/* --- END GRADIENT GLOW --- */}
+
+                  {/* The actual border line ring (behind button, sharp) */}
+                  <div className="absolute -inset-[4px] rounded-[38%] overflow-hidden pointer-events-none opacity-100 z-10">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%]">
+                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                      </div>
+                      {/* Secondary blend layer for vibrance */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%] opacity-60 blur-md mix-blend-screen">
+                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                      </div>
+                  </div>
+
+                  {/* Squircle Button (Enhanced with visual depth/skeuomorphism) */}
+                  <button 
+                    onClick={triggerEntryTransition}
+                    className="relative w-36 h-36 md:w-44 md:h-44 bg-gradient-to-b from-[#121212] to-[#080808] border border-white/5 rounded-[38%] flex items-center justify-center transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),inset_0_-12px_24px_rgba(0,0,0,0.8),0_20px_40px_-10px_rgba(0,0,0,0.8)] active:translate-y-1 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.9),inset_0_-1px_1px_rgba(255,255,255,0.05),0_5px_15px_rgba(0,0,0,0.4)] group z-20"
+                  >
+                    <div className="flex flex-col items-center gap-1 transition-transform group-hover:scale-105 active:scale-95">
+                       <span className="text-white font-anton text-2xl md:text-4xl tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">ENTER</span>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
 
             {staggerState.timer && (
-              <div className="relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-bottom pb-16 md:pb-8 translate-y-0 opacity-100 blur-0 scale-100">
+              <div className="relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-bottom pb-16 md:pb-8 translate-y-0 opacity-100 blur-0 scale-100 z-[150]">
                  <Countdown />
               </div>
             )}
@@ -202,27 +271,16 @@ function App() {
 
       {showMainLayout && (
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">
-          
-          {/* MOBILE OVERLAY MENU */}
           <div 
             onClick={() => setIsMobileMenuOpen(false)}
             className={`fixed inset-0 z-[2900] bg-[#050505]/95 backdrop-blur-[60px] transition-all duration-700 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}`}
           >
-             <nav 
-               onClick={(e) => e.stopPropagation()}
-               className="flex flex-col items-center gap-10 md:gap-14"
-             >
+             <nav onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-10 md:gap-14">
                 <div className={`transition-all duration-700 ${isMobileMenuOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'}`} style={{ transitionDelay: '50ms' }}>
                    <RegisterButton size="lg" className="mb-10" />
                 </div>
-                
                 {SECTIONS.map((section, idx) => (
-                    <button 
-                        key={section}
-                        onClick={() => handleSectionSelect(section)}
-                        className={`text-4xl md:text-7xl font-anton tracking-widest transition-all duration-500 hover:scale-110 active:scale-95 ${currentSection === section ? 'text-fuchsia-500 drop-shadow-[0_0_20px_rgba(217,70,239,0.6)]' : 'text-white/60 hover:text-white'}`}
-                        style={{ transitionDelay: isMobileMenuOpen ? `${(idx + 2) * 100}ms` : '0ms' }}
-                    >
+                    <button key={section} onClick={() => handleSectionSelect(section)} className={`text-4xl md:text-7xl font-anton tracking-widest transition-all duration-500 hover:scale-110 active:scale-95 ${currentSection === section ? 'text-fuchsia-500 drop-shadow-[0_0_20px_rgba(217,70,239,0.6)]' : 'text-white/60 hover:text-white'}`} style={{ transitionDelay: isMobileMenuOpen ? `${(idx + 2) * 100}ms` : '0ms' }}>
                         {section}
                     </button>
                 ))}
@@ -236,20 +294,12 @@ function App() {
               </div>
               <span className="text-lg md:text-3xl font-anton tracking-[0.08em] text-white group-hover:text-fuchsia-400 transition-colors uppercase">YANTRAKSH</span>
             </div>
-            
             <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
               <NavbarSlider initialSection={currentSection} onSelect={handleSectionSelect} />
             </div>
-
             <div className="flex items-center gap-2 md:gap-6 shrink-0 relative z-[3100]">
-                <div className="hidden lg:block transition-transform">
-                    <RegisterButton size="sm" />
-                </div>
-                <button 
-                    onClick={toggleMobileMenu}
-                    className="lg:hidden w-14 h-14 flex flex-col items-center justify-center gap-1.5 focus:outline-none hover:bg-white/5 rounded-full transition-all active:scale-90 relative z-[3500]"
-                    aria-label="Toggle Menu"
-                >
+                <div className="hidden lg:block transition-transform"><RegisterButton size="sm" /></div>
+                <button onClick={toggleMobileMenu} className="lg:hidden w-14 h-14 flex flex-col items-center justify-center gap-1.5 focus:outline-none hover:bg-white/5 rounded-full transition-all active:scale-90 relative z-[3500]" aria-label="Toggle Menu">
                     <div className={`w-7 h-1 bg-white rounded-full transition-all duration-300 transform ${isMobileMenuOpen ? 'rotate-45 translate-y-2.5' : ''}`}></div>
                     <div className={`w-7 h-1 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0 scale-x-0' : ''}`}></div>
                     <div className={`w-7 h-1 bg-white rounded-full transition-all duration-300 transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-2.5' : ''}`}></div>
@@ -258,32 +308,18 @@ function App() {
           </header>
 
           <div className="flex-1 w-full relative overflow-hidden mt-20 md:mt-24">
-            <div 
-              className="flex w-full h-full transition-transform duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)]"
-              style={{ transform: `translateX(-${activeSectionIndex * 100}vw)` }}
-            >
-              <SectionView title="HOME">
-                <Home onBack={handleHomeBack} onSectionChange={handleSectionSelect} initialSection={currentSection} hideNavbar={true} />
-              </SectionView>
-              <SectionView title="GALLERY">
-                <Gallery />
-              </SectionView>
-              <SectionView title="MODULES">
-                <Modules />
-              </SectionView>
-              <SectionView title="EVENTS">
-                <Events />
-              </SectionView>
-              <SectionView title="TEAM">
-                <Team />
-              </SectionView>
+            <div className="flex w-full h-full transition-transform duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)]" style={{ transform: `translateX(-${activeSectionIndex * 100}vw)` }}>
+              <SectionView title="HOME"><Home onBack={handleHomeBack} onSectionChange={handleSectionSelect} initialSection={currentSection} hideNavbar={true} /></SectionView>
+              <SectionView title="GALLERY"><Gallery /></SectionView>
+              <SectionView title="MODULES"><Modules /></SectionView>
+              <SectionView title="EVENTS"><Events /></SectionView>
+              <SectionView title="TEAM"><Team /></SectionView>
             </div>
           </div>
         </div>
       )}
 
       <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[600] bg-[length:100%_2px,3px_100%] opacity-20"></div>
-
     </div>
   );
 }

@@ -1,16 +1,11 @@
-
 import React, { useEffect, useRef } from 'react';
 
-// Softened neon palette with slightly higher base opacities for "fat" colors
+// Boosted intensity palette: Fuchsia, Purple, Navy Blue, Deep Green
 const NEON_COLORS = [
-  'rgba(217, 70, 239, 0.15)', // Soft Fuchsia
-  'rgba(162, 28, 175, 0.12)', // Deep Purple
-  'rgba(124, 58, 237, 0.12)', // Violet
-  'rgba(37, 99, 235, 0.10)',  // Electric Blue
-  'rgba(6, 182, 212, 0.10)',  // Cyan
-  'rgba(236, 72, 153, 0.15)', // Hot Pink
-  'rgba(139, 92, 246, 0.12)', // Lavender
-  'rgba(255, 0, 255, 0.10)',  // Neon Magenta
+  'rgba(217, 70, 239, 0.25)', // 0: Fuchsia
+  'rgba(168, 85, 247, 0.25)', // 1: Purple
+  'rgba(30, 58, 138, 0.22)',  // 2: Navy Blue
+  'rgba(6, 78, 59, 0.25)',    // 3: Deep Green
 ];
 
 class Particle {
@@ -21,15 +16,19 @@ class Particle {
   vy: number;
   color: string;
   alpha: number;
+  twinkleSpeed: number;
 
   constructor(width: number, height: number) {
     this.x = Math.random() * (width || 1920);
     this.y = Math.random() * (height || 1080);
-    this.size = Math.random() * 2 + 0.5;
-    this.vx = (Math.random() - 0.5) * 0.5; 
-    this.vy = (Math.random() - 0.5) * 0.5;
-    this.color = Math.random() > 0.6 ? '255, 255, 255' : '236, 72, 153';
-    this.alpha = Math.random() * 0.5 + 0.2;
+    this.size = Math.random() * Math.random() * 2.2 + 0.3;
+    this.vx = (Math.random() - 0.5) * 0.25; 
+    this.vy = (Math.random() - 0.5) * 0.25;
+    
+    const palette = ['255, 255, 255', '255, 255, 255', '217, 70, 239', '30, 58, 138', '200, 200, 255'];
+    this.color = palette[Math.floor(Math.random() * palette.length)];
+    this.alpha = Math.random() * 0.5 + 0.1;
+    this.twinkleSpeed = Math.random() * 0.01;
   }
 
   update(width: number, height: number) {
@@ -40,6 +39,10 @@ class Particle {
     if (this.x > width + 20) this.x = -20;
     if (this.y < -20) this.y = height + 20;
     if (this.y > height + 20) this.y = -20;
+    
+    this.alpha += Math.sin(Date.now() * this.twinkleSpeed) * 0.005;
+    if (this.alpha < 0.1) this.alpha = 0.1;
+    if (this.alpha > 0.7) this.alpha = 0.7;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -47,6 +50,13 @@ class Particle {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
+    
+    if (this.size > 1.8) {
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = `rgba(${this.color}, ${this.alpha})`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
   }
 }
 
@@ -64,19 +74,24 @@ class Blob {
   alpha: number;
   targetAlpha: number = 1.0;
   lifeTimer: number; 
-  fadeSpeed: number = 0.005; // Slightly faster fades
+  fadeSpeed: number = 0.003;
 
-  constructor(width: number, height: number, startInstant = false) {
-    this.radius = Math.random() * 450 + 350;
-    this.x = Math.random() * width;
-    this.y = Math.random() * height;
+  constructor(width: number, height: number, startInstant = false, forcedColor?: string, forcedX?: number, forcedY?: number) {
+    const isMobile = width < 768;
+    // Scale radius down on mobile so they don't wash out the center
+    const baseRadius = isMobile ? width * 0.6 : 450;
+    const varRadius = isMobile ? width * 0.2 : 400;
+    this.radius = Math.random() * varRadius + baseRadius;
     
-    this.vx = (Math.random() - 0.5) * 0.25;
-    this.vy = (Math.random() - 0.5) * 0.25;
+    this.x = forcedX !== undefined ? forcedX : Math.random() * width;
+    this.y = forcedY !== undefined ? forcedY : Math.random() * height;
     
-    this.color = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
+    const velScale = forcedColor ? (isMobile ? 0.03 : 0.06) : 0.12;
+    this.vx = (Math.random() - 0.5) * velScale;
+    this.vy = (Math.random() - 0.5) * velScale;
     
-    // If startInstant is true, we skip 'appearing' and go straight to 'stable'
+    this.color = forcedColor || NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
+    
     if (startInstant) {
       this.state = 'stable';
       this.alpha = this.targetAlpha;
@@ -85,8 +100,7 @@ class Blob {
       this.alpha = 0;
     }
     
-    // 20-30 seconds
-    this.lifeTimer = (20 + Math.random() * 10) * 60; 
+    this.lifeTimer = (forcedColor ? 999999 : (15 + Math.random() * 20)) * 60; 
   }
 
   update(width: number, height: number) {
@@ -131,6 +145,7 @@ class Blob {
     
     const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
     gradient.addColorStop(0, this.color);
+    gradient.addColorStop(0.4, this.color.replace('0.25', '0.08').replace('0.22', '0.06'));
     gradient.addColorStop(1, 'transparent');
     
     ctx.fillStyle = gradient;
@@ -161,8 +176,11 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
 
     const { width, height } = dimsRef.current;
     if (width > 0) {
-      for (let i = 0; i < 4; i++) {
-        blobsRef.current.push(new Blob(width, height));
+      // Only allow bursts on desktop or tablets to keep mobile background dark
+      if (width >= 768) {
+        for (let i = 0; i < 3; i++) {
+          blobsRef.current.push(new Blob(width, height));
+        }
       }
     }
   }, [burstTrigger]);
@@ -181,18 +199,30 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
         canvas.width = width;
         canvas.height = height;
         
+        const isMobile = width < 768;
+
         if (particlesRef.current.length === 0) {
-            for (let i = 0; i < 150; i++) {
+            // Optimized particle count for mobile
+            const count = isMobile ? 150 : 380;
+            for (let i = 0; i < count; i++) {
                 particlesRef.current.push(new Particle(width, height));
             }
         }
 
         if (blobsRef.current.length === 0) {
-            // Spawn initial blobs with 'startInstant' so the screen isn't black
-            for (let i = 0; i < 15; i++) {
-                const b = new Blob(width, height, true);
-                b.lifeTimer = Math.random() * b.lifeTimer;
-                blobsRef.current.push(b);
+            // Corner anchors - Fuchsia, Purple, Navy, Green
+            blobsRef.current.push(new Blob(width, height, true, NEON_COLORS[2], 0, 0));
+            blobsRef.current.push(new Blob(width, height, true, NEON_COLORS[3], width, 0));
+            blobsRef.current.push(new Blob(width, height, true, NEON_COLORS[0], 0, height));
+            blobsRef.current.push(new Blob(width, height, true, NEON_COLORS[1], width, height));
+
+            // Extra random blobs only for non-mobile to keep corners strictly as requested on mobile
+            if (!isMobile) {
+              for (let i = 0; i < 6; i++) {
+                  const b = new Blob(width, height, true);
+                  b.lifeTimer = Math.random() * b.lifeTimer;
+                  blobsRef.current.push(b);
+              }
             }
         }
     };
@@ -209,11 +239,12 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
 
     const spawnInterval = setInterval(() => {
       const { width, height } = dimsRef.current;
-      // Maintain at least 12 active/stable blobs for that "fat" color look
-      if (width > 0 && blobsRef.current.filter(b => b.state !== 'disappearing').length < 12) {
+      const isMobile = width < 768;
+      // Do not auto-spawn extra blobs on mobile to keep it dark and corner-focused
+      if (!isMobile && width > 0 && blobsRef.current.filter(b => b.state !== 'disappearing').length < 12) {
           blobsRef.current.push(new Blob(width, height));
       }
-    }, 3000); 
+    }, 3500); 
 
     const animate = () => {
       const { width, height } = dimsRef.current;
