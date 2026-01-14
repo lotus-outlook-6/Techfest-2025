@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Terminal from './components/Terminal';
 import Countdown from './components/Countdown';
@@ -97,8 +98,7 @@ function App() {
       setTimeout(() => {
           setShowMainLayout(false);
           setCurrentSection('HOME');
-          setIsLayoutExpanded(false);
-          setShowTerminal(false);
+          // Terminal state is preserved naturally because components stay mounted
       }, 500);
       setTimeout(() => {
           setIsTransitioning(false);
@@ -113,7 +113,6 @@ function App() {
   };
 
   const handleLogoClick = () => {
-    // If already unlocked once in this session, immediate open
     if (isTerminalUnlocked) {
       if (isMinimized) {
         setIsMinimized(false);
@@ -129,7 +128,7 @@ function App() {
     clickTimerRef.current = window.setTimeout(() => setClickCount(0), 2000);
 
     if (newCount >= easterEggTarget) {
-      setIsTerminalUnlocked(true); // Permanent unlock for the session
+      setIsTerminalUnlocked(true); 
       if (!showTerminal) {
         setIsLayoutExpanded(true);
         setTimeout(() => {
@@ -157,7 +156,6 @@ function App() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // REQUESTED SEQUENCE: Yellow, Orange, Red, Pink, Fuchsia, Blue, Navy
   const vibrantRingGradient = `conic-gradient(from 0deg, #facc15, #f97316, #ef4444, #ec4899, #d946ef, #3b82f6, #1e3a8a, #facc15)`;
 
   return (
@@ -186,88 +184,79 @@ function App() {
 
       <div className={`fixed inset-0 z-[400] bg-black transition-opacity duration-1000 ${isTransitioning ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}></div>
 
-      {!showMainLayout && (
-        <div className={`
-          fixed inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out z-[200] pointer-events-none
-          ${showMain ? 'opacity-100' : 'opacity-0'} 
-          ${isTransitioning ? 'blur-[50px] scale-[0.8] opacity-0' : 'blur-0 scale-100'}
-        `}>
-          <SocialButtons />
-          
-          <div className="relative z-20 flex flex-col items-center justify-between w-full h-[85vh] max-w-5xl px-4 pointer-events-none">
-            {staggerState.header && (
-              <div className="relative z-[150] transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center translate-y-16 md:translate-y-4">
-                <div className="flex items-center justify-center pointer-events-auto">
-                   <InteractiveText onLogoClick={handleLogoClick} />
-                </div>
-                <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mt-4 opacity-70 animate-line"></div>
+      {/* LANDING PAGE CONTAINER - Changed to always mounted for state persistence */}
+      <div className={`
+        fixed inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out z-[200]
+        ${showMainLayout ? 'opacity-0 pointer-events-none invisible' : 'opacity-100 pointer-events-auto visible'}
+        ${!showMain ? 'opacity-0' : ''} 
+        ${isTransitioning ? 'blur-[50px] scale-[0.8]' : 'blur-0 scale-100'}
+      `}>
+        <SocialButtons />
+        
+        <div className="relative z-20 flex flex-col items-center justify-between w-full h-[85vh] max-w-5xl px-4 pointer-events-none">
+          {staggerState.header && (
+            <div className={`relative z-[150] transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] animate-fade-in w-full text-center translate-y-16 md:translate-y-4`}>
+              <div className="flex items-center justify-center pointer-events-auto">
+                 <InteractiveText onLogoClick={handleLogoClick} />
+              </div>
+              <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent mt-4 opacity-70 animate-line"></div>
+            </div>
+          )}
+
+          <div className="relative flex-1 w-full flex items-center justify-center z-10">
+            {showTerminal && (
+              <div className="pointer-events-auto z-[200]">
+                <Terminal 
+                  onEnter={triggerEntryTransition} 
+                  isMinimized={isMinimized}
+                  onMinimize={() => setIsMinimized(true)}
+                  onClose={handleTerminalClose}
+                />
               </div>
             )}
 
-            <div className="relative flex-1 w-full flex items-center justify-center z-10">
-              {showTerminal && (
-                <div className="pointer-events-auto z-[200]">
-                  <Terminal 
-                    onEnter={triggerEntryTransition} 
-                    isMinimized={isMinimized}
-                    onMinimize={() => setIsMinimized(true)}
-                    onClose={handleTerminalClose}
-                  />
-                </div>
-              )}
-
-              {/* Main "ENTER" Button Area */}
-              {!showTerminal && staggerState.timer && (
-                <div className="pointer-events-auto group relative animate-fade-in z-0">
-                  
-                  {/* --- REFINED SYNCHRONIZED GRADIENT GLOW BEHIND --- */}
-                  {/* Large Outer Rotating Glow - Opacity reduced on mobile to prevent "whiteness" */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280%] h-[280%] rounded-full opacity-15 md:opacity-30 blur-[110px] pointer-events-none overflow-hidden">
-                      <div className="absolute inset-[-50%]">
-                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
-                      </div>
-                  </div>
-
-                  {/* Mid-range Soft Glow - Opacity reduced on mobile */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-[180%] rounded-full opacity-20 md:opacity-40 blur-[60px] pointer-events-none overflow-hidden">
-                      <div className="absolute inset-[-50%]">
-                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
-                      </div>
-                  </div>
-                  {/* --- END GRADIENT GLOW --- */}
-
-                  {/* The actual border line ring (behind button, sharp) */}
-                  <div className="absolute -inset-[4px] rounded-[38%] overflow-hidden pointer-events-none opacity-100 z-10">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%]">
-                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
-                      </div>
-                      {/* Secondary blend layer for vibrance */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%] opacity-60 blur-md mix-blend-screen">
-                          <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
-                      </div>
-                  </div>
-
-                  {/* Squircle Button (Enhanced with visual depth/skeuomorphism) */}
-                  <button 
-                    onClick={triggerEntryTransition}
-                    className="relative w-36 h-36 md:w-44 md:h-44 bg-gradient-to-b from-[#121212] to-[#080808] border border-white/5 rounded-[38%] flex items-center justify-center transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),inset_0_-12px_24px_rgba(0,0,0,0.8),0_20px_40px_-10px_rgba(0,0,0,0.8)] active:translate-y-1 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.9),inset_0_-1px_1px_rgba(255,255,255,0.05),0_5px_15px_rgba(0,0,0,0.4)] group z-20"
-                  >
-                    <div className="flex flex-col items-center gap-1 transition-transform group-hover:scale-105 active:scale-95">
-                       <span className="text-white font-anton text-2xl md:text-4xl tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">ENTER</span>
+            {!showTerminal && staggerState.timer && (
+              <div className="pointer-events-auto group relative animate-fade-in z-0">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280%] h-[280%] rounded-full opacity-15 md:opacity-30 blur-[110px] pointer-events-none overflow-hidden">
+                    <div className="absolute inset-[-50%]">
+                        <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
                     </div>
-                  </button>
                 </div>
-              )}
-            </div>
 
-            {staggerState.timer && (
-              <div className="relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-bottom pb-16 md:pb-8 translate-y-0 opacity-100 blur-0 scale-100 z-[150]">
-                 <Countdown />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180%] h-[180%] rounded-full opacity-20 md:opacity-40 blur-[60px] pointer-events-none overflow-hidden">
+                    <div className="absolute inset-[-50%]">
+                        <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                    </div>
+                </div>
+
+                <div className="absolute -inset-[4px] rounded-[38%] overflow-hidden pointer-events-none opacity-100 z-10">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%]">
+                        <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                    </div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250%] h-[250%] opacity-60 blur-md mix-blend-screen">
+                        <div className="w-full h-full animate-spin-slow" style={{ background: vibrantRingGradient, animationDuration: '4s' }}></div>
+                    </div>
+                </div>
+
+                <button 
+                  onClick={triggerEntryTransition}
+                  className="relative w-36 h-36 md:w-44 md:h-44 bg-gradient-to-b from-[#121212] to-[#080808] border border-white/5 rounded-[38%] flex items-center justify-center transition-all duration-300 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),inset_0_-12px_24px_rgba(0,0,0,0.8),0_20px_40px_-10px_rgba(0,0,0,0.8)] active:translate-y-1 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.9),inset_0_-1px_1px_rgba(255,255,255,0.05),0_5px_15px_rgba(0,0,0,0.4)] group z-20"
+                >
+                  <div className="flex flex-col items-center gap-1 transition-transform group-hover:scale-105 active:scale-95">
+                     <span className="text-white font-anton text-2xl md:text-4xl tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">ENTER</span>
+                  </div>
+                </button>
               </div>
             )}
           </div>
+
+          {staggerState.timer && (
+            <div className={`relative transition-all duration-1000 ease-[cubic-bezier(0.19,1,0.22,1)] origin-bottom pb-16 md:pb-8 translate-y-0 opacity-100 blur-0 scale-100 z-[150]`}>
+               <Countdown />
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {showMainLayout && (
         <div className="fixed inset-0 z-[200] flex flex-col pointer-events-auto animate-fade-in">

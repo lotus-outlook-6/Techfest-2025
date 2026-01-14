@@ -1,9 +1,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
+interface HistoryLine {
+  text: string;
+  color: string;
+  isTable?: boolean;
+}
+
 interface TerminalProps {
   onEnter: () => void;
-  isEntering?: boolean; // Kept for compatibility but unused as requested
+  isEntering?: boolean;
   isMinimized?: boolean;
   onMinimize?: () => void;
   onClose?: () => void;
@@ -17,11 +23,39 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
   const [showCursor, setShowCursor] = useState(true);
   const [animState, setAnimState] = useState<'opening' | 'open' | 'closing'>('opening');
   
+  // Terminal Logic State
+  const [history, setHistory] = useState<HistoryLine[]>([]);
+  const [animatedLines, setAnimatedLines] = useState<string[]>(['', '']);
+  const [isInputReady, setIsInputReady] = useState(false);
+  const [currentPrompt, setCurrentPrompt] = useState('SOT:\\3rd_Year\\User>');
+  const [activePromptColor, setActivePromptColor] = useState('text-gray-200');
+  const [isExitAwaiting, setIsExitAwaiting] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  
   const [maximizeClicks, setMaximizeClicks] = useState(0);
   const [tooltipKey, setTooltipKey] = useState(0);
   const [tooltipMessage, setTooltipMessage] = useState('');
   
   const inputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const HEADER_LINES = [
+    'Triguna Sen School of Technology | Techfest [Version 3.60.2025.2026]',
+    '(c) Assam University Silchar. All rights reserved.'
+  ];
+
+  const ADMIN_INSTRUCTION = 'SOT:\\3rd_Year\\Admin_LP6> Use these commands to deep dive into the terminal: "help", "dir", "echo", "clc", "exit"';
+
+  const ECHO_COLORS = [
+    'text-fuchsia-500',
+    'text-cyan-400',
+    'text-lime-400',
+    'text-orange-400',
+    'text-red-500',
+    'text-blue-500',
+    'text-purple-400',
+    'text-yellow-300'
+  ];
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimState('open'), 50);
@@ -29,29 +63,53 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
   }, []);
 
   useEffect(() => {
-    const targetText = 'Do you want to install YANTRAKSH!';
-    let index = 0;
-    const timeoutId = setTimeout(() => {
-      const intervalId = setInterval(() => {
-        index++;
-        setInputValue(targetText.slice(0, index));
-        if (index === targetText.length) clearInterval(intervalId);
-      }, 50);
-      return () => clearInterval(intervalId);
-    }, 800);
-    return () => clearTimeout(timeoutId);
+    if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [history, animatedLines, inputValue, isThinking]);
+
+  // Initial Typing Sequence
+  useEffect(() => {
+    const line1 = 'SOT:\\3rd_Year\\User> Do you want to install YANTRAKSH!';
+    const line2 = 'Press "Enter" to continue or "ESC" to exit';
+    
+    let l1Idx = 0;
+    let l2Idx = 0;
+
+    const startTyping = setTimeout(() => {
+      const t1 = setInterval(() => {
+        l1Idx++;
+        setAnimatedLines(prev => [line1.slice(0, l1Idx), prev[1]]);
+        if (l1Idx === line1.length) {
+          clearInterval(t1);
+          setTimeout(() => {
+            const t2 = setInterval(() => {
+              l2Idx++;
+              setAnimatedLines(prev => [prev[0], line2.slice(0, l2Idx)]);
+              if (l2Idx === line2.length) {
+                clearInterval(t2);
+                setIsInputReady(true);
+              }
+            }, 30);
+          }, 400);
+        }
+      }, 40);
+      return () => clearInterval(t1);
+    }, 600);
+
+    return () => clearTimeout(startTyping);
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => setShowCursor(prev => !prev), 2500);
+    const interval = setInterval(() => setShowCursor(prev => !prev), 600);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (!isMinimized && animState === 'open') {
+    if (!isMinimized && animState === 'open' && isInputReady && !isThinking) {
         inputRef.current?.focus();
     }
-  }, [isMinimized, animState]);
+  }, [isMinimized, animState, isInputReady, isThinking]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isMinimized || animState !== 'open') return;
@@ -73,6 +131,148 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragOffset]);
+
+  const typeResponse = async (lines: string[], resultColor?: string, tableMode = false) => {
+    setIsThinking(true);
+    // Simulate "Processing" delay
+    await new Promise(r => setTimeout(r, 600));
+
+    for (const fullText of lines) {
+      if (fullText === '') {
+        setHistory(prev => [...prev, { text: '', color: activePromptColor }]);
+        continue;
+      }
+      
+      let currentText = '';
+      // Create a slot in history for the typing line
+      setHistory(prev => [...prev, { text: '', color: resultColor || activePromptColor, isTable: tableMode }]);
+      
+      const charArray = Array.from(fullText);
+      for (const char of charArray) {
+        currentText += char;
+        setHistory(prev => {
+          const newHist = [...prev];
+          newHist[newHist.length - 1] = { text: currentText, color: resultColor || activePromptColor, isTable: tableMode };
+          return newHist;
+        });
+        await new Promise(r => setTimeout(r, tableMode ? 5 : 15));
+      }
+    }
+    setIsThinking(false);
+  };
+
+  const processCommand = async (cmd: string) => {
+    const trimmed = cmd.trim().toLowerCase();
+    const isUser = currentPrompt.includes('User');
+
+    if (isUser) {
+        if (trimmed === '') {
+            onEnter();
+            return;
+        } else {
+            await typeResponse(['invalid input']);
+            return;
+        }
+    }
+
+    if (isExitAwaiting) {
+        if (trimmed === '') {
+            setCurrentPrompt('SOT:\\3rd_Year\\User>');
+            setIsExitAwaiting(false);
+            setHistory([]);
+            return;
+        } else {
+            setIsExitAwaiting(false);
+            await typeResponse(['Exit protocol aborted.']);
+            return;
+        }
+    }
+
+    if (trimmed === 'help') {
+        await typeResponse([
+            '',
+            'Provides abstruse elucidations of executable directives within the Admin_LP6 environment:',
+            'DIR   — Enumerates site artefacts in tabular manifestation with teleological utility.',
+            'ECHO  — Catalyzes chromatic transmutation of textual insignia via "ECHO" or "ECHO DEF".',
+            'CLC   — Obliterates ocular residues of antecedent invocations, reinstating solely the prologue.',
+            'EXIT  — Initiates cessation protocol of Admin modality, soliciting affirmation prior to User reversion.',
+            ''
+        ], 'text-fuchsia-400');
+        return;
+    }
+
+    if (trimmed === 'dir') {
+        await typeResponse([
+            '+-------------+----------------------------------------------+',
+            '| File        | Description                                  |',
+            '+-------------+----------------------------------------------+',
+            '| home.tsx    | Constitutes the primordial ingress interface |',
+            '| landing.tsx | Manifests the vestibular prelude for users   |',
+            '| gallery     | Curates pictorial and multimedia expositions |',
+            '| modules     | Encapsulates pedagogic or functional units   |',
+            '| events      | Chronicles temporal congregations and affairs|',
+            '| teams       | Enumerates collaborative cohorts and members |',
+            '+-------------+----------------------------------------------+'
+        ], 'text-cyan-400', true);
+        return;
+    }
+
+    if (trimmed.startsWith('echo')) {
+        const parts = trimmed.split(' ');
+        let newColor = activePromptColor;
+        if (parts.length > 1 && parts[1] === 'def') {
+            newColor = 'text-gray-200';
+        } else {
+            newColor = ECHO_COLORS[Math.floor(Math.random() * ECHO_COLORS.length)];
+        }
+        await typeResponse(['Admin is Echoed successfully!']);
+        // Only update active color AFTER the command finishes typing
+        setActivePromptColor(newColor);
+        return;
+    }
+
+    if (trimmed === 'clc') {
+        setIsThinking(true);
+        await new Promise(r => setTimeout(r, 400));
+        setHistory([{ text: '', color: activePromptColor }, { text: ADMIN_INSTRUCTION, color: activePromptColor }]);
+        setIsThinking(false);
+        return;
+    }
+
+    if (trimmed === 'exit') {
+        setIsExitAwaiting(true);
+        await typeResponse(['Do you want to exit? Press "Enter" key to exit']);
+        return;
+    }
+
+    await typeResponse(['invalid input']);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isThinking) {
+      e.preventDefault();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      const cmd = inputValue;
+      setHistory(prev => [...prev, { text: `${currentPrompt} ${cmd} ENTER Pressed`, color: activePromptColor }]);
+      setInputValue('');
+      processCommand(cmd);
+    } else if (e.key === 'Escape') {
+      if (currentPrompt.includes('Admin')) return;
+      const cmd = inputValue;
+      const adminPrompt = 'SOT:\\3rd_Year\\Admin_LP6>';
+      setHistory(prev => [
+          ...prev, 
+          { text: `${currentPrompt} ${cmd} ESC Pressed`, color: 'text-gray-200' },
+          { text: '', color: 'text-gray-200' }, 
+          { text: ADMIN_INSTRUCTION, color: activePromptColor }
+      ]);
+      setInputValue('');
+      setCurrentPrompt(adminPrompt);
+    }
+  };
 
   const handleCloseTrigger = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -155,18 +355,58 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
                     </div>
                 </div>
             </div>
-            <div className="p-4 md:p-6 text-gray-200 flex-1 min-h-[250px] text-left font-mono rounded-b-lg overflow-hidden" onClick={() => inputRef.current?.focus()}>
-                <div className="mb-6 text-gray-400 leading-relaxed">
-                    <p>Triguna Sen School of Technology | Techfest [Version 3.60.2025.2026]</p>
-                    <p>(c) Assam University Silchar. All rights reserved.</p>
+            <div ref={scrollRef} className="p-4 md:p-6 text-gray-200 h-[280px] text-left font-mono rounded-b-lg overflow-y-auto custom-scrollbar" onClick={() => !isThinking && inputRef.current?.focus()}>
+                <div className="mb-4 text-gray-400 leading-relaxed">
+                    {HEADER_LINES.map((l, i) => <p key={i}>{l}</p>)}
                 </div>
-                <div className="flex items-center flex-wrap">
-                    <span className="text-gray-200 mr-2 shrink-0">SOT:\3rd_Year\User{`>`}</span>
-                    <div className="relative flex-1 flex items-center min-w-[200px]">
-                        <input ref={inputRef} type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onEnter()} className="bg-transparent border-none outline-none text-gray-100 w-full p-0 m-0 caret-transparent" autoComplete="off" />
-                        {showCursor && !isMinimized && animState === 'open' && <div className="absolute h-4 w-2 bg-gray-200 pointer-events-none" style={{ left: `${inputValue.length}ch` }}></div>}
-                    </div>
+                
+                {/* Initial Typing Animations */}
+                <div className="mb-1">
+                    <p className="text-gray-200">{animatedLines[0]}</p>
+                    <p className="text-gray-200">{animatedLines[1]}</p>
                 </div>
+
+                {/* Command History */}
+                <div className="space-y-1 whitespace-pre-wrap">
+                  {history.map((line, idx) => (
+                    <p key={idx} className={`${line.color} min-h-[1.2em] ${line.isTable ? 'leading-tight text-[10px] md:text-xs' : ''}`}>
+                      {line.text}
+                    </p>
+                  ))}
+                </div>
+
+                {/* Processing Indicator */}
+                {isThinking && (
+                  <div className="flex items-center gap-2 mt-1">
+                     <span className={`${activePromptColor} animate-pulse`}>[SYSTEM] PROCESSING...</span>
+                  </div>
+                )}
+
+                {/* Current Interactive Line */}
+                {isInputReady && !isThinking && (
+                  <div className="flex items-center flex-wrap mt-1">
+                      <span className={`${activePromptColor} mr-2 shrink-0`}>
+                        {currentPrompt}
+                      </span>
+                      <div className="relative flex-1 flex items-center min-w-[200px]">
+                          <input 
+                            ref={inputRef} 
+                            type="text" 
+                            value={inputValue} 
+                            onChange={(e) => setInputValue(e.target.value)} 
+                            onKeyDown={handleKeyDown}
+                            className="bg-transparent border-none outline-none text-gray-100 w-full p-0 m-0 caret-transparent" 
+                            autoComplete="off" 
+                          />
+                          {showCursor && !isMinimized && animState === 'open' && (
+                            <div 
+                              className={`absolute h-4 w-2 pointer-events-none ${activePromptColor.startsWith('text-') ? activePromptColor.replace('text-', 'bg-') : 'bg-gray-200'}`} 
+                              style={{ left: `${inputValue.length}ch` }}
+                            ></div>
+                          )}
+                      </div>
+                  </div>
+                )}
             </div>
         </div>
       </div>
