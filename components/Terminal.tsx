@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface HistoryLine {
   text: string;
@@ -57,6 +57,38 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
     'text-yellow-300'
   ];
 
+  const triggerInitialTyping = useCallback(() => {
+    setAnimatedLines(['', '']);
+    setHistory([]);
+    setIsInputReady(false);
+    
+    const line1 = 'SOT:\\3rd_Year\\User> Do you want to install YANTRAKSH!';
+    const line2 = 'Press "Enter" to continue or "ESC" to exit';
+    
+    let l1Idx = 0;
+    let l2Idx = 0;
+
+    const t1 = setInterval(() => {
+      l1Idx++;
+      setAnimatedLines(prev => [line1.slice(0, l1Idx), prev[1]]);
+      if (l1Idx === line1.length) {
+        clearInterval(t1);
+        setTimeout(() => {
+          const t2 = setInterval(() => {
+            l2Idx++;
+            setAnimatedLines(prev => [prev[0], line2.slice(0, l2Idx)]);
+            if (l2Idx === line2.length) {
+              clearInterval(t2);
+              setIsInputReady(true);
+            }
+          }, 30);
+        }, 400);
+      }
+    }, 40);
+
+    return () => clearInterval(t1);
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setAnimState('open'), 50);
     return () => clearTimeout(timer);
@@ -68,37 +100,12 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
     }
   }, [history, animatedLines, inputValue, isThinking]);
 
-  // Initial Typing Sequence
   useEffect(() => {
-    const line1 = 'SOT:\\3rd_Year\\User> Do you want to install YANTRAKSH!';
-    const line2 = 'Press "Enter" to continue or "ESC" to exit';
-    
-    let l1Idx = 0;
-    let l2Idx = 0;
-
     const startTyping = setTimeout(() => {
-      const t1 = setInterval(() => {
-        l1Idx++;
-        setAnimatedLines(prev => [line1.slice(0, l1Idx), prev[1]]);
-        if (l1Idx === line1.length) {
-          clearInterval(t1);
-          setTimeout(() => {
-            const t2 = setInterval(() => {
-              l2Idx++;
-              setAnimatedLines(prev => [prev[0], line2.slice(0, l2Idx)]);
-              if (l2Idx === line2.length) {
-                clearInterval(t2);
-                setIsInputReady(true);
-              }
-            }, 30);
-          }, 400);
-        }
-      }, 40);
-      return () => clearInterval(t1);
+        triggerInitialTyping();
     }, 600);
-
     return () => clearTimeout(startTyping);
-  }, []);
+  }, [triggerInitialTyping]);
 
   useEffect(() => {
     const interval = setInterval(() => setShowCursor(prev => !prev), 600);
@@ -134,7 +141,6 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
 
   const typeResponse = async (lines: string[], resultColor?: string, tableMode = false) => {
     setIsThinking(true);
-    // Simulate "Processing" delay
     await new Promise(r => setTimeout(r, 600));
 
     for (const fullText of lines) {
@@ -144,7 +150,6 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
       }
       
       let currentText = '';
-      // Create a slot in history for the typing line
       setHistory(prev => [...prev, { text: '', color: resultColor || activePromptColor, isTable: tableMode }]);
       
       const charArray = Array.from(fullText);
@@ -161,31 +166,52 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
     setIsThinking(false);
   };
 
+  const resetToUserMode = async () => {
+    setIsThinking(true);
+    
+    // Phase 1: Erase everything one by one
+    // We'll pop lines from history with a delay to simulate erasure
+    const historyCount = history.length;
+    for (let i = 0; i < historyCount; i++) {
+        setHistory(prev => prev.slice(0, -1));
+        await new Promise(r => setTimeout(r, 30));
+    }
+    
+    // Clear initial animated lines too
+    setAnimatedLines(['', '']);
+    await new Promise(r => setTimeout(r, 200));
+
+    // Phase 2: Switching user animation
+    const dots = ['', '.', '..', '...'];
+    let dotIdx = 0;
+    
+    // Update interval for the dots
+    const interval = setInterval(() => {
+        dotIdx = (dotIdx + 1) % dots.length;
+        setHistory([{ text: `Switching user${dots[dotIdx]}`, color: 'text-gray-200' }]);
+    }, 450);
+
+    // Wait 5 seconds
+    await new Promise(r => setTimeout(r, 5000));
+    clearInterval(interval);
+    
+    // Final clear before restart
+    setHistory([]);
+    setCurrentPrompt('SOT:\\3rd_Year\\User>');
+    setActivePromptColor('text-gray-200');
+    setIsExitAwaiting(false);
+    
+    triggerInitialTyping();
+    setIsThinking(false);
+  };
+
   const processCommand = async (cmd: string) => {
     const trimmed = cmd.trim().toLowerCase();
-    const isUser = currentPrompt.includes('User');
 
-    if (isUser) {
-        if (trimmed === '') {
-            onEnter();
-            return;
-        } else {
-            await typeResponse(['invalid input']);
-            return;
-        }
-    }
-
-    if (isExitAwaiting) {
-        if (trimmed === '') {
-            setCurrentPrompt('SOT:\\3rd_Year\\User>');
-            setIsExitAwaiting(false);
-            setHistory([]);
-            return;
-        } else {
-            setIsExitAwaiting(false);
-            await typeResponse(['Exit protocol aborted.']);
-            return;
-        }
+    if (trimmed === 'exit') {
+        setIsExitAwaiting(true);
+        await typeResponse(['Do you want to exit? Press "Enter" key to exit']);
+        return;
     }
 
     if (trimmed === 'help') {
@@ -226,7 +252,6 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
             newColor = ECHO_COLORS[Math.floor(Math.random() * ECHO_COLORS.length)];
         }
         await typeResponse(['Admin is Echoed successfully!']);
-        // Only update active color AFTER the command finishes typing
         setActivePromptColor(newColor);
         return;
     }
@@ -239,13 +264,15 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
         return;
     }
 
-    if (trimmed === 'exit') {
-        setIsExitAwaiting(true);
-        await typeResponse(['Do you want to exit? Press "Enter" key to exit']);
-        return;
-    }
+    await typeResponse(['invalid input'], 'text-red-500');
+  };
 
-    await typeResponse(['invalid input']);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const allowedRegex = /^[helpdirclcxitoafmn\s]*$/i;
+    if (allowedRegex.test(val)) {
+        setInputValue(val);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -254,23 +281,61 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
       return;
     }
 
+    const isUserMode = currentPrompt.includes('User');
+    const cmd = inputValue;
+
     if (e.key === 'Enter') {
-      const cmd = inputValue;
-      setHistory(prev => [...prev, { text: `${currentPrompt} ${cmd} ENTER Pressed`, color: activePromptColor }]);
+      if (isUserMode) {
+        if (cmd === '') {
+            setHistory(prev => [...prev, { text: `${currentPrompt} ENTER Pressed`, color: activePromptColor }]);
+            onEnter();
+        } else {
+            setHistory(prev => [...prev, { text: `${currentPrompt} ${cmd}`, color: activePromptColor }]);
+            processCommand(cmd);
+        }
+      } else {
+        // Admin Mode
+        if (isExitAwaiting) {
+            if (cmd === '') {
+                resetToUserMode();
+            } else {
+                setIsExitAwaiting(false);
+                setHistory(prev => [...prev, { text: 'Exit protocol aborted.', color: activePromptColor }]);
+            }
+        } else if (cmd === '') {
+            setHistory(prev => [
+                ...prev, 
+                { text: `${currentPrompt} ENTER Pressed`, color: activePromptColor },
+                { text: 'invalid input', color: 'text-red-500' }
+            ]);
+        } else {
+            setHistory(prev => [...prev, { text: `${currentPrompt} ${cmd}`, color: activePromptColor }]);
+            processCommand(cmd);
+        }
+      }
       setInputValue('');
-      processCommand(cmd);
     } else if (e.key === 'Escape') {
-      if (currentPrompt.includes('Admin')) return;
-      const cmd = inputValue;
-      const adminPrompt = 'SOT:\\3rd_Year\\Admin_LP6>';
-      setHistory(prev => [
-          ...prev, 
-          { text: `${currentPrompt} ${cmd} ESC Pressed`, color: 'text-gray-200' },
-          { text: '', color: 'text-gray-200' }, 
-          { text: ADMIN_INSTRUCTION, color: activePromptColor }
-      ]);
-      setInputValue('');
-      setCurrentPrompt(adminPrompt);
+      if (isUserMode) {
+          if (cmd === '') {
+              setHistory(prev => [
+                  ...prev, 
+                  { text: `${currentPrompt} ESC Pressed`, color: activePromptColor },
+                  { text: '', color: '' }, 
+                  { text: ADMIN_INSTRUCTION, color: activePromptColor }
+              ]);
+              setCurrentPrompt('SOT:\\3rd_Year\\Admin_LP6>');
+          } else {
+              setInputValue('');
+          }
+      } else {
+          // Admin Mode
+          setHistory(prev => [
+            ...prev, 
+            { text: `${currentPrompt} ESC Pressed`, color: 'text-gray-200' },
+            { text: 'invalid input', color: 'text-red-500' }
+          ]);
+          setInputValue('');
+      }
     }
   };
 
@@ -376,7 +441,7 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
                 </div>
 
                 {/* Processing Indicator */}
-                {isThinking && (
+                {isThinking && !history.some(h => h.text.startsWith('Switching user')) && (
                   <div className="flex items-center gap-2 mt-1">
                      <span className={`${activePromptColor} animate-pulse`}>[SYSTEM] PROCESSING...</span>
                   </div>
@@ -393,7 +458,7 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
                             ref={inputRef} 
                             type="text" 
                             value={inputValue} 
-                            onChange={(e) => setInputValue(e.target.value)} 
+                            onChange={handleInputChange} 
                             onKeyDown={handleKeyDown}
                             className="bg-transparent border-none outline-none text-gray-100 w-full p-0 m-0 caret-transparent" 
                             autoComplete="off" 
