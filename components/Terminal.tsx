@@ -170,14 +170,12 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
     setIsThinking(true);
     
     // Phase 1: Erase everything one by one
-    // We'll pop lines from history with a delay to simulate erasure
     const historyCount = history.length;
     for (let i = 0; i < historyCount; i++) {
         setHistory(prev => prev.slice(0, -1));
         await new Promise(r => setTimeout(r, 30));
     }
     
-    // Clear initial animated lines too
     setAnimatedLines(['', '']);
     await new Promise(r => setTimeout(r, 200));
 
@@ -185,7 +183,6 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
     const dots = ['', '.', '..', '...'];
     let dotIdx = 0;
     
-    // Update interval for the dots
     const interval = setInterval(() => {
         dotIdx = (dotIdx + 1) % dots.length;
         setHistory([{ text: `Switching user${dots[dotIdx]}`, color: 'text-gray-200' }]);
@@ -195,7 +192,6 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
     await new Promise(r => setTimeout(r, 5000));
     clearInterval(interval);
     
-    // Final clear before restart
     setHistory([]);
     setCurrentPrompt('SOT:\\3rd_Year\\User>');
     setActivePromptColor('text-gray-200');
@@ -377,7 +373,7 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
   const conicGradient = `conic-gradient(from 0deg, transparent 0deg, transparent 200deg, #1e3a8a 240deg, #ec4899 280deg, #ef4444 310deg, #f97316 340deg, #ffff00 360deg)`;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-[50] pointer-events-none">
+    <div className="fixed inset-0 flex items-center justify-center z-[2000] pointer-events-none">
       <div 
         className="pointer-events-auto absolute w-[90%] md:w-[650px] rounded-lg shadow-[0_0_40px_rgba(217,70,239,0.15)] flex flex-col font-mono text-sm md:text-base transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
         style={{ transform: currentTransform, opacity: currentOpacity, cursor: isDragging ? 'grabbing' : 'default' }}

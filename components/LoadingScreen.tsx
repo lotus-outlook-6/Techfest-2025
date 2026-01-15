@@ -36,7 +36,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
   }, [bootMessages]);
 
   useEffect(() => {
-    // Total duration for the progress bar animation
     const duration = isTransition ? 5500 : 3000;
     const intervalTime = 50;
     const totalSteps = duration / intervalTime;
@@ -48,9 +47,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
       setProgress(nextProgress);
 
       if (isTransition) {
-        // Calculate which log should be visible based on progress
         const logIdx = Math.floor((nextProgress / 100) * transitionMessages.length);
-        
         setLogs(prev => {
           const currentMsg = transitionMessages[logIdx];
           if (logIdx < transitionMessages.length && !prev.includes(currentMsg)) {
@@ -68,11 +65,13 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
     return () => clearInterval(timer);
   }, [isTransition, transitionMessages]);
 
-  // TRANSITION-SPECIFIC UI (MID-PAGE SWAP)
-  if (isTransition) {
-    return (
-      <div className="fixed inset-0 z-[500] bg-[#050505] flex flex-col items-center justify-center font-mono animate-fade-in">
-        <div className="w-full max-w-xl px-10">
+  return (
+    <div className="fixed inset-0 z-[10000] bg-[#050505] flex flex-col items-center justify-center font-mono overflow-hidden">
+      {/* Scanline Overlay Effect */}
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,20,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-[10001] bg-[length:100%_2px,3px_100%] opacity-20"></div>
+      
+      {isTransition ? (
+        <div className="w-full max-w-xl px-10 relative z-10 animate-fade-in">
           <div className="flex justify-between items-end mb-6">
             <div className="text-left">
               <h2 className="text-white text-3xl font-anton tracking-widest uppercase mb-1 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">
@@ -107,55 +106,44 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isTransition = false }) =
             </div>
           </div>
           
-          {/* THE PROGRESS TRACK - Removed white border, added deep glow */}
           <div className="relative w-full h-3.5 bg-[#0a0a0a] rounded-full overflow-hidden shadow-[0_0_30px_rgba(217,70,239,0.1)] border border-fuchsia-950/20">
-            {/* THE PROGRESS BAR - Circular ends, Intense Glow */}
             <div 
               className="absolute top-0 left-0 h-full bg-gradient-to-r from-fuchsia-700 via-fuchsia-500 to-fuchsia-400 transition-all duration-300 ease-out rounded-full shadow-[0_0_25px_#d946ef,0_0_50px_rgba(217,70,239,0.6)]"
               style={{ width: `${progress}%` }}
             >
-              {/* Internal Shimmer - Softened to remove "Windows 7" sharp line look */}
               <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)] animate-[shimmer_3s_infinite] rounded-full"></div>
-              
-              {/* Moving Glow Tip */}
               <div className="absolute top-0 right-0 h-full w-8 bg-white/20 blur-md rounded-full"></div>
             </div>
           </div>
         </div>
-        
-        {/* Ambient background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-fuchsia-950/10 blur-[200px] rounded-full pointer-events-none"></div>
+      ) : (
+        <div className="w-full max-w-md px-8 text-center relative z-10">
+          <div className="mb-4 text-white text-lg tracking-widest font-bold animate-pulse drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">
+            {bootMessage}
+          </div>
+          
+          <div className="relative w-full h-1.5 bg-gray-900 overflow-hidden rounded-full shadow-[0_0_15px_rgba(217,70,239,0.1)] border border-white/5">
+            <div 
+              className="absolute top-0 left-0 h-full bg-fuchsia-600 transition-all duration-300 ease-out rounded-full shadow-[0_0_15px_#d946ef]"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          
+          <div className="mt-4 text-fuchsia-500 font-bold text-sm tracking-widest">
+            {Math.floor(progress)}%
+          </div>
+        </div>
+      )}
 
-        <style>{`
-          @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
-          }
-        `}</style>
-      </div>
-    );
-  }
+      {/* Ambient Background Glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-fuchsia-950/10 blur-[200px] rounded-full pointer-events-none"></div>
 
-  // BOOT-SPECIFIC UI (FIRST LOAD)
-  return (
-    <div className="fixed inset-0 z-[200] bg-[#050505] flex flex-col items-center justify-center font-mono">
-      <div className="w-full max-w-md px-8 text-center">
-        <div className="mb-4 text-white text-lg tracking-widest font-bold animate-pulse">
-          {bootMessage}
-        </div>
-        
-        <div className="relative w-full h-1.5 bg-gray-950 overflow-hidden rounded-full shadow-[0_0_15px_rgba(217,70,239,0.1)]">
-          <div 
-            className="absolute top-0 left-0 h-full bg-fuchsia-600 transition-all duration-300 ease-out rounded-full shadow-[0_0_15px_#d946ef]"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        
-        <div className="mt-4 text-fuchsia-500 font-bold text-sm tracking-widest">
-          {Math.floor(progress)}%
-        </div>
-      </div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-fuchsia-900/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
     </div>
   );
 };

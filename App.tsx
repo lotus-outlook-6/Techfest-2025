@@ -98,7 +98,6 @@ function App() {
       setTimeout(() => {
           setShowMainLayout(false);
           setCurrentSection('HOME');
-          // Terminal state is preserved naturally because components stay mounted
       }, 500);
       setTimeout(() => {
           setIsTransitioning(false);
@@ -184,13 +183,27 @@ function App() {
 
       <div className={`fixed inset-0 z-[400] bg-black transition-opacity duration-1000 ${isTransitioning ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}></div>
 
-      {/* LANDING PAGE CONTAINER - Changed to always mounted for state persistence */}
+      {/* LANDING PAGE CONTAINER */}
       <div className={`
         fixed inset-0 flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out z-[200]
         ${showMainLayout ? 'opacity-0 pointer-events-none invisible' : 'opacity-100 pointer-events-auto visible'}
         ${!showMain ? 'opacity-0' : ''} 
         ${isTransitioning ? 'blur-[50px] scale-[0.8]' : 'blur-0 scale-100'}
       `}>
+        {/* Terminal elevated above everything in the landing page view */}
+        {showTerminal && (
+          <div className="fixed inset-0 flex items-center justify-center z-[5000] pointer-events-none">
+            <div className="pointer-events-auto">
+              <Terminal 
+                onEnter={triggerEntryTransition} 
+                isMinimized={isMinimized}
+                onMinimize={() => setIsMinimized(true)}
+                onClose={handleTerminalClose}
+              />
+            </div>
+          </div>
+        )}
+
         <SocialButtons />
         
         <div className="relative z-20 flex flex-col items-center justify-between w-full h-[85vh] max-w-5xl px-4 pointer-events-none">
@@ -204,17 +217,6 @@ function App() {
           )}
 
           <div className="relative flex-1 w-full flex items-center justify-center z-10">
-            {showTerminal && (
-              <div className="pointer-events-auto z-[200]">
-                <Terminal 
-                  onEnter={triggerEntryTransition} 
-                  isMinimized={isMinimized}
-                  onMinimize={() => setIsMinimized(true)}
-                  onClose={handleTerminalClose}
-                />
-              </div>
-            )}
-
             {!showTerminal && staggerState.timer && (
               <div className="pointer-events-auto group relative animate-fade-in z-0">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280%] h-[280%] rounded-full opacity-15 md:opacity-30 blur-[110px] pointer-events-none overflow-hidden">
