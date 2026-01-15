@@ -286,8 +286,12 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
             setHistory(prev => [...prev, { text: `${currentPrompt} ENTER Pressed`, color: activePromptColor }]);
             onEnter();
         } else {
-            setHistory(prev => [...prev, { text: `${currentPrompt} ${cmd}`, color: activePromptColor }]);
-            processCommand(cmd);
+            // User mode should not process technical commands like help/dir
+            setHistory(prev => [
+                ...prev, 
+                { text: `${currentPrompt} ${cmd}`, color: activePromptColor },
+                { text: 'invalid input', color: 'text-red-500' }
+            ]);
         }
       } else {
         // Admin Mode
@@ -321,15 +325,11 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
               ]);
               setCurrentPrompt('SOT:\\3rd_Year\\Admin_LP6>');
           } else {
+              // Typing text and pressing ESC should just clear input, not enter Admin
               setInputValue('');
           }
       } else {
-          // Admin Mode
-          setHistory(prev => [
-            ...prev, 
-            { text: `${currentPrompt} ESC Pressed`, color: 'text-gray-200' },
-            { text: 'invalid input', color: 'text-red-500' }
-          ]);
+          // Admin Mode ESC
           setInputValue('');
       }
     }
@@ -375,7 +375,7 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[2000] pointer-events-none">
       <div 
-        className="pointer-events-auto absolute w-[90%] md:w-[650px] rounded-lg shadow-[0_0_40px_rgba(217,70,239,0.15)] flex flex-col font-mono text-sm md:text-base transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
+        className="pointer-events-auto absolute w-[90%] md:w-[600px] rounded-lg shadow-[0_0_40px_rgba(217,70,239,0.15)] flex flex-col font-mono text-sm md:text-base transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)]"
         style={{ transform: currentTransform, opacity: currentOpacity, cursor: isDragging ? 'grabbing' : 'default' }}
       >
         <div className="absolute -inset-[3px] rounded-[12px] overflow-hidden pointer-events-none">
@@ -410,13 +410,13 @@ const Terminal: React.FC<TerminalProps> = ({ onEnter, isMinimized = false, onMin
                     </div>
                     <div className="hover:bg-red-900/50 w-10 h-10 flex items-center justify-center rounded group/close cursor-pointer" onClick={handleCloseTrigger}>
                         <div className="w-2.5 h-2.5 relative">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-px bg-gray-400 group-hover/close:bg-red-400 rotate-45"></div>
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-px bg-gray-400 group-hover/close:bg-red-400 -rotate-45"></div>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-3.5 h-px bg-gray-400 group-hover/close:bg-red-400 rotate-45"></div>
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-3.5 h-px bg-gray-400 group-hover/close:bg-red-400 -rotate-45"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div ref={scrollRef} className="p-4 md:p-6 text-gray-200 h-[280px] text-left font-mono rounded-b-lg overflow-y-auto custom-scrollbar" onClick={() => !isThinking && inputRef.current?.focus()}>
+            <div ref={scrollRef} className="p-4 md:p-6 text-gray-200 h-[270px] text-left font-mono rounded-b-lg overflow-y-auto custom-scrollbar" onClick={() => !isThinking && inputRef.current?.focus()}>
                 <div className="mb-4 text-gray-400 leading-relaxed">
                     {HEADER_LINES.map((l, i) => <p key={i}>{l}</p>)}
                 </div>

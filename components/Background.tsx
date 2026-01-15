@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 
 // Boosted intensity palette: Fuchsia, Purple, Navy Blue, Deep Green
@@ -78,15 +79,15 @@ class Blob {
 
   constructor(width: number, height: number, startInstant = false, forcedColor?: string, forcedX?: number, forcedY?: number) {
     const isMobile = width < 768;
-    // Scale radius down on mobile so they don't wash out the center
-    const baseRadius = isMobile ? width * 0.6 : 450;
-    const varRadius = isMobile ? width * 0.2 : 400;
+    // Increased mobile radius to match desktop vibrancy relative to screen
+    const baseRadius = isMobile ? width * 0.8 : 450;
+    const varRadius = isMobile ? width * 0.4 : 400;
     this.radius = Math.random() * varRadius + baseRadius;
     
     this.x = forcedX !== undefined ? forcedX : Math.random() * width;
     this.y = forcedY !== undefined ? forcedY : Math.random() * height;
     
-    const velScale = forcedColor ? (isMobile ? 0.03 : 0.06) : 0.12;
+    const velScale = forcedColor ? (isMobile ? 0.04 : 0.06) : 0.12;
     this.vx = (Math.random() - 0.5) * velScale;
     this.vy = (Math.random() - 0.5) * velScale;
     
@@ -176,11 +177,10 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
 
     const { width, height } = dimsRef.current;
     if (width > 0) {
-      // Only allow bursts on desktop or tablets to keep mobile background dark
-      if (width >= 768) {
-        for (let i = 0; i < 3; i++) {
-          blobsRef.current.push(new Blob(width, height));
-        }
+      // Allow bursts on all devices now
+      const burstCount = width < 768 ? 2 : 3;
+      for (let i = 0; i < burstCount; i++) {
+        blobsRef.current.push(new Blob(width, height));
       }
     }
   }, [burstTrigger]);
@@ -202,8 +202,8 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
         const isMobile = width < 768;
 
         if (particlesRef.current.length === 0) {
-            // Optimized particle count for mobile
-            const count = isMobile ? 150 : 380;
+            // Increased particle count for mobile to match vibrancy
+            const count = isMobile ? 250 : 380;
             for (let i = 0; i < count; i++) {
                 particlesRef.current.push(new Particle(width, height));
             }
@@ -216,13 +216,12 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
             blobsRef.current.push(new Blob(width, height, true, NEON_COLORS[0], 0, height));
             blobsRef.current.push(new Blob(width, height, true, NEON_COLORS[1], width, height));
 
-            // Extra random blobs only for non-mobile to keep corners strictly as requested on mobile
-            if (!isMobile) {
-              for (let i = 0; i < 6; i++) {
-                  const b = new Blob(width, height, true);
-                  b.lifeTimer = Math.random() * b.lifeTimer;
-                  blobsRef.current.push(b);
-              }
+            // Added random blobs for mobile to fix the "drastic change" in center intensity
+            const randomCount = isMobile ? 3 : 6;
+            for (let i = 0; i < randomCount; i++) {
+                const b = new Blob(width, height, true);
+                b.lifeTimer = Math.random() * b.lifeTimer;
+                blobsRef.current.push(b);
             }
         }
     };
@@ -240,8 +239,9 @@ const Background: React.FC<BackgroundProps> = ({ burstTrigger = 0 }) => {
     const spawnInterval = setInterval(() => {
       const { width, height } = dimsRef.current;
       const isMobile = width < 768;
-      // Do not auto-spawn extra blobs on mobile to keep it dark and corner-focused
-      if (!isMobile && width > 0 && blobsRef.current.filter(b => b.state !== 'disappearing').length < 12) {
+      const maxBlobs = isMobile ? 8 : 12;
+      
+      if (width > 0 && blobsRef.current.filter(b => b.state !== 'disappearing').length < maxBlobs) {
           blobsRef.current.push(new Blob(width, height));
       }
     }, 3500); 
